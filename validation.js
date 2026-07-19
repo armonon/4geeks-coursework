@@ -617,6 +617,7 @@ const initPatientEnquiryForm = () => {
     updateDateLimits();
     updateConcernCounter();
     setupListeners();
+    window.HealthCoreFormReady = true;
 
     form.addEventListener("submit", (event) => {
         event.preventDefault();
@@ -647,5 +648,5 @@ const schedulePatientEnquiryForm = () => {
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", schedulePatientEnquiryForm);
 } else {
-    schedulePatientEnquiryForm();
+    initPatientEnquiryForm();
 }

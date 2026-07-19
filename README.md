@@ -20,7 +20,7 @@ Install dependencies once:
 npm install
 ```
 
-Build the production Tailwind CSS file and inline it into the HTML pages:
+Build the production Tailwind CSS file and prepare the HTML pages:
 
 ```bash
 npm run build
@@ -42,4 +42,4 @@ npx http-server . -p 3000 -a 0.0.0.0
 
 Then open `http://localhost:3000`.
 
-The site uses generated Tailwind CSS inlined into the HTML pages so first paint is not delayed by a separate stylesheet request.
+The site uses a small inline critical CSS block for first paint, then loads the generated Tailwind CSS file asynchronously so it can be cached. Form validation JavaScript is loaded only when the form is used.
