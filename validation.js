@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+const initPatientEnquiryForm = () => {
     const form = document.getElementById("patient-enquiry-form");
 
     if (!form) {
@@ -548,6 +548,19 @@ document.addEventListener("DOMContentLoaded", () => {
         hideSuccessMessage();
     };
 
+    let counterFrame = null;
+
+    const queueConcernCounter = () => {
+        if (counterFrame) {
+            window.cancelAnimationFrame(counterFrame);
+        }
+
+        counterFrame = window.requestAnimationFrame(() => {
+            updateConcernCounter();
+            counterFrame = null;
+        });
+    };
+
     const setupListeners = () => {
         fieldNames.forEach((name) => {
             const control = byId(name);
@@ -556,12 +569,24 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            const eventName = control.tagName === "SELECT" || control.type === "checkbox" ? "change" : "input";
-            control.addEventListener(eventName, () => {
+            const validateOnChange =
+                control.tagName === "SELECT" ||
+                control.type === "checkbox" ||
+                control.type === "date";
+            const validationEvent = validateOnChange ? "change" : "blur";
+
+            control.addEventListener(validationEvent, () => {
                 hideSuccessMessage();
                 validateField(name);
             });
-            control.addEventListener("blur", () => validateField(name));
+
+            if (!validateOnChange) {
+                control.addEventListener("input", hideSuccessMessage);
+            }
+
+            if (name === "health_concern") {
+                control.addEventListener("input", queueConcernCounter);
+            }
         });
 
         form.querySelectorAll('input[name="new_patient"]').forEach((radio) => {
@@ -608,4 +633,19 @@ document.addEventListener("DOMContentLoaded", () => {
     form.addEventListener("reset", () => {
         window.setTimeout(resetFormState, 0);
     });
-});
+};
+
+const schedulePatientEnquiryForm = () => {
+    if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(initPatientEnquiryForm, { timeout: 1000 });
+        return;
+    }
+
+    window.setTimeout(initPatientEnquiryForm, 0);
+};
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", schedulePatientEnquiryForm);
+} else {
+    schedulePatientEnquiryForm();
+}
