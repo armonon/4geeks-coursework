@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "build:css": "tailwindcss -i ./src/tailwind.css -o ./assets/tailwind.css --minify",
+    "serve": "http-server . -p 3000 -a 0.0.0.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.17",
+    "http-server": "^14.1.1",
+    "tailwindcss": "^4.1.17"
+  }
+}
