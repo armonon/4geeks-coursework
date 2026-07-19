@@ -20,10 +20,10 @@ Install dependencies once:
 npm install
 ```
 
-Build the production Tailwind CSS file:
+Build the production Tailwind CSS file and inline it into the HTML pages:
 
 ```bash
-npm run build:css
+npm run build
 ```
 
 ## Run Locally
@@ -42,4 +42,4 @@ npx http-server . -p 3000 -a 0.0.0.0
 
 Then open `http://localhost:3000`.
 
-The site uses a generated Tailwind CSS file instead of the Tailwind browser compiler for better performance.
+The site uses generated Tailwind CSS inlined into the HTML pages so first paint is not delayed by a separate stylesheet request.

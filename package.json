@@ -1,6 +1,8 @@
 {
   "scripts": {
+    "build": "npm run build:css && npm run inline:css",
     "build:css": "tailwindcss -i ./src/tailwind.css -o ./assets/tailwind.css --minify",
+    "inline:css": "node scripts/inline-css.js",
     "serve": "http-server . -p 3000 -a 0.0.0.0"
   },
   "devDependencies": {
