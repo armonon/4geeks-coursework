@@ -1,18 +1,20 @@
-# HealthCore Public Website
+# Maison Lumiere E-Commerce Prototype
 
-Milestone 1 project for HealthCore's first professional public website.
+This project is built only with HTML and Tailwind CSS, as required by the assignment.
 
-## Files
+## Views
 
-- `index.html` - English landing page
-- `index.es.html` - Spanish landing page
-- `application.html` - English patient enquiry form
-- `application.es.html` - Spanish patient enquiry form
-- `validation.js` - shared bilingual form validation
-- `assets/tailwind.css` - generated Tailwind stylesheet for faster page loads
-- `CONTEXT.md` - project context, preserved from the provided brief
+- `index.html` - home page with navbar, hero, new arrivals, best sellers, and footer
+- `catalog.html` - filter bar and 4 x 5 product grid
+- `product.html` - two-column product detail view with Schema.org Product data
+- `cart.html` - full cart page with three sample products and order summary
+- `checkout.html` - three-step payment form for personal details, shipping, and card payment
 
-## Build Styles
+## SEO And Structure
+
+The prototype uses semantic landmarks such as `header`, `nav`, `main`, `section`, `article`, `aside`, `footer`, and `form`. The home page includes Organization structured data, and the product page includes Product structured data.
+
+## Run Locally
 
 Install dependencies once:
 
@@ -20,26 +22,16 @@ Install dependencies once:
 npm install
 ```
 
-Build the production Tailwind CSS file and prepare the HTML pages:
+Build the Tailwind stylesheet:
 
 ```bash
 npm run build
 ```
 
-## Run Locally
-
-From the repository root, run:
+Serve the project:
 
 ```bash
 npm run serve
 ```
 
-You can also use the assignment-compatible command directly:
-
-```bash
-npx http-server . -p 3000 -a 0.0.0.0
-```
-
 Then open `http://localhost:3000`.
-
-The site uses a small inline critical CSS block for first paint, then loads the generated Tailwind CSS file asynchronously so it can be cached. Form validation JavaScript is loaded only when the form is used.

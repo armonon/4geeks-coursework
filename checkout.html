@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Maison Lumiere</title>
+    <meta name="description" content="Maison Lumiere checkout prototype with personal details, shipping address, and card payment steps.">
+    <meta name="author" content="Maison Lumiere">
+    <meta name="theme-color" content="#111827">
+    <link rel="stylesheet" href="assets/tailwind.css">
+</head>
+<body class="bg-stone-50 text-gray-950 antialiased">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-3 focus:font-semibold">Skip to main content</a>
+    <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur">
+        <nav class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8" aria-label="Primary navigation">
+            <a href="index.html" class="inline-flex items-center gap-3 text-xl font-black tracking-wide"><span class="flex h-10 w-10 items-center justify-center rounded bg-gray-950 text-sm text-white">ML</span>Maison Lumiere</a>
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
+                <form role="search" class="flex rounded-md border border-gray-300 bg-white"><label for="site-search" class="sr-only">Search products</label><input id="site-search" type="search" placeholder="Search products" class="min-h-11 w-full rounded-l-md px-4 text-sm outline-none focus:ring-2 focus:ring-gray-950 sm:w-72"><button class="rounded-r-md bg-gray-950 px-4 text-sm font-bold text-white">Search</button></form>
+                <ul class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-bold text-gray-700"><li><a href="catalog.html">Catalog</a></li><li><a href="product.html">Product</a></li><li><a href="cart.html">Cart</a></li><li><a class="text-gray-950" aria-current="page" href="checkout.html">Checkout</a></li><li><a class="rounded-md border border-gray-300 px-3 py-2" href="#">Account</a></li></ul>
+            </div>
+        </nav>
+    </header>
+
+    <main id="main-content" class="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+        <p class="text-sm font-bold uppercase tracking-wide text-rose-700">Secure checkout prototype</p>
+        <h1 class="mt-3 text-4xl font-black sm:text-5xl">Payment form</h1>
+        <ol class="mt-8 grid gap-3 text-sm font-bold sm:grid-cols-3" aria-label="Checkout steps">
+            <li class="rounded-md bg-gray-950 px-4 py-3 text-white">1. Personal details</li>
+            <li class="rounded-md border border-gray-300 bg-white px-4 py-3">2. Shipping address</li>
+            <li class="rounded-md border border-gray-300 bg-white px-4 py-3">3. Card payment</li>
+        </ol>
+
+        <form class="mt-8 grid gap-8" aria-label="Checkout form">
+            <section class="rounded-md border border-gray-200 bg-white p-5 sm:p-6" aria-labelledby="personal-title">
+                <h2 id="personal-title" class="text-2xl font-black">Personal details</h2>
+                <div class="mt-5 grid gap-5 sm:grid-cols-2">
+                    <div><label for="first-name" class="block text-sm font-bold">First name</label><input id="first-name" name="first-name" autocomplete="given-name" class="mt-2 w-full rounded-md border border-gray-300 px-4 py-3" required></div>
+                    <div><label for="last-name" class="block text-sm font-bold">Last name</label><input id="last-name" name="last-name" autocomplete="family-name" class="mt-2 w-full rounded-md border border-gray-300 px-4 py-3" required></div>
+                    <div><label for="email" class="block text-sm font-bold">Email</label><input id="email" name="email" type="email" autocomplete="email" class="mt-2 w-full rounded-md border border-gray-300 px-4 py-3" required></div>
+                    <div><label for="phone" class="block text-sm font-bold">Phone</label><input id="phone" name="phone" type="tel" autocomplete="tel" class="mt-2 w-full rounded-md border border-gray-300 px-4 py-3" required></div>
+                </div>
+            </section>
+
+            <section class="rounded-md border border-gray-200 bg-white p-5 sm:p-6" aria-labelledby="shipping-title">
+                <h2 id="shipping-title" class="text-2xl font-black">Shipping address</h2>
+                <div class="mt-5 grid gap-5 sm:grid-cols-2">
+                    <div class="sm:col-span-2"><label for="address" class="block text-sm font-bold">Street address</label><input id="address" name="address" autocomplete="shipping street-address" class="mt-2 w-full rounded-md border border-gray-300 px-4 py-3" required></div>
+                    <div><label for="city" class="block text-sm font-bold">City</label><input id="city" name="city" autocomplete="shipping address-level2" class="mt-2 w-full rounded-md border border-gray-300 px-4 py-3" required></div>
+                    <div><label for="postal-code" class="block text-sm font-bold">Postal code</label><input id="postal-code" name="postal-code" autocomplete="shipping postal-code" class="mt-2 w-full rounded-md border border-gray-300 px-4 py-3" required></div>
+                    <div><label for="country" class="block text-sm font-bold">Country</label><select id="country" name="country" autocomplete="shipping country-name" class="mt-2 w-full rounded-md border border-gray-300 bg-white px-4 py-3"><option>France</option><option>United States</option><option>Spain</option><option>United Kingdom</option></select></div>
+                    <div><label for="delivery" class="block text-sm font-bold">Delivery option</label><select id="delivery" name="delivery" class="mt-2 w-full rounded-md border border-gray-300 bg-white px-4 py-3"><option>Standard delivery</option><option>Express delivery</option><option>Store pickup</option></select></div>
+                </div>
+            </section>
+
+            <section class="rounded-md border border-gray-200 bg-white p-5 sm:p-6" aria-labelledby="payment-title">
+                <h2 id="payment-title" class="text-2xl font-black">Card payment</h2>
+                <div class="mt-5 grid gap-5 sm:grid-cols-2">
+                    <div class="sm:col-span-2"><label for="card-name" class="block text-sm font-bold">Name on card</label><input id="card-name" name="card-name" autocomplete="cc-name" class="mt-2 w-full rounded-md border border-gray-300 px-4 py-3" required></div>
+                    <div class="sm:col-span-2"><label for="card-number" class="block text-sm font-bold">Card number</label><input id="card-number" name="card-number" inputmode="numeric" autocomplete="cc-number" placeholder="1234 5678 9012 3456" class="mt-2 w-full rounded-md border border-gray-300 px-4 py-3" required></div>
+                    <div><label for="expiration" class="block text-sm font-bold">Expiration</label><input id="expiration" name="expiration" autocomplete="cc-exp" placeholder="MM / YY" class="mt-2 w-full rounded-md border border-gray-300 px-4 py-3" required></div>
+                    <div><label for="cvc" class="block text-sm font-bold">CVC</label><input id="cvc" name="cvc" inputmode="numeric" autocomplete="cc-csc" placeholder="123" class="mt-2 w-full rounded-md border border-gray-300 px-4 py-3" required></div>
+                </div>
+                <button class="mt-6 min-h-12 w-full rounded-md bg-gray-950 px-6 py-3 font-bold text-white hover:bg-rose-800" type="submit">Pay $474.12</button>
+            </section>
+        </form>
+    </main>
+
+    <footer class="border-t border-gray-200 bg-gray-950 text-white"><div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8"><section><h2 class="text-lg font-black">Maison Lumiere</h2><p class="mt-3 text-sm leading-6 text-gray-300">Checkout prototype with three semantic form steps.</p></section><section><h2 class="font-bold">Categories</h2><ul class="mt-3 space-y-2 text-sm text-gray-300"><li>Footwear</li><li>Shirts</li><li>Pants</li><li>Accessories</li></ul></section><section><h2 class="font-bold">Legal</h2><ul class="mt-3 space-y-2 text-sm text-gray-300"><li>Terms and conditions</li><li>Privacy policy</li><li>About the brand</li></ul></section><section><h2 class="font-bold">Contact</h2><address class="mt-3 not-italic text-sm leading-6 text-gray-300">12 Rue de Rivoli, Paris<br>hello@maisonlumiere.example</address></section></div></footer>
+</body>
+</html>

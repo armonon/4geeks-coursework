@@ -2,17 +2,13 @@ const fs = require("fs");
 const path = require("path");
 
 const root = path.resolve(__dirname, "..");
-const criticalCss = fs.readFileSync(path.join(root, "assets", "critical.css"), "utf8");
-const fullCssLoader = [
-    `<style data-critical-css>${criticalCss}</style>`,
-    `<link rel="stylesheet" href="assets/tailwind.css" media="print" onload="this.media='all'">`,
-    `<noscript><link rel="stylesheet" href="assets/tailwind.css"></noscript>`
-].join("");
+const stylesheet = `<link rel="stylesheet" href="assets/tailwind.css">`;
 const targetFiles = [
     "index.html",
-    "index.es.html",
-    "application.html",
-    "application.es.html"
+    "catalog.html",
+    "product.html",
+    "cart.html",
+    "checkout.html"
 ];
 
 const stylePattern =
@@ -26,5 +22,5 @@ for (const fileName of targetFiles) {
         throw new Error(`No stylesheet marker found in ${fileName}`);
     }
 
-    fs.writeFileSync(filePath, html.replace(stylePattern, fullCssLoader));
+    fs.writeFileSync(filePath, html.replace(stylePattern, stylesheet));
 }

@@ -1,15 +1,15 @@
 {
   "title": {
-    "en": "HealthCore public website",
-    "es": "Sitio público de HealthCore"
+    "en": "Maison Lumiere e-commerce prototype",
+    "es": "Prototipo e-commerce Maison Lumiere"
   },
   "description": {
-    "us": "Bilingual public website and patient enquiry form for HealthCore using semantic HTML, Tailwind CSS, Schema.org markup, and JavaScript validation.",
-    "es": "Sitio público bilingüe y formulario de consulta de pacientes para HealthCore con HTML semántico, Tailwind CSS, Schema.org y validación con JavaScript."
+    "us": "Responsive French clothing store prototype with home, catalog, product, cart, and checkout views using semantic HTML, Tailwind CSS, and Schema.org markup.",
+    "es": "Prototipo responsive de tienda de ropa francesa con vistas de inicio, catálogo, producto, carrito y checkout usando HTML semántico, Tailwind CSS y Schema.org."
   },
-  "repository": "https://github.com/armonon/prokect1",
-  "preview": "https://www.healthcore.com/logo.png",
+  "repository": "https://github.com/armonon/maison-lumiere-ecommerce",
+  "preview": "",
   "projectType": "project",
   "difficulty": "beginner",
-  "technologies": ["HTML", "Tailwind CSS", "JavaScript"]
+  "technologies": ["HTML", "Tailwind CSS"]
 }
