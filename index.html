@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="AgentHub operations console for users, AI agents, skills, contracts, and platform errors."
+    />
+    <title>AgentHub — Admin Console</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            boxShadow: {
+              soft: "0 18px 50px -24px rgba(15, 23, 42, 0.28)",
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+
+  <body class="h-full overflow-hidden bg-slate-100 font-sans text-slate-900 antialiased transition-colors dark:bg-slate-950 dark:text-slate-100">
+    <div class="flex h-full min-h-0">
+      <aside class="flex h-full w-20 shrink-0 flex-col border-r border-slate-800 bg-slate-950 text-slate-300 md:w-64" aria-label="Primary navigation">
+        <div class="flex h-20 items-center gap-3 border-b border-slate-800 px-4 md:px-6">
+          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-950/40">
+            <i data-lucide="bot" class="h-5 w-5" aria-hidden="true"></i>
+          </div>
+          <div class="hidden min-w-0 md:block">
+            <p class="truncate text-lg font-bold tracking-tight text-white">AgentHub</p>
+            <p class="text-xs font-medium text-slate-500">Operations console</p>
+          </div>
+        </div>
+
+        <nav class="flex-1 space-y-1.5 overflow-y-auto px-3 py-6">
+          <p class="mb-3 hidden px-3 text-[11px] font-bold uppercase tracking-[0.2em] text-slate-600 md:block">Workspace</p>
+          <a href="#dashboard" data-nav="dashboard" class="nav-link group flex items-center gap-3 rounded-xl bg-blue-600 px-3 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-950/20" aria-current="page">
+            <i data-lucide="layout-dashboard" class="h-5 w-5 shrink-0" aria-hidden="true"></i>
+            <span class="hidden md:block">Dashboard</span>
+            <span class="nav-active-dot ml-auto hidden h-1.5 w-1.5 rounded-full bg-white md:block"></span>
+          </a>
+          <a href="#users" data-nav="users" class="nav-link group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white">
+            <i data-lucide="users" class="h-5 w-5 shrink-0" aria-hidden="true"></i>
+            <span class="hidden md:block">User Management</span>
+          </a>
+          <a href="#agents" data-nav="agents" class="nav-link group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white">
+            <i data-lucide="cpu" class="h-5 w-5 shrink-0" aria-hidden="true"></i>
+            <span class="hidden md:block">Agent Management</span>
+          </a>
+          <a href="#skills" data-nav="skills" class="nav-link group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white">
+            <i data-lucide="sparkles" class="h-5 w-5 shrink-0" aria-hidden="true"></i>
+            <span class="hidden md:block">Skills</span>
+          </a>
+          <a href="#contracts" data-nav="contracts" class="nav-link group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white">
+            <i data-lucide="file-signature" class="h-5 w-5 shrink-0" aria-hidden="true"></i>
+            <span class="hidden md:block">Agent Contracts</span>
+          </a>
+          <a href="#errors" data-nav="errors" class="nav-link group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white">
+            <i data-lucide="triangle-alert" class="h-5 w-5 shrink-0" aria-hidden="true"></i>
+            <span class="hidden md:block">Error Log</span>
+            <span class="ml-auto hidden rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-bold text-rose-300 md:block">7</span>
+          </a>
+        </nav>
+
+        <div class="border-t border-slate-800 p-3 md:p-4">
+          <div class="flex items-center gap-3 rounded-xl bg-slate-900/70 p-2 md:p-3">
+            <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-700 text-xs font-bold text-white">LM</div>
+            <div class="hidden min-w-0 flex-1 md:block">
+              <p class="truncate text-sm font-semibold text-white">Lena Morgan</p>
+              <p class="truncate text-xs text-slate-500">Super admin</p>
+            </div>
+            <button class="hidden rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-800 hover:text-white md:block" aria-label="Account settings">
+              <i data-lucide="settings" class="h-4 w-4" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <div class="flex min-w-0 flex-1 flex-col">
+        <header class="flex h-20 shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 px-5 backdrop-blur transition-colors dark:border-slate-800 dark:bg-slate-900/95 md:px-8">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 text-xs font-semibold text-slate-400">
+              <span>AgentHub</span>
+              <i data-lucide="chevron-right" class="h-3.5 w-3.5" aria-hidden="true"></i>
+              <span id="breadcrumb-title" class="truncate text-blue-600 dark:text-blue-400">Dashboard</span>
+            </div>
+            <h1 id="page-title" class="mt-1 truncate text-xl font-bold tracking-tight text-slate-950 dark:text-white md:text-2xl">Dashboard</h1>
+          </div>
+          <div class="flex items-center gap-2 md:gap-3">
+            <div class="hidden items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:border-emerald-900/70 dark:bg-emerald-950/40 dark:text-emerald-300 sm:flex">
+              <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+              All systems operational
+            </div>
+            <button id="theme-toggle" class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-blue-300 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-600 dark:hover:text-blue-400 dark:focus:ring-offset-slate-900" aria-label="Switch to dark mode">
+              <i data-lucide="moon" class="theme-moon h-5 w-5" aria-hidden="true"></i>
+              <i data-lucide="sun" class="theme-sun hidden h-5 w-5" aria-hidden="true"></i>
+            </button>
+            <button class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:border-blue-300 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-blue-600 dark:hover:text-blue-400" aria-label="Notifications">
+              <i data-lucide="bell" class="h-5 w-5" aria-hidden="true"></i>
+              <span class="absolute right-2 top-2 h-2 w-2 rounded-full border-2 border-white bg-rose-500 dark:border-slate-800"></span>
+            </button>
+          </div>
+        </header>
+
+        <main class="min-h-0 flex-1 overflow-y-auto">
+          <div class="mx-auto w-full max-w-[1600px] p-5 md:p-8">
+            <!-- Dashboard -->
+            <section id="dashboard" data-section aria-labelledby="dashboard-heading">
+              <div class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                <div>
+                  <p class="text-sm font-semibold text-blue-600 dark:text-blue-400">Tuesday, July 28</p>
+                  <h2 id="dashboard-heading" class="mt-1 text-2xl font-bold tracking-tight text-slate-950 dark:text-white md:text-3xl">Good morning, Lena</h2>
+                  <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Here’s what’s happening across AgentHub today.</p>
+                </div>
+                <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-950">
+                  <i data-lucide="download" class="h-4 w-4" aria-hidden="true"></i>
+                  Export report
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                <article class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition-colors dark:border-slate-800 dark:bg-slate-900">
+                  <div class="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-emerald-50 dark:bg-emerald-950/30"></div>
+                  <div class="relative flex items-start justify-between">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+                      <i data-lucide="circle-dollar-sign" class="h-5 w-5" aria-hidden="true"></i>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                      <i data-lucide="trending-up" class="h-3.5 w-3.5" aria-hidden="true"></i> 12.4%
+                    </span>
+                  </div>
+                  <p class="relative mt-5 text-sm font-medium text-slate-500 dark:text-slate-400">Revenue this month</p>
+                  <p class="relative mt-1 text-3xl font-bold tracking-tight text-slate-950 dark:text-white">$42,860</p>
+                  <p class="relative mt-2 text-xs text-slate-400">vs. $38,120 last month</p>
+                </article>
+
+                <article class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition-colors dark:border-slate-800 dark:bg-slate-900">
+                  <div class="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-amber-50 dark:bg-amber-950/30"></div>
+                  <div class="relative flex items-start justify-between">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+                      <i data-lucide="badge-percent" class="h-5 w-5" aria-hidden="true"></i>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+                      <i data-lucide="trending-down" class="h-3.5 w-3.5" aria-hidden="true"></i> 3.2%
+                    </span>
+                  </div>
+                  <p class="relative mt-5 text-sm font-medium text-slate-500 dark:text-slate-400">Discount losses</p>
+                  <p class="relative mt-1 text-3xl font-bold tracking-tight text-slate-950 dark:text-white">$3,240</p>
+                  <p class="relative mt-2 text-xs text-slate-400">7.6% of gross revenue</p>
+                </article>
+
+                <article class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition-colors dark:border-slate-800 dark:bg-slate-900">
+                  <div class="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-blue-50 dark:bg-blue-950/30"></div>
+                  <div class="relative flex items-start justify-between">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
+                      <i data-lucide="bot" class="h-5 w-5" aria-hidden="true"></i>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-xs font-bold text-blue-600 dark:text-blue-400">
+                      <i data-lucide="plus" class="h-3.5 w-3.5" aria-hidden="true"></i> 8 this week
+                    </span>
+                  </div>
+                  <p class="relative mt-5 text-sm font-medium text-slate-500 dark:text-slate-400">Active agents</p>
+                  <p class="relative mt-1 text-3xl font-bold tracking-tight text-slate-950 dark:text-white">128</p>
+                  <p class="relative mt-2 text-xs text-slate-400">Across 54 client workspaces</p>
+                </article>
+
+                <article class="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition-colors dark:border-slate-800 dark:bg-slate-900">
+                  <div class="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-rose-50 dark:bg-rose-950/30"></div>
+                  <div class="relative flex items-start justify-between">
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300">
+                      <i data-lucide="circle-alert" class="h-5 w-5" aria-hidden="true"></i>
+                    </div>
+                    <span class="inline-flex items-center gap-1 text-xs font-bold text-rose-600 dark:text-rose-400">
+                      <i data-lucide="arrow-up" class="h-3.5 w-3.5" aria-hidden="true"></i> 2 today
+                    </span>
+                  </div>
+                  <p class="relative mt-5 text-sm font-medium text-slate-500 dark:text-slate-400">Failing agents</p>
+                  <p class="relative mt-1 text-3xl font-bold tracking-tight text-slate-950 dark:text-white">7</p>
+                  <p class="relative mt-2 text-xs text-slate-400">5.2% of deployed agents</p>
+                </article>
+              </div>
+
+              <article class="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition-colors dark:border-slate-800 dark:bg-slate-900 md:p-6">
+                <div class="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                  <div>
+                    <h3 class="text-base font-bold text-slate-950 dark:text-white">Weekly activity</h3>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Agent runs and successful completions</p>
+                  </div>
+                  <div class="flex items-center gap-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+                    <span class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-blue-500"></span> Runs</span>
+                    <span class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-cyan-300 dark:bg-cyan-500"></span> Completed</span>
+                  </div>
+                </div>
+                <div class="mt-7 flex h-64 items-end justify-between gap-2 border-b border-slate-200 px-2 dark:border-slate-700 md:gap-5 md:px-6" role="img" aria-label="Weekly activity chart. Friday was the busiest day with 298 agent runs.">
+                  <div class="flex h-full flex-1 items-end justify-center gap-1">
+                    <div class="h-36 w-3 rounded-t-md bg-blue-500 md:w-5"></div><div class="h-28 w-3 rounded-t-md bg-cyan-300 dark:bg-cyan-500 md:w-5"></div>
+                  </div>
+                  <div class="flex h-full flex-1 items-end justify-center gap-1">
+                    <div class="h-44 w-3 rounded-t-md bg-blue-500 md:w-5"></div><div class="h-36 w-3 rounded-t-md bg-cyan-300 dark:bg-cyan-500 md:w-5"></div>
+                  </div>
+                  <div class="flex h-full flex-1 items-end justify-center gap-1">
+                    <div class="h-32 w-3 rounded-t-md bg-blue-500 md:w-5"></div><div class="h-24 w-3 rounded-t-md bg-cyan-300 dark:bg-cyan-500 md:w-5"></div>
+                  </div>
+                  <div class="flex h-full flex-1 items-end justify-center gap-1">
+                    <div class="h-48 w-3 rounded-t-md bg-blue-500 md:w-5"></div><div class="h-40 w-3 rounded-t-md bg-cyan-300 dark:bg-cyan-500 md:w-5"></div>
+                  </div>
+                  <div class="flex h-full flex-1 items-end justify-center gap-1">
+                    <div class="h-56 w-3 rounded-t-md bg-blue-500 md:w-5"></div><div class="h-48 w-3 rounded-t-md bg-cyan-300 dark:bg-cyan-500 md:w-5"></div>
+                  </div>
+                  <div class="flex h-full flex-1 items-end justify-center gap-1">
+                    <div class="h-40 w-3 rounded-t-md bg-blue-500 md:w-5"></div><div class="h-32 w-3 rounded-t-md bg-cyan-300 dark:bg-cyan-500 md:w-5"></div>
+                  </div>
+                  <div class="flex h-full flex-1 items-end justify-center gap-1">
+                    <div class="h-28 w-3 rounded-t-md bg-blue-500 md:w-5"></div><div class="h-20 w-3 rounded-t-md bg-cyan-300 dark:bg-cyan-500 md:w-5"></div>
+                  </div>
+                </div>
+                <div class="mt-3 grid grid-cols-7 text-center text-xs font-medium text-slate-400">
+                  <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                </div>
+              </article>
+
+              <div class="mt-6 grid gap-6 xl:grid-cols-3">
+                <article class="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft transition-colors dark:border-slate-800 dark:bg-slate-900 xl:col-span-2">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h3 class="font-bold text-slate-950 dark:text-white">Recent activity</h3>
+                      <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Latest events across your workspace</p>
+                    </div>
+                    <button class="text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400">View all</button>
+                  </div>
+                  <ul class="mt-5 divide-y divide-slate-100 dark:divide-slate-800">
+                    <li class="flex items-start gap-3 py-3 first:pt-0">
+                      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-300"><i data-lucide="play" class="h-4 w-4" aria-hidden="true"></i></span>
+                      <div class="min-w-0 flex-1"><p class="text-sm font-medium text-slate-700 dark:text-slate-200"><strong>Nora Finance</strong> completed a reconciliation run</p><p class="mt-1 text-xs text-slate-400">Acme Labs · 3 minutes ago</p></div>
+                      <span class="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Success</span>
+                    </li>
+                    <li class="flex items-start gap-3 py-3">
+                      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-50 text-violet-600 dark:bg-violet-950 dark:text-violet-300"><i data-lucide="file-plus-2" class="h-4 w-4" aria-hidden="true"></i></span>
+                      <div class="min-w-0 flex-1"><p class="text-sm font-medium text-slate-700 dark:text-slate-200">A new contract was created for <strong>Atlas Research</strong></p><p class="mt-1 text-xs text-slate-400">Northstar Inc. · 42 minutes ago</p></div>
+                      <span class="rounded-full bg-blue-50 px-2 py-1 text-[10px] font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">Contract</span>
+                    </li>
+                    <li class="flex items-start gap-3 py-3 last:pb-0">
+                      <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600 dark:bg-rose-950 dark:text-rose-300"><i data-lucide="triangle-alert" class="h-4 w-4" aria-hidden="true"></i></span>
+                      <div class="min-w-0 flex-1"><p class="text-sm font-medium text-slate-700 dark:text-slate-200"><strong>DealDesk Copilot</strong> reported a CRM timeout</p><p class="mt-1 text-xs text-slate-400">SummitOps · 1 hour ago</p></div>
+                      <span class="rounded-full bg-rose-50 px-2 py-1 text-[10px] font-bold text-rose-700 dark:bg-rose-950 dark:text-rose-300">Attention</span>
+                    </li>
+                  </ul>
+                </article>
+
+                <article class="rounded-2xl border border-slate-200 bg-slate-950 p-5 text-white shadow-soft dark:border-slate-800">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <p class="text-sm font-semibold text-slate-400">Platform health</p>
+                      <p class="mt-1 text-2xl font-bold">98.7%</p>
+                    </div>
+                    <div class="flex h-12 w-12 items-center justify-center rounded-full border-4 border-emerald-400/30 text-emerald-400">
+                      <i data-lucide="activity" class="h-5 w-5" aria-hidden="true"></i>
+                    </div>
+                  </div>
+                  <div class="mt-6 space-y-4">
+                    <div><div class="mb-1.5 flex justify-between text-xs"><span class="text-slate-400">API uptime</span><span class="font-semibold">99.99%</span></div><div class="h-1.5 overflow-hidden rounded-full bg-slate-800"><div class="h-full w-full rounded-full bg-emerald-400"></div></div></div>
+                    <div><div class="mb-1.5 flex justify-between text-xs"><span class="text-slate-400">Run success rate</span><span class="font-semibold">96.4%</span></div><div class="h-1.5 overflow-hidden rounded-full bg-slate-800"><div class="h-full w-11/12 rounded-full bg-blue-400"></div></div></div>
+                    <div><div class="mb-1.5 flex justify-between text-xs"><span class="text-slate-400">Queue capacity</span><span class="font-semibold">72%</span></div><div class="h-1.5 overflow-hidden rounded-full bg-slate-800"><div class="h-full w-3/4 rounded-full bg-amber-400"></div></div></div>
+                  </div>
+                </article>
+              </div>
+            </section>
+
+            <!-- Users -->
+            <section id="users" data-section class="hidden" aria-labelledby="users-heading">
+              <div class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                <div><h2 id="users-heading" class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white md:text-3xl">User management</h2><p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Manage customer accounts, plans, and access.</p></div>
+                <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"><i data-lucide="user-plus" class="h-4 w-4" aria-hidden="true"></i>Add user</button>
+              </div>
+
+              <div class="mb-6 grid gap-4 sm:grid-cols-3">
+                <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">Total users</p><p class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">1,284</p><p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400">+42 this month</p></article>
+                <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">Active</p><p class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">1,196</p><p class="mt-1 text-xs text-slate-400">93.1% of users</p></article>
+                <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">On trial</p><p class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">64</p><p class="mt-1 text-xs text-amber-600 dark:text-amber-400">12 expire this week</p></article>
+              </div>
+
+              <article class="overflow-visible rounded-2xl border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-900">
+                <div class="flex flex-col justify-between gap-3 border-b border-slate-200 p-4 dark:border-slate-800 sm:flex-row sm:items-center">
+                  <div class="relative w-full sm:max-w-xs"><i data-lucide="search" class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true"></i><input type="search" placeholder="Search users..." class="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white" /></div>
+                  <button class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-semibold text-slate-600 hover:border-blue-300 hover:text-blue-600 dark:border-slate-700 dark:text-slate-300"><i data-lucide="list-filter" class="h-4 w-4" aria-hidden="true"></i>Filter</button>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full min-w-[920px] text-left">
+                    <thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:bg-slate-950/50 dark:text-slate-400">
+                      <tr><th class="px-5 py-3.5">User</th><th class="px-5 py-3.5">Plan</th><th class="px-5 py-3.5">Status</th><th class="px-5 py-3.5">Joined</th><th class="px-5 py-3.5 text-right">Actions</th></tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tr data-record class="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                        <td class="px-5 py-4"><div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">MC</span><div><p class="text-sm font-semibold text-slate-900 dark:text-white">Maya Chen</p><p class="mt-0.5 text-xs text-slate-500">maya@acmelabs.com</p></div></div></td>
+                        <td class="px-5 py-4"><span class="rounded-full bg-violet-50 px-2.5 py-1 text-xs font-bold text-violet-700 dark:bg-violet-950 dark:text-violet-300">Growth</span></td>
+                        <td class="px-5 py-4"><span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300"><span class="h-2 w-2 rounded-full bg-emerald-500"></span>Active</span></td>
+                        <td class="px-5 py-4 text-sm text-slate-500 dark:text-slate-400">Jun 14, 2026</td>
+                        <td class="px-5 py-4 text-right"><div class="relative inline-block text-left"><button data-dropdown class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Actions for Maya Chen" aria-haspopup="menu" aria-expanded="false"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-40 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 text-left shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="user" data-id="maya" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-delete="Maya Chen" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div></td>
+                      </tr>
+                      <tr data-record class="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                        <td class="px-5 py-4"><div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-cyan-100 text-sm font-bold text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300">ER</span><div><p class="text-sm font-semibold text-slate-900 dark:text-white">Elijah Reed</p><p class="mt-0.5 text-xs text-slate-500">elijah@northstar.io</p></div></div></td>
+                        <td class="px-5 py-4"><span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">Business</span></td>
+                        <td class="px-5 py-4"><span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300"><span class="h-2 w-2 rounded-full bg-emerald-500"></span>Active</span></td>
+                        <td class="px-5 py-4 text-sm text-slate-500 dark:text-slate-400">May 2, 2026</td>
+                        <td class="px-5 py-4 text-right"><div class="relative inline-block text-left"><button data-dropdown class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Actions for Elijah Reed" aria-haspopup="menu" aria-expanded="false"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-40 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 text-left shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="user" data-id="elijah" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-delete="Elijah Reed" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div></td>
+                      </tr>
+                      <tr data-record class="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                        <td class="px-5 py-4"><div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-amber-100 text-sm font-bold text-amber-700 dark:bg-amber-950 dark:text-amber-300">SM</span><div><p class="text-sm font-semibold text-slate-900 dark:text-white">Sofia Martinez</p><p class="mt-0.5 text-xs text-slate-500">sofia@bloomworks.co</p></div></div></td>
+                        <td class="px-5 py-4"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">Starter</span></td>
+                        <td class="px-5 py-4"><span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 dark:text-amber-300"><span class="h-2 w-2 rounded-full bg-amber-500"></span>Trial</span></td>
+                        <td class="px-5 py-4 text-sm text-slate-500 dark:text-slate-400">Jul 19, 2026</td>
+                        <td class="px-5 py-4 text-right"><div class="relative inline-block text-left"><button data-dropdown class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Actions for Sofia Martinez" aria-haspopup="menu" aria-expanded="false"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-40 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 text-left shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="user" data-id="sofia" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-delete="Sofia Martinez" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div></td>
+                      </tr>
+                      <tr data-record class="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                        <td class="px-5 py-4"><div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-rose-100 text-sm font-bold text-rose-700 dark:bg-rose-950 dark:text-rose-300">NW</span><div><p class="text-sm font-semibold text-slate-900 dark:text-white">Noah Williams</p><p class="mt-0.5 text-xs text-slate-500">noah@summitops.com</p></div></div></td>
+                        <td class="px-5 py-4"><span class="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">Enterprise</span></td>
+                        <td class="px-5 py-4"><span class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-700 dark:text-rose-300"><span class="h-2 w-2 rounded-full bg-rose-500"></span>Suspended</span></td>
+                        <td class="px-5 py-4 text-sm text-slate-500 dark:text-slate-400">Mar 8, 2026</td>
+                        <td class="px-5 py-4 text-right"><div class="relative inline-block text-left"><button data-dropdown class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Actions for Noah Williams" aria-haspopup="menu" aria-expanded="false"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute bottom-full right-0 z-30 mb-2 hidden w-40 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 text-left shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="user" data-id="noah" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-delete="Noah Williams" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div></td>
+                      </tr>
+                      <tr data-record class="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40">
+                        <td class="px-5 py-4"><div class="flex items-center gap-3"><span class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">PS</span><div><p class="text-sm font-semibold text-slate-900 dark:text-white">Priya Shah</p><p class="mt-0.5 text-xs text-slate-500">priya@kinetichealth.ai</p></div></div></td>
+                        <td class="px-5 py-4"><span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">Business</span></td>
+                        <td class="px-5 py-4"><span class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 dark:text-emerald-300"><span class="h-2 w-2 rounded-full bg-emerald-500"></span>Active</span></td>
+                        <td class="px-5 py-4 text-sm text-slate-500 dark:text-slate-400">Feb 22, 2026</td>
+                        <td class="px-5 py-4 text-right"><div class="relative inline-block text-left"><button data-dropdown class="rounded-lg p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Actions for Priya Shah" aria-haspopup="menu" aria-expanded="false"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute bottom-full right-0 z-30 mb-2 hidden w-40 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 text-left shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="user" data-id="priya" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-delete="Priya Shah" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="flex items-center justify-between border-t border-slate-200 px-5 py-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400"><span>Showing 5 of 1,284 users</span><div class="flex gap-2"><button class="rounded-lg border border-slate-200 px-3 py-1.5 opacity-50 dark:border-slate-700">Previous</button><button class="rounded-lg border border-slate-200 px-3 py-1.5 font-semibold text-slate-700 hover:border-blue-400 dark:border-slate-700 dark:text-slate-200">Next</button></div></div>
+              </article>
+            </section>
+
+            <!-- Agents -->
+            <section id="agents" data-section class="hidden" aria-labelledby="agents-heading">
+              <div class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                <div><h2 id="agents-heading" class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white md:text-3xl">Agent management</h2><p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Configure your deployed workforce and review assigned skills.</p></div>
+                <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"><i data-lucide="plus" class="h-4 w-4"></i>Register agent</button>
+              </div>
+              <div class="grid gap-5 xl:grid-cols-2">
+                <article data-record class="rounded-2xl border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-900">
+                  <div class="p-5">
+                    <div class="flex items-start gap-4">
+                      <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"><i data-lucide="calculator" class="h-6 w-6"></i></div>
+                      <div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2"><h3 class="font-bold text-slate-950 dark:text-white">Nora Finance</h3><span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Active</span></div><p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Owned by Acme Labs</p></div>
+                      <div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Actions for Nora Finance" aria-haspopup="menu"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="agent" data-id="nora" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="settings-2" class="h-4 w-4"></i>Configure</button><button data-delete="Nora Finance" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div>
+                    </div>
+                    <div class="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-950/50"><div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Last run</p><p class="mt-1 text-sm font-semibold text-slate-700 dark:text-slate-200">3 min ago</p></div><div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Success rate</p><p class="mt-1 text-sm font-semibold text-emerald-600 dark:text-emerald-400">99.2%</p></div></div>
+                  </div>
+                  <div class="border-t border-slate-100 dark:border-slate-800"><button data-collapse class="flex w-full items-center justify-between px-5 py-3.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/40" aria-expanded="false"><span class="flex items-center gap-2"><i data-lucide="sparkles" class="h-4 w-4 text-blue-500"></i>1 assigned skill</span><i data-chevron data-lucide="chevron-down" class="h-4 w-4 transition-transform duration-300"></i></button><div data-collapsible class="max-h-0 overflow-hidden opacity-0 transition-all duration-300 ease-in-out"><div class="flex flex-wrap gap-2 px-5 pb-4"><span class="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">Document Intelligence</span></div></div></div>
+                </article>
+
+                <article data-record class="rounded-2xl border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-900">
+                  <div class="p-5">
+                    <div class="flex items-start gap-4">
+                      <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300"><i data-lucide="telescope" class="h-6 w-6"></i></div>
+                      <div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2"><h3 class="font-bold text-slate-950 dark:text-white">Atlas Research</h3><span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"><span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>Active</span></div><p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Owned by Northstar Inc.</p></div>
+                      <div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Actions for Atlas Research" aria-haspopup="menu"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="agent" data-id="atlas" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="settings-2" class="h-4 w-4"></i>Configure</button><button data-delete="Atlas Research" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div>
+                    </div>
+                    <div class="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-950/50"><div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Last run</p><p class="mt-1 text-sm font-semibold text-slate-700 dark:text-slate-200">18 min ago</p></div><div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Success rate</p><p class="mt-1 text-sm font-semibold text-emerald-600 dark:text-emerald-400">97.8%</p></div></div>
+                  </div>
+                  <div class="border-t border-slate-100 dark:border-slate-800"><button data-collapse class="flex w-full items-center justify-between px-5 py-3.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/40" aria-expanded="false"><span class="flex items-center gap-2"><i data-lucide="sparkles" class="h-4 w-4 text-violet-500"></i>2 assigned skills</span><i data-chevron data-lucide="chevron-down" class="h-4 w-4 transition-transform duration-300"></i></button><div data-collapsible class="max-h-0 overflow-hidden opacity-0 transition-all duration-300 ease-in-out"><div class="flex flex-wrap gap-2 px-5 pb-4"><span class="rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 dark:bg-violet-950 dark:text-violet-300">Web Research</span><span class="rounded-lg bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">Document Intelligence</span></div></div></div>
+                </article>
+
+                <article data-record class="rounded-2xl border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-900">
+                  <div class="p-5">
+                    <div class="flex items-start gap-4">
+                      <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300"><i data-lucide="calendar-clock" class="h-6 w-6"></i></div>
+                      <div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2"><h3 class="font-bold text-slate-950 dark:text-white">Calendar Concierge</h3><span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-600 dark:bg-slate-800 dark:text-slate-300"><span class="h-1.5 w-1.5 rounded-full bg-slate-400"></span>Inactive</span></div><p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Owned by BloomWorks</p></div>
+                      <div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Actions for Calendar Concierge" aria-haspopup="menu"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="agent" data-id="calendar" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="settings-2" class="h-4 w-4"></i>Configure</button><button data-delete="Calendar Concierge" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div>
+                    </div>
+                    <div class="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-slate-50 p-3 dark:bg-slate-950/50"><div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Last run</p><p class="mt-1 text-sm font-semibold text-slate-700 dark:text-slate-200">2 days ago</p></div><div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Success rate</p><p class="mt-1 text-sm font-semibold text-amber-600 dark:text-amber-400">91.4%</p></div></div>
+                  </div>
+                  <div class="border-t border-slate-100 dark:border-slate-800"><button data-collapse class="flex w-full items-center justify-between px-5 py-3.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/40" aria-expanded="false"><span class="flex items-center gap-2"><i data-lucide="sparkles" class="h-4 w-4 text-cyan-500"></i>1 assigned skill</span><i data-chevron data-lucide="chevron-down" class="h-4 w-4 transition-transform duration-300"></i></button><div data-collapsible class="max-h-0 overflow-hidden opacity-0 transition-all duration-300 ease-in-out"><div class="flex flex-wrap gap-2 px-5 pb-4"><span class="rounded-lg bg-cyan-50 px-3 py-1.5 text-xs font-semibold text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300">Calendar Management</span></div></div></div>
+                </article>
+
+                <article data-record class="rounded-2xl border border-rose-200 bg-white shadow-soft dark:border-rose-900/60 dark:bg-slate-900">
+                  <div class="p-5">
+                    <div class="flex items-start gap-4">
+                      <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300"><i data-lucide="handshake" class="h-6 w-6"></i></div>
+                      <div class="min-w-0 flex-1"><div class="flex flex-wrap items-center gap-2"><h3 class="font-bold text-slate-950 dark:text-white">DealDesk Copilot</h3><span class="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-rose-700 dark:bg-rose-950 dark:text-rose-300"><span class="h-1.5 w-1.5 rounded-full bg-rose-500"></span>Failing</span></div><p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Owned by SummitOps</p></div>
+                      <div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Actions for DealDesk Copilot" aria-haspopup="menu"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute bottom-full right-0 z-30 mb-2 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="agent" data-id="dealdesk" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="settings-2" class="h-4 w-4"></i>Configure</button><button data-delete="DealDesk Copilot" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div>
+                    </div>
+                    <div class="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-rose-50/70 p-3 dark:bg-rose-950/20"><div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Last run</p><p class="mt-1 text-sm font-semibold text-slate-700 dark:text-slate-200">Failed · 1 hr ago</p></div><div><p class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Success rate</p><p class="mt-1 text-sm font-semibold text-rose-600 dark:text-rose-400">72.1%</p></div></div>
+                  </div>
+                  <div class="border-t border-slate-100 dark:border-slate-800"><button data-collapse class="flex w-full items-center justify-between px-5 py-3.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800/40" aria-expanded="false"><span class="flex items-center gap-2"><i data-lucide="sparkles" class="h-4 w-4 text-rose-500"></i>2 assigned skills</span><i data-chevron data-lucide="chevron-down" class="h-4 w-4 transition-transform duration-300"></i></button><div data-collapsible class="max-h-0 overflow-hidden opacity-0 transition-all duration-300 ease-in-out"><div class="flex flex-wrap gap-2 px-5 pb-4"><span class="rounded-lg bg-violet-50 px-3 py-1.5 text-xs font-semibold text-violet-700 dark:bg-violet-950 dark:text-violet-300">Web Research</span><span class="rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">CRM Sync</span></div></div></div>
+                </article>
+              </div>
+            </section>
+
+            <!-- Skills -->
+            <section id="skills" data-section class="hidden" aria-labelledby="skills-heading">
+              <div class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                <div><h2 id="skills-heading" class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white md:text-3xl">Skills catalog</h2><p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Extend what your AI workforce can safely accomplish.</p></div>
+                <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"><i data-lucide="plus" class="h-4 w-4"></i>Create skill</button>
+              </div>
+              <aside class="mb-6 flex items-start gap-4 rounded-2xl border border-blue-200 bg-blue-50 p-5 dark:border-blue-900/60 dark:bg-blue-950/30">
+                <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white"><i data-lucide="lightbulb" class="h-5 w-5"></i></span>
+                <div><h3 class="font-bold text-blue-950 dark:text-blue-100">What is a skill?</h3><p class="mt-1 text-sm leading-6 text-blue-800/80 dark:text-blue-200/70">A skill is a reusable, permission-scoped capability attached to an agent—like searching the web, reading a document, or updating a calendar. Skills let teams expand what an agent can do without changing its core identity.</p></div>
+              </aside>
+              <div class="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+                <article data-record class="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+                  <div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300"><i data-lucide="globe-2" class="h-5 w-5"></i></span><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for Web Research"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="skill" data-id="web" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-delete="Web Research" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div></div>
+                  <span class="mt-5 w-fit rounded-full bg-violet-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-violet-700 dark:bg-violet-950 dark:text-violet-300">Knowledge</span><h3 class="mt-3 font-bold text-slate-950 dark:text-white">Web Research</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-500 dark:text-slate-400">Searches trusted web sources and returns cited, structured findings.</p><div class="mt-5 border-t border-slate-100 pt-4 dark:border-slate-800"><div class="flex items-center justify-between text-xs"><span class="text-slate-500 dark:text-slate-400">Enabled agents</span><span class="font-bold text-slate-900 dark:text-white">2</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div class="h-full w-1/2 rounded-full bg-violet-500"></div></div></div>
+                </article>
+                <article data-record class="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+                  <div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300"><i data-lucide="files" class="h-5 w-5"></i></span><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for Document Intelligence"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="skill" data-id="docs" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-delete="Document Intelligence" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div></div>
+                  <span class="mt-5 w-fit rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-700 dark:bg-blue-950 dark:text-blue-300">Documents</span><h3 class="mt-3 font-bold text-slate-950 dark:text-white">Document Intelligence</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-500 dark:text-slate-400">Extracts, compares, and summarizes data from uploaded documents.</p><div class="mt-5 border-t border-slate-100 pt-4 dark:border-slate-800"><div class="flex items-center justify-between text-xs"><span class="text-slate-500 dark:text-slate-400">Enabled agents</span><span class="font-bold text-slate-900 dark:text-white">2</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div class="h-full w-1/2 rounded-full bg-blue-500"></div></div></div>
+                </article>
+                <article data-record class="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+                  <div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300"><i data-lucide="calendar-days" class="h-5 w-5"></i></span><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for Calendar Management"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="skill" data-id="calendar" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-delete="Calendar Management" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div></div>
+                  <span class="mt-5 w-fit rounded-full bg-cyan-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300">Productivity</span><h3 class="mt-3 font-bold text-slate-950 dark:text-white">Calendar Management</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-500 dark:text-slate-400">Finds availability, schedules meetings, and manages invites.</p><div class="mt-5 border-t border-slate-100 pt-4 dark:border-slate-800"><div class="flex items-center justify-between text-xs"><span class="text-slate-500 dark:text-slate-400">Enabled agents</span><span class="font-bold text-slate-900 dark:text-white">1</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div class="h-full w-1/4 rounded-full bg-cyan-500"></div></div></div>
+                </article>
+                <article data-record class="flex flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900">
+                  <div class="flex items-start justify-between"><span class="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"><i data-lucide="refresh-cw" class="h-5 w-5"></i></span><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for CRM Sync"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute bottom-full right-0 z-30 mb-2 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="skill" data-id="crm" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-delete="CRM Sync" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"><i data-lucide="trash-2" class="h-4 w-4"></i>Delete</button></div></div></div>
+                  <span class="mt-5 w-fit rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Integration</span><h3 class="mt-3 font-bold text-slate-950 dark:text-white">CRM Sync</h3><p class="mt-2 flex-1 text-sm leading-6 text-slate-500 dark:text-slate-400">Reads and updates deals, contacts, and activity in your CRM.</p><div class="mt-5 border-t border-slate-100 pt-4 dark:border-slate-800"><div class="flex items-center justify-between text-xs"><span class="text-slate-500 dark:text-slate-400">Enabled agents</span><span class="font-bold text-slate-900 dark:text-white">1</span></div><div class="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800"><div class="h-full w-1/4 rounded-full bg-emerald-500"></div></div></div>
+                </article>
+              </div>
+            </section>
+
+            <!-- Contracts -->
+            <section id="contracts" data-section class="hidden" aria-labelledby="contracts-heading">
+              <div class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                <div><h2 id="contracts-heading" class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white md:text-3xl">Agent contracts</h2><p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Review active and historical AI workforce rentals.</p></div>
+                <button class="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700"><i data-lucide="file-plus-2" class="h-4 w-4"></i>New contract</button>
+              </div>
+              <div class="mb-6 grid gap-4 sm:grid-cols-3">
+                <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">Contract value</p><p class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">$38,420</p><p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400">+9.8% this month</p></article>
+                <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">Active contracts</p><p class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">46</p><p class="mt-1 text-xs text-slate-400">Across 38 clients</p></article>
+                <article class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">Renewals due</p><p class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">8</p><p class="mt-1 text-xs text-amber-600 dark:text-amber-400">Within 14 days</p></article>
+              </div>
+              <article class="overflow-visible rounded-2xl border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-900">
+                <div class="overflow-x-auto">
+                  <table class="w-full min-w-[1120px] text-left">
+                    <thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:bg-slate-950/50 dark:text-slate-400"><tr><th class="px-5 py-3.5">Contract / Client</th><th class="px-5 py-3.5">Agent</th><th class="px-5 py-3.5">Skills</th><th class="px-5 py-3.5">Term</th><th class="px-5 py-3.5">Status</th><th class="px-5 py-3.5">Paid</th><th class="px-5 py-3.5"></th></tr></thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tr data-record class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40"><td class="px-5 py-4"><p class="text-sm font-bold text-slate-900 dark:text-white">CTR-2407</p><p class="mt-0.5 text-xs text-slate-500">Acme Labs</p></td><td class="px-5 py-4 text-sm font-medium text-slate-700 dark:text-slate-200">Nora Finance</td><td class="px-5 py-4"><span class="rounded-lg bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">Document Intelligence</span></td><td class="px-5 py-4 text-xs text-slate-500 dark:text-slate-400">Jul 1 – Jul 31, 2026</td><td class="px-5 py-4"><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Active</span></td><td class="px-5 py-4 text-sm font-bold text-slate-900 dark:text-white">$650.00</td><td class="px-5 py-4"><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for contract CTR-2407"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="contract" data-id="ctr2407" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button></div></div></td></tr>
+                      <tr data-record class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40"><td class="px-5 py-4"><p class="text-sm font-bold text-slate-900 dark:text-white">CTR-2402</p><p class="mt-0.5 text-xs text-slate-500">Northstar Inc.</p></td><td class="px-5 py-4 text-sm font-medium text-slate-700 dark:text-slate-200">Atlas Research</td><td class="px-5 py-4"><div class="flex flex-wrap gap-1"><span class="rounded-lg bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-700 dark:bg-violet-950 dark:text-violet-300">Web Research</span><span class="rounded-lg bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-700 dark:bg-blue-950 dark:text-blue-300">+1</span></div></td><td class="px-5 py-4 text-xs text-slate-500 dark:text-slate-400">Jul 1 – Sep 30, 2026</td><td class="px-5 py-4"><span class="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Active</span></td><td class="px-5 py-4 text-sm font-bold text-slate-900 dark:text-white">$1,080.00</td><td class="px-5 py-4"><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for contract CTR-2402"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="contract" data-id="ctr2402" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button></div></div></td></tr>
+                      <tr data-record class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40"><td class="px-5 py-4"><p class="text-sm font-bold text-slate-900 dark:text-white">CTR-2389</p><p class="mt-0.5 text-xs text-slate-500">BloomWorks</p></td><td class="px-5 py-4 text-sm font-medium text-slate-700 dark:text-slate-200">Calendar Concierge</td><td class="px-5 py-4"><span class="rounded-lg bg-cyan-50 px-2 py-1 text-[11px] font-semibold text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300">Calendar Management</span></td><td class="px-5 py-4 text-xs text-slate-500 dark:text-slate-400">Jun 15 – Aug 15, 2026</td><td class="px-5 py-4"><span class="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-950 dark:text-amber-300">Paused</span></td><td class="px-5 py-4 text-sm font-bold text-slate-900 dark:text-white">$560.00</td><td class="px-5 py-4"><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for contract CTR-2389"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="contract" data-id="ctr2389" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button></div></div></td></tr>
+                      <tr data-record class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40"><td class="px-5 py-4"><p class="text-sm font-bold text-slate-900 dark:text-white">CTR-2310</p><p class="mt-0.5 text-xs text-slate-500">SummitOps</p></td><td class="px-5 py-4 text-sm font-medium text-slate-700 dark:text-slate-200">DealDesk Copilot</td><td class="px-5 py-4"><div class="flex flex-wrap gap-1"><span class="rounded-lg bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">CRM Sync</span><span class="rounded-lg bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-700 dark:bg-violet-950 dark:text-violet-300">+1</span></div></td><td class="px-5 py-4 text-xs text-slate-500 dark:text-slate-400">Apr 1 – Jun 30, 2026</td><td class="px-5 py-4"><span class="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">Completed</span></td><td class="px-5 py-4 text-sm font-bold text-slate-900 dark:text-white">$950.00</td><td class="px-5 py-4"><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for contract CTR-2310"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute bottom-full right-0 z-30 mb-2 hidden w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="contract" data-id="ctr2310" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button></div></div></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="border-t border-slate-200 px-5 py-4 text-sm text-slate-500 dark:border-slate-800 dark:text-slate-400">Showing 4 recent contracts</div>
+              </article>
+            </section>
+
+            <!-- Errors -->
+            <section id="errors" data-section class="hidden" aria-labelledby="errors-heading">
+              <div class="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+                <div><h2 id="errors-heading" class="text-2xl font-bold tracking-tight text-slate-950 dark:text-white md:text-3xl">Error log</h2><p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Investigate agent failures and track resolution status.</p></div>
+                <button class="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm hover:border-blue-300 hover:text-blue-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"><i data-lucide="download" class="h-4 w-4"></i>Export logs</button>
+              </div>
+              <div class="mb-6 grid gap-4 sm:grid-cols-3">
+                <article class="rounded-2xl border border-rose-200 bg-rose-50 p-4 dark:border-rose-900/60 dark:bg-rose-950/30"><p class="text-xs font-bold uppercase tracking-wider text-rose-500">Open incidents</p><p class="mt-2 text-2xl font-bold text-rose-950 dark:text-rose-100">7</p><p class="mt-1 text-xs text-rose-600 dark:text-rose-300">2 require immediate action</p></article>
+                <article class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">Resolved today</p><p class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">18</p><p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Median time: 14 min</p></article>
+                <article class="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"><p class="text-xs font-bold uppercase tracking-wider text-slate-400">24h error rate</p><p class="mt-2 text-2xl font-bold text-slate-950 dark:text-white">1.3%</p><p class="mt-1 text-xs text-emerald-600 dark:text-emerald-400">Down 0.4%</p></article>
+              </div>
+              <article class="overflow-visible rounded-2xl border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-900">
+                <div class="overflow-x-auto">
+                  <table class="w-full min-w-[1080px] text-left">
+                    <thead class="bg-slate-50 text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:bg-slate-950/50 dark:text-slate-400"><tr><th class="px-5 py-3.5">Timestamp</th><th class="px-5 py-3.5">Agent</th><th class="px-5 py-3.5">Type</th><th class="px-5 py-3.5">Description</th><th class="px-5 py-3.5">State</th><th class="px-5 py-3.5"></th></tr></thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tr data-record data-error-row class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40"><td class="px-5 py-4 text-xs text-slate-500 dark:text-slate-400">Jul 28, 09:42:18</td><td class="px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white">DealDesk Copilot</td><td class="px-5 py-4"><span class="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-bold text-rose-700 dark:bg-rose-950 dark:text-rose-300">Critical</span></td><td class="max-w-sm px-5 py-4 text-sm text-slate-500 dark:text-slate-400">CRM provider returned a 503 during deal sync.</td><td class="px-5 py-4"><span data-state class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400"><span class="h-2 w-2 rounded-full bg-rose-500"></span>Open</span></td><td class="px-5 py-4"><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for error ERR-9241"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="error" data-id="err9241" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-resolve class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40"><i data-lucide="circle-check" class="h-4 w-4"></i>Mark as resolved</button></div></div></td></tr>
+                      <tr data-record data-error-row class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40"><td class="px-5 py-4 text-xs text-slate-500 dark:text-slate-400">Jul 28, 09:17:04</td><td class="px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white">Atlas Research</td><td class="px-5 py-4"><span class="rounded-full bg-orange-50 px-2.5 py-1 text-xs font-bold text-orange-700 dark:bg-orange-950 dark:text-orange-300">Timeout</span></td><td class="max-w-sm px-5 py-4 text-sm text-slate-500 dark:text-slate-400">Research job exceeded the 120-second limit.</td><td class="px-5 py-4"><span data-state class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400"><span class="h-2 w-2 rounded-full bg-rose-500"></span>Open</span></td><td class="px-5 py-4"><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for error ERR-9238"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="error" data-id="err9238" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-resolve class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40"><i data-lucide="circle-check" class="h-4 w-4"></i>Mark as resolved</button></div></div></td></tr>
+                      <tr data-record data-error-row class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40"><td class="px-5 py-4 text-xs text-slate-500 dark:text-slate-400">Jul 28, 08:54:31</td><td class="px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white">Nora Finance</td><td class="px-5 py-4"><span class="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 dark:bg-amber-950 dark:text-amber-300">Validation</span></td><td class="max-w-sm px-5 py-4 text-sm text-slate-500 dark:text-slate-400">Invoice currency was missing from the source record.</td><td class="px-5 py-4"><span data-state class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400"><span class="h-2 w-2 rounded-full bg-rose-500"></span>Open</span></td><td class="px-5 py-4"><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for error ERR-9230"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="error" data-id="err9230" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-resolve class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40"><i data-lucide="circle-check" class="h-4 w-4"></i>Mark as resolved</button></div></div></td></tr>
+                      <tr data-record data-error-row class="opacity-70 hover:bg-slate-50/80 dark:hover:bg-slate-800/40"><td class="px-5 py-4 text-xs text-slate-500 dark:text-slate-400">Jul 28, 08:12:47</td><td class="px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white">Calendar Concierge</td><td class="px-5 py-4"><span class="rounded-full bg-fuchsia-50 px-2.5 py-1 text-xs font-bold text-fuchsia-700 dark:bg-fuchsia-950 dark:text-fuchsia-300">Permission</span></td><td class="max-w-sm px-5 py-4 text-sm text-slate-500 dark:text-slate-400">Calendar write permission was revoked by the client.</td><td class="px-5 py-4"><span data-state class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400"><i data-lucide="check" class="h-3.5 w-3.5"></i>Resolved</span></td><td class="px-5 py-4"><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for error ERR-9218"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute right-0 z-30 mt-2 hidden w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="error" data-id="err9218" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button disabled class="flex w-full cursor-not-allowed items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-400"><i data-lucide="circle-check" class="h-4 w-4"></i>Resolved</button></div></div></td></tr>
+                      <tr data-record data-error-row class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40"><td class="px-5 py-4 text-xs text-slate-500 dark:text-slate-400">Jul 28, 07:48:02</td><td class="px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white">DealDesk Copilot</td><td class="px-5 py-4"><span class="rounded-full bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-300">Integration</span></td><td class="max-w-sm px-5 py-4 text-sm text-slate-500 dark:text-slate-400">CRM field mapping no longer matches the provider schema.</td><td class="px-5 py-4"><span data-state class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400"><span class="h-2 w-2 rounded-full bg-rose-500"></span>Open</span></td><td class="px-5 py-4"><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for error ERR-9211"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute bottom-full right-0 z-30 mb-2 hidden w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="error" data-id="err9211" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-resolve class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40"><i data-lucide="circle-check" class="h-4 w-4"></i>Mark as resolved</button></div></div></td></tr>
+                      <tr data-record data-error-row class="hover:bg-slate-50/80 dark:hover:bg-slate-800/40"><td class="px-5 py-4 text-xs text-slate-500 dark:text-slate-400">Jul 28, 07:03:56</td><td class="px-5 py-4 text-sm font-semibold text-slate-900 dark:text-white">Atlas Research</td><td class="px-5 py-4"><span class="rounded-full bg-orange-50 px-2.5 py-1 text-xs font-bold text-orange-700 dark:bg-orange-950 dark:text-orange-300">Timeout</span></td><td class="max-w-sm px-5 py-4 text-sm text-slate-500 dark:text-slate-400">Document retrieval timed out after three retries.</td><td class="px-5 py-4"><span data-state class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 dark:text-rose-400"><span class="h-2 w-2 rounded-full bg-rose-500"></span>Open</span></td><td class="px-5 py-4"><div class="relative"><button data-dropdown class="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Actions for error ERR-9204"><i data-lucide="ellipsis" class="h-5 w-5"></i></button><div data-menu class="absolute bottom-full right-0 z-30 mb-2 hidden w-44 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800"><button data-open-modal="error" data-id="err9204" class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700"><i data-lucide="eye" class="h-4 w-4"></i>View detail</button><button data-resolve class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50 dark:text-emerald-300 dark:hover:bg-emerald-950/40"><i data-lucide="circle-check" class="h-4 w-4"></i>Mark as resolved</button></div></div></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            </section>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Shared modal -->
+    <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div id="modal-panel" class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+        <div class="sticky top-0 z-10 flex items-start justify-between border-b border-slate-200 bg-white px-5 py-4 dark:border-slate-800 dark:bg-slate-900">
+          <div><p id="modal-eyebrow" class="text-xs font-bold uppercase tracking-[0.18em] text-blue-600 dark:text-blue-400">Details</p><h2 id="modal-title" class="mt-1 text-xl font-bold text-slate-950 dark:text-white">Record detail</h2></div>
+          <button data-close-modal class="rounded-xl p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:hover:bg-slate-800 dark:hover:text-white" aria-label="Close modal"><i data-lucide="x" class="h-5 w-5"></i></button>
+        </div>
+        <div id="modal-content" class="p-5"></div>
+        <div id="modal-footer" class="flex justify-end gap-3 border-t border-slate-200 px-5 py-4 dark:border-slate-800">
+          <button data-close-modal class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="pointer-events-none fixed bottom-5 right-5 z-[60] translate-y-6 rounded-xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white opacity-0 shadow-2xl transition-all duration-300 dark:bg-white dark:text-slate-950" role="status" aria-live="polite"></div>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      const sectionTitles = {
+        dashboard: "Dashboard",
+        users: "User Management",
+        agents: "Agent Management",
+        skills: "Skills",
+        contracts: "Agent Contracts",
+        errors: "Error Log",
+      };
+
+      const users = {
+        maya: { name: "Maya Chen", email: "maya@acmelabs.com", company: "Acme Labs", plan: "Growth", status: "Active", joined: "June 14, 2026", role: "Workspace owner", agents: "Nora Finance", billing: "Monthly · Visa ending 2048" },
+        elijah: { name: "Elijah Reed", email: "elijah@northstar.io", company: "Northstar Inc.", plan: "Business", status: "Active", joined: "May 2, 2026", role: "Operations lead", agents: "Atlas Research", billing: "Quarterly · ACH" },
+        sofia: { name: "Sofia Martinez", email: "sofia@bloomworks.co", company: "BloomWorks", plan: "Starter", status: "Trial", joined: "July 19, 2026", role: "Founder", agents: "Calendar Concierge", billing: "Trial ends August 2" },
+        noah: { name: "Noah Williams", email: "noah@summitops.com", company: "SummitOps", plan: "Enterprise", status: "Suspended", joined: "March 8, 2026", role: "Revenue operations", agents: "DealDesk Copilot", billing: "Annual · Invoice" },
+        priya: { name: "Priya Shah", email: "priya@kinetichealth.ai", company: "Kinetic Health", plan: "Business", status: "Active", joined: "February 22, 2026", role: "Product lead", agents: "3 active agents", billing: "Monthly · Mastercard ending 6174" },
+      };
+
+      const agents = {
+        nora: { name: "Nora Finance", owner: "Acme Labs", model: "AH Reasoning v3", status: "Active", skills: "Document Intelligence", prompt: "You are Nora, a precise finance operations assistant for Acme Labs. Reconcile invoices against purchase orders, flag discrepancies, and produce an audit-ready summary. Never approve or move funds. Escalate any variance above $500 to a human reviewer." },
+        atlas: { name: "Atlas Research", owner: "Northstar Inc.", model: "AH Research v2", status: "Active", skills: "Web Research, Document Intelligence", prompt: "You are Atlas, a market research agent for Northstar Inc. Gather evidence from reputable sources, cite every material claim, distinguish facts from inference, and deliver concise executive briefings. Never invent a source or conceal uncertainty." },
+        calendar: { name: "Calendar Concierge", owner: "BloomWorks", model: "AH Fast v2", status: "Inactive", skills: "Calendar Management", prompt: "You coordinate meetings for BloomWorks. Confirm time zones, respect working hours, avoid conflicts, and include a clear agenda in every invitation. Ask before moving or canceling an existing event." },
+        dealdesk: { name: "DealDesk Copilot", owner: "SummitOps", model: "AH Reasoning v3", status: "Failing", skills: "Web Research, CRM Sync", prompt: "You support SummitOps revenue operations. Review deal context, enrich account information, and keep CRM fields current. Do not alter pricing, legal terms, forecast stage, or close dates without explicit human approval." },
+      };
+
+      const skills = {
+        web: { name: "Web Research", category: "Knowledge", description: "Searches approved public sources and returns structured findings with citations and confidence notes.", scope: "Read-only web access", agents: "Atlas Research, DealDesk Copilot", version: "v2.4.1", updated: "July 18, 2026" },
+        docs: { name: "Document Intelligence", category: "Documents", description: "Extracts tables and clauses, compares files, and summarizes PDFs and office documents.", scope: "Read uploaded workspace files", agents: "Nora Finance, Atlas Research", version: "v3.1.0", updated: "July 22, 2026" },
+        calendar: { name: "Calendar Management", category: "Productivity", description: "Checks availability, creates events, updates invitations, and manages scheduling conflicts.", scope: "Read and write calendar events", agents: "Calendar Concierge", version: "v1.8.3", updated: "July 9, 2026" },
+        crm: { name: "CRM Sync", category: "Integration", description: "Reads and updates approved contact, company, activity, and deal fields in a connected CRM.", scope: "Selected CRM objects and fields", agents: "DealDesk Copilot", version: "v2.0.6", updated: "July 25, 2026" },
+      };
+
+      const contracts = {
+        ctr2407: { id: "CTR-2407", client: "Acme Labs", agent: "Nora Finance", term: "July 1 – July 31, 2026", status: "Active", base: 520, items: [["Document Intelligence", 180]], discount: 50, total: 650 },
+        ctr2402: { id: "CTR-2402", client: "Northstar Inc.", agent: "Atlas Research", term: "July 1 – September 30, 2026", status: "Active", base: 680, items: [["Web Research", 220], ["Document Intelligence", 180]], discount: 0, total: 1080 },
+        ctr2389: { id: "CTR-2389", client: "BloomWorks", agent: "Calendar Concierge", term: "June 15 – August 15, 2026", status: "Paused", base: 420, items: [["Calendar Management", 140]], discount: 0, total: 560 },
+        ctr2310: { id: "CTR-2310", client: "SummitOps", agent: "DealDesk Copilot", term: "April 1 – June 30, 2026", status: "Completed", base: 610, items: [["Web Research", 220], ["CRM Sync", 190]], discount: 70, total: 950 },
+      };
+
+      const errors = {
+        err9241: { id: "ERR-9241", agent: "DealDesk Copilot", timestamp: "July 28, 2026 at 09:42:18 PDT", severity: "Critical", context: "Outbound CRM update for opportunity OP-8831", summary: "CRM provider returned a 503 during deal sync.", trace: "IntegrationError: CRM service unavailable\\n  at crm.syncOpportunity (connector.js:284)\\n  at agent.executeTool (runtime.js:119)\\nCaused by: HTTP 503 — retry-after: 120" },
+        err9238: { id: "ERR-9238", agent: "Atlas Research", timestamp: "July 28, 2026 at 09:17:04 PDT", severity: "Timeout", context: "Competitive landscape research run RUN-48109", summary: "Research job exceeded the 120-second limit.", trace: "TimeoutError: execution exceeded 120000ms\\n  at research.collectSources (research.js:418)\\n  retry_count: 2\\n  sources_completed: 17/24" },
+        err9230: { id: "ERR-9230", agent: "Nora Finance", timestamp: "July 28, 2026 at 08:54:31 PDT", severity: "Validation", context: "Invoice reconciliation batch INV-0728-A", summary: "Invoice currency was missing from the source record.", trace: "ValidationError: currency is required\\n  record: INV-88319\\n  field: currency\\n  received: null" },
+        err9218: { id: "ERR-9218", agent: "Calendar Concierge", timestamp: "July 28, 2026 at 08:12:47 PDT", severity: "Permission", context: "Meeting update EVENT-24071", summary: "Calendar write permission was revoked by the client.", trace: "PermissionError: insufficient_scope\\n  required: calendar.events.write\\n  connection: bloomworks-google-1\\n  resolution: client reauthorized" },
+        err9211: { id: "ERR-9211", agent: "DealDesk Copilot", timestamp: "July 28, 2026 at 07:48:02 PDT", severity: "Integration", context: "Nightly CRM schema check", summary: "CRM field mapping no longer matches the provider schema.", trace: "SchemaError: unknown field annual_contract_value\\n  object: opportunity\\n  provider_field: annualContractValue\\n  mapping_version: 14" },
+        err9204: { id: "ERR-9204", agent: "Atlas Research", timestamp: "July 28, 2026 at 07:03:56 PDT", severity: "Timeout", context: "Document retrieval for report RPT-192", summary: "Document retrieval timed out after three retries.", trace: "RetrievalTimeout: source did not respond\\n  source_id: DOC-7784\\n  attempts: 3\\n  elapsed: 90018ms" },
+      };
+
+      const modal = document.getElementById("modal");
+      const modalTitle = document.getElementById("modal-title");
+      const modalEyebrow = document.getElementById("modal-eyebrow");
+      const modalContent = document.getElementById("modal-content");
+      const modalFooter = document.getElementById("modal-footer");
+      let lastFocusedElement = null;
+      let toastTimer;
+
+      function detailGrid(entries) {
+        return `<dl class="grid gap-4 sm:grid-cols-2">${entries.map(([label, value]) => `<div class="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/60"><dt class="text-[10px] font-bold uppercase tracking-wider text-slate-400">${label}</dt><dd class="mt-1.5 text-sm font-semibold text-slate-800 dark:text-slate-100">${value}</dd></div>`).join("")}</dl>`;
+      }
+
+      function closeMenus(exceptButton) {
+        document.querySelectorAll("[data-menu]").forEach((menu) => {
+          const trigger = menu.parentElement.querySelector("[data-dropdown]");
+          if (trigger !== exceptButton) {
+            menu.classList.add("hidden");
+            if (trigger) trigger.setAttribute("aria-expanded", "false");
+          }
+        });
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById("toast");
+        clearTimeout(toastTimer);
+        toast.textContent = message;
+        toast.classList.remove("translate-y-6", "opacity-0");
+        toastTimer = setTimeout(() => toast.classList.add("translate-y-6", "opacity-0"), 2600);
+      }
+
+      function openModal(type, id, trigger) {
+        lastFocusedElement = trigger;
+        let title = "";
+        let eyebrow = "Record detail";
+        let content = "";
+        let footer = `<button data-close-modal class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Close</button>`;
+
+        if (type === "user") {
+          const user = users[id];
+          title = user.name;
+          eyebrow = "User record";
+          content = `<div class="mb-5 flex items-center gap-4 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-500 p-5 text-white"><div class="flex h-14 w-14 items-center justify-center rounded-full bg-white/20 text-lg font-bold">${user.name.split(" ").map((n) => n[0]).join("")}</div><div><p class="text-lg font-bold">${user.name}</p><p class="text-sm text-blue-100">${user.email}</p></div></div>${detailGrid([["Company", user.company], ["Role", user.role], ["Plan", user.plan], ["Account status", user.status], ["Joined", user.joined], ["Billing", user.billing], ["Rented agents", user.agents], ["User ID", `USR-${id.toUpperCase()}-26`]])}`;
+        }
+
+        if (type === "agent") {
+          const agent = agents[id];
+          title = `Configure ${agent.name}`;
+          eyebrow = "Agent configuration";
+          content = `${detailGrid([["Owner", agent.owner], ["Status", agent.status], ["Model", agent.model], ["Enabled skills", agent.skills]])}<div class="mt-5"><label for="system-prompt" class="mb-2 block text-sm font-bold text-slate-800 dark:text-slate-100">System prompt</label><p class="mb-3 text-xs leading-5 text-slate-500 dark:text-slate-400">This prompt defines the agent’s role, operating boundaries, and escalation behavior.</p><textarea id="system-prompt" rows="8" class="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200">${agent.prompt}</textarea></div>`;
+          footer = `<button data-close-modal class="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Cancel</button><button data-save-agent class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700">Save changes</button>`;
+        }
+
+        if (type === "skill") {
+          const skill = skills[id];
+          title = skill.name;
+          eyebrow = "Skill detail";
+          content = `<div class="mb-5 rounded-2xl border border-blue-100 bg-blue-50 p-5 text-sm leading-6 text-blue-900 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-100">${skill.description}</div>${detailGrid([["Category", skill.category], ["Permission scope", skill.scope], ["Enabled agents", skill.agents], ["Current version", skill.version], ["Last updated", skill.updated], ["Availability", "Published to catalog"]])}`;
+        }
+
+        if (type === "contract") {
+          const contract = contracts[id];
+          title = contract.id;
+          eyebrow = "Contract breakdown";
+          const itemRows = contract.items.map(([name, price]) => `<div class="flex items-center justify-between py-2 text-sm"><span class="text-slate-600 dark:text-slate-300">${name}</span><span class="font-semibold text-slate-900 dark:text-white">$${price.toFixed(2)}</span></div>`).join("");
+          content = `${detailGrid([["Client", contract.client], ["Rented agent", contract.agent], ["Term", contract.term], ["Status", contract.status]])}<div class="mt-5 rounded-2xl border border-slate-200 p-4 dark:border-slate-700"><h3 class="text-sm font-bold text-slate-900 dark:text-white">Itemized charges</h3><div class="mt-3 divide-y divide-slate-100 dark:divide-slate-800"><div class="flex items-center justify-between py-2 text-sm"><span class="text-slate-600 dark:text-slate-300">Base agent rental</span><span class="font-semibold text-slate-900 dark:text-white">$${contract.base.toFixed(2)}</span></div>${itemRows}${contract.discount ? `<div class="flex items-center justify-between py-2 text-sm"><span class="text-emerald-600 dark:text-emerald-400">Contract discount</span><span class="font-semibold text-emerald-600 dark:text-emerald-400">−$${contract.discount.toFixed(2)}</span></div>` : ""}</div><div class="mt-2 flex items-center justify-between border-t border-slate-200 pt-4 dark:border-slate-700"><span class="font-bold text-slate-900 dark:text-white">Total paid</span><span class="text-xl font-bold text-blue-600 dark:text-blue-400">$${contract.total.toFixed(2)}</span></div></div>`;
+        }
+
+        if (type === "error") {
+          const error = errors[id];
+          title = error.id;
+          eyebrow = `${error.severity} error`;
+          content = `${detailGrid([["Agent", error.agent], ["Timestamp", error.timestamp], ["Severity", error.severity], ["Execution context", error.context]])}<div class="mt-5 rounded-xl border border-rose-100 bg-rose-50 p-4 text-sm text-rose-900 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-100">${error.summary}</div><div class="mt-5"><h3 class="mb-2 text-sm font-bold text-slate-900 dark:text-white">Full trace</h3><pre class="overflow-x-auto whitespace-pre-wrap rounded-xl bg-slate-950 p-4 text-xs leading-6 text-slate-300">${error.trace}</pre></div>`;
+        }
+
+        modalTitle.textContent = title;
+        modalEyebrow.textContent = eyebrow;
+        modalContent.innerHTML = content;
+        modalFooter.innerHTML = footer;
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+        document.body.classList.add("overflow-hidden");
+        closeMenus();
+        lucide.createIcons();
+        modal.querySelector("[data-close-modal]").focus();
+      }
+
+      function closeModal() {
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+        document.body.classList.remove("overflow-hidden");
+        if (lastFocusedElement) lastFocusedElement.focus();
+      }
+
+      function navigateTo(section) {
+        if (!sectionTitles[section]) section = "dashboard";
+        document.querySelectorAll("[data-section]").forEach((panel) => panel.classList.toggle("hidden", panel.id !== section));
+        document.querySelectorAll("[data-nav]").forEach((link) => {
+          const active = link.dataset.nav === section;
+          link.className = active
+            ? "nav-link group flex items-center gap-3 rounded-xl bg-blue-600 px-3 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-950/20"
+            : "nav-link group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium text-slate-400 transition hover:bg-slate-900 hover:text-white";
+          link.setAttribute("aria-current", active ? "page" : "false");
+          const dot = link.querySelector(".nav-active-dot");
+          if (dot) dot.remove();
+          if (active) {
+            const activeDot = document.createElement("span");
+            activeDot.className = "nav-active-dot ml-auto hidden h-1.5 w-1.5 rounded-full bg-white md:block";
+            link.appendChild(activeDot);
+          }
+        });
+        document.getElementById("page-title").textContent = sectionTitles[section];
+        document.getElementById("breadcrumb-title").textContent = sectionTitles[section];
+        document.querySelector("main").scrollTop = 0;
+        closeMenus();
+      }
+
+      function applyTheme(theme) {
+        const dark = theme === "dark";
+        document.documentElement.classList.toggle("dark", dark);
+        document.querySelector(".theme-moon").classList.toggle("hidden", dark);
+        document.querySelector(".theme-sun").classList.toggle("hidden", !dark);
+        const button = document.getElementById("theme-toggle");
+        button.setAttribute("aria-label", dark ? "Switch to light mode" : "Switch to dark mode");
+      }
+
+      document.addEventListener("click", (event) => {
+        const dropdown = event.target.closest("[data-dropdown]");
+        if (dropdown) {
+          event.stopPropagation();
+          const menu = dropdown.parentElement.querySelector("[data-menu]");
+          const opening = menu.classList.contains("hidden");
+          closeMenus(dropdown);
+          menu.classList.toggle("hidden", !opening);
+          dropdown.setAttribute("aria-expanded", String(opening));
+          return;
+        }
+
+        const modalTrigger = event.target.closest("[data-open-modal]");
+        if (modalTrigger) {
+          openModal(modalTrigger.dataset.openModal, modalTrigger.dataset.id, modalTrigger);
+          return;
+        }
+
+        const closeButton = event.target.closest("[data-close-modal]");
+        if (closeButton) {
+          closeModal();
+          return;
+        }
+
+        const collapseButton = event.target.closest("[data-collapse]");
+        if (collapseButton) {
+          const content = collapseButton.nextElementSibling;
+          const chevron = collapseButton.querySelector("[data-chevron]");
+          const expanded = collapseButton.getAttribute("aria-expanded") === "true";
+          collapseButton.setAttribute("aria-expanded", String(!expanded));
+          content.classList.toggle("max-h-0", !expanded === false);
+          content.classList.toggle("max-h-40", !expanded);
+          content.classList.toggle("opacity-0", !expanded === false);
+          content.classList.toggle("opacity-100", !expanded);
+          chevron.classList.toggle("rotate-180", !expanded);
+          return;
+        }
+
+        const deleteButton = event.target.closest("[data-delete]");
+        if (deleteButton) {
+          const record = deleteButton.closest("[data-record]");
+          const name = deleteButton.dataset.delete;
+          if (record) {
+            record.classList.add("opacity-0");
+            setTimeout(() => record.remove(), 250);
+          }
+          closeMenus();
+          showToast(`${name} removed from this prototype`);
+          return;
+        }
+
+        const resolveButton = event.target.closest("[data-resolve]");
+        if (resolveButton) {
+          const row = resolveButton.closest("[data-error-row]");
+          const state = row.querySelector("[data-state]");
+          state.className = "inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400";
+          state.innerHTML = '<i data-lucide="check" class="h-3.5 w-3.5"></i>Resolved';
+          row.classList.add("opacity-70");
+          resolveButton.disabled = true;
+          resolveButton.className = "flex w-full cursor-not-allowed items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-400";
+          resolveButton.innerHTML = '<i data-lucide="circle-check" class="h-4 w-4"></i>Resolved';
+          closeMenus();
+          lucide.createIcons();
+          showToast("Error marked as resolved");
+          return;
+        }
+
+        const saveAgent = event.target.closest("[data-save-agent]");
+        if (saveAgent) {
+          closeModal();
+          showToast("Agent configuration saved");
+          return;
+        }
+
+        closeMenus();
+      });
+
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) closeModal();
+      });
+
+      document.getElementById("theme-toggle").addEventListener("click", () => {
+        const theme = document.documentElement.classList.contains("dark") ? "light" : "dark";
+        localStorage.setItem("agenthub-theme", theme);
+        applyTheme(theme);
+      });
+
+      window.addEventListener("hashchange", () => navigateTo(location.hash.slice(1)));
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          if (!modal.classList.contains("hidden")) closeModal();
+          else closeMenus();
+        }
+      });
+
+      const savedTheme = localStorage.getItem("agenthub-theme");
+      const preferredTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      applyTheme(savedTheme || preferredTheme);
+      navigateTo(location.hash.slice(1) || "dashboard");
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
