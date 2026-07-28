@@ -3,6 +3,9 @@
 A command-line TypeScript prototype for a small cinema screening room with 8
 rows and 10 seats per row.
 
+The repository also includes a responsive visual website where staff can click
+seats, find an adjacent pair, and confirm reservations.
+
 The program represents the room with a two-dimensional array only:
 
 - `0` means the seat is available.
@@ -38,6 +41,18 @@ npm start
 
 The demo prints all four required scenarios and messages for successful,
 duplicate, and invalid reservations.
+
+## Run the Website
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Then open `http://localhost:3000`. The website uses the same 8 × 10 matrix
+approach as the command-line prototype and adds clickable seat selection,
+live counts, adjacent-seat suggestions, reservation totals, and reset controls.
 
 ## Test
 
@@ -104,6 +119,7 @@ cinema-seat-manager/
 │   └── index.ts        # Command-line demonstrations
 ├── tests/
 │   └── cinema.test.ts  # Automated scenario tests
+├── web/                 # Responsive interactive seat-map website
 ├── package.json
 ├── tsconfig.json
 └── README.md
