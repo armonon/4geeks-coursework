@@ -1,6 +1,20 @@
-# Maison Lumiere E-Commerce Prototype
+# Maison Lumière E-Commerce and Operations Utilities
 
 This project is built only with HTML and Tailwind CSS, as required by the assignment.
+
+Milestone 2 adds a reusable, strictly typed logic layer for the company's
+products, customers, and orders. Exact rules are in `CONTEXT.md`.
+
+## TypeScript Utilities
+
+- `src/types/models.ts` — interfaces and report types
+- `src/utils/collections.ts` — filtering, sorting, and grouping
+- `src/utils/search.ts` — linear and binary search
+- `src/utils/transformations.ts` — aggregations and reports
+- `src/utils/validations.ts` — business validations
+
+Run `npm run typecheck` to validate TypeScript, `npm test` for automated tests,
+or `npm run demo` to execute the sample operations.
 
 ## Views
 
