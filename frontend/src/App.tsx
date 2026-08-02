@@ -1,46 +1,93 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { KPIRow } from "@/components/dashboard/kpi-row";
-import { IncomeOutcomeChart } from "@/components/dashboard/income-outcome-chart";
-import { ProfitPercentChart } from "@/components/dashboard/profit-percent-chart";
-import {
-  type FinancialMovement,
-  type KPIMetrics,
-  type MonthlyDataPoint,
-} from "@/lib/financial-types";
+import { type FinancialMovement } from "@/lib/financial-types";
 import { computeKPIs, computeMonthlyData } from "@/lib/financial-utils";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+
+// vercel-react-best-practices: bundle-dynamic-imports.
+// Charts pull in Recharts (large). Load them after the main bundle is
+// parsed so the KPI row + header stream in first.
+const IncomeOutcomeChart = lazy(() =>
+  import("@/components/dashboard/income-outcome-chart").then((m) => ({
+    default: m.IncomeOutcomeChart,
+  })),
+);
+const ProfitPercentChart = lazy(() =>
+  import("@/components/dashboard/profit-percent-chart").then((m) => ({
+    default: m.ProfitPercentChart,
+  })),
+);
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "";
 
-async function fetchFinancialData(): Promise<FinancialMovement[]> {
-  const response = await fetch(`${API_BASE_URL}/api/metrics`);
+async function fetchFinancialData(
+  signal: AbortSignal,
+): Promise<FinancialMovement[]> {
+  const response = await fetch(`${API_BASE_URL}/api/metrics`, { signal });
   if (!response.ok) {
     throw new Error(`Failed to fetch financial data: ${response.status}`);
   }
   return response.json();
 }
 
+function ChartCardFallback() {
+  return (
+    <Card className="border-border/60" aria-hidden="true">
+      <CardHeader className="pb-4">
+        <Skeleton className="h-5 w-52" />
+        <Skeleton className="h-3 w-64 mt-1" />
+      </CardHeader>
+      <CardContent>
+        <Skeleton className="h-[280px] w-full rounded-lg" />
+      </CardContent>
+    </Card>
+  );
+}
+
 function App() {
-  const [metrics, setMetrics] = useState<KPIMetrics | null>(null);
-  const [monthlyData, setMonthlyData] = useState<MonthlyDataPoint[]>([]);
+  // vercel-react-best-practices: rerender-derived-state-no-effect.
+  // Keep the raw response in state; derive KPIs and monthly points during
+  // render with useMemo instead of storing them in extra state variables
+  // that a second effect would need to keep in sync.
+  const [movements, setMovements] = useState<FinancialMovement[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchFinancialData()
-      .then((movements) => {
-        setMetrics(computeKPIs(movements));
-        setMonthlyData(computeMonthlyData(movements));
+    const controller = new AbortController();
+
+    fetchFinancialData(controller.signal)
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        setMovements(data);
       })
-      .catch(() => {
+      .catch((err: unknown) => {
+        if (controller.signal.aborted) return;
+        // accessibility: log the real error so debugging is possible
+        // even though we render a friendly Spanish message.
+        console.error("fetchFinancialData failed", err);
         setError(
           "No se pudo cargar la informacion financiera. Revisa la API de backend.",
         );
       })
       .finally(() => {
+        if (controller.signal.aborted) return;
         setLoading(false);
       });
+
+    return () => controller.abort();
   }, []);
+
+  const metrics = useMemo(
+    () => (movements ? computeKPIs(movements) : null),
+    [movements],
+  );
+  const monthlyData = useMemo(
+    () => (movements ? computeMonthlyData(movements) : []),
+    [movements],
+  );
 
   return (
     <main
@@ -93,8 +140,12 @@ function App() {
             <h2 id="charts-heading" className="sr-only">
               Financial charts
             </h2>
-            <IncomeOutcomeChart data={monthlyData} loading={loading} />
-            <ProfitPercentChart data={monthlyData} loading={loading} />
+            <Suspense fallback={<ChartCardFallback />}>
+              <IncomeOutcomeChart data={monthlyData} loading={loading} />
+            </Suspense>
+            <Suspense fallback={<ChartCardFallback />}>
+              <ProfitPercentChart data={monthlyData} loading={loading} />
+            </Suspense>
           </section>
         </div>
       </div>
