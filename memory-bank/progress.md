@@ -45,6 +45,22 @@ Rolling log of substantive changes. Newest first.
 - Backend services under `services/` — Milestone 5+.
 - Merging `@repo/shared-types` and `@trackflow/business-logic`.
 
+### Delivery workflow — end-of-branch pass
+
+Ran all five steps from `AGENTS.md § Delivery workflow` before the
+final commit:
+
+1. `git status` — clean tree after each phase commit.
+2. `npm run typecheck` — three workspaces, exit 0.
+3. `npm run test` — 5/5 tests pass in `@trackflow/business-logic`;
+   backoffice / website have placeholder `test` scripts pending
+   real coverage (rule MONO-2 stopgap, marked `TODO(MONO-2)` in
+   their `package.json` for a follow-up).
+4. `npm run build` — all three workspaces build cleanly with
+   turbopack.
+5. `npm run verify:freight-quote` — skill script prints
+   `freight-quote-invariants: OK (10 assertions)`.
+
 ### Notes on rebuilds vs. migrations
 
 The public website's Milestone 1 version and the Milestone 2
