@@ -43,25 +43,56 @@ function App() {
   }, []);
 
   return (
-    <main className="dark min-h-screen bg-background text-foreground">
+    <main
+      id="main"
+      className="dark min-h-screen bg-background text-foreground"
+    >
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-3 focus:py-2 focus:text-primary-foreground focus:shadow-lg"
+      >
+        Skip to main content
+      </a>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8">
           <DashboardHeader period="2024 - Full Year" />
 
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="sr-only"
+          >
+            {loading
+              ? "Loading financial data"
+              : error
+                ? "Failed to load financial data"
+                : "Financial data loaded"}
+          </div>
+
           {error ? (
-            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive-foreground">
+            <div
+              role="alert"
+              className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive-foreground"
+            >
               {error}
             </div>
           ) : null}
 
-          <section aria-label="Key performance indicators">
+          <section aria-labelledby="kpi-heading">
+            <h2 id="kpi-heading" className="sr-only">
+              Key performance indicators
+            </h2>
             <KPIRow metrics={metrics} loading={loading} />
           </section>
 
           <section
-            aria-label="Financial charts"
+            aria-labelledby="charts-heading"
             className="grid grid-cols-1 gap-4 xl:grid-cols-2"
           >
+            <h2 id="charts-heading" className="sr-only">
+              Financial charts
+            </h2>
             <IncomeOutcomeChart data={monthlyData} loading={loading} />
             <ProfitPercentChart data={monthlyData} loading={loading} />
           </section>
