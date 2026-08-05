@@ -1,0 +1,19 @@
+{
+  "scripts": {
+    "build": "npm run build:css && npm run prepare:html",
+    "build:css": "tailwindcss -i ./src/tailwind.css -o ./assets/tailwind.css --minify",
+    "prepare:html": "node scripts/prepare-html.js",
+    "serve": "http-server . -p 3000 -a 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "demo": "tsx src/demo.ts",
+    "test": "tsx --test tests/**/*.test.ts"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.17",
+    "@types/node": "^24.1.0",
+    "http-server": "^14.1.1",
+    "tailwindcss": "^4.1.17",
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  }
+}

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maison Lumiere | French Clothing Store Prototype</title>
+    <meta name="description" content="Maison Lumiere is a responsive French fashion e-commerce prototype featuring new arrivals, best sellers, catalog, product, cart, and checkout views.">
+    <meta name="author" content="Maison Lumiere">
+    <meta name="theme-color" content="#111827">
+    <link rel="stylesheet" href="assets/tailwind.css">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Maison Lumiere",
+        "url": "https://example.com",
+        "logo": "https://example.com/logo.png",
+        "sameAs": ["https://instagram.com/maisonlumiere", "https://facebook.com/maisonlumiere"]
+    }
+    </script>
+</head>
+<body class="bg-stone-50 text-gray-950 antialiased">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-3 focus:font-semibold focus:text-gray-950">Skip to main content</a>
+
+    <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur">
+        <nav class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8" aria-label="Primary navigation">
+            <a href="index.html" class="inline-flex items-center gap-3 text-xl font-black tracking-wide" aria-label="Maison Lumiere home">
+                <span class="flex h-10 w-10 items-center justify-center rounded bg-gray-950 text-sm text-white" aria-hidden="true">ML</span>
+                Maison Lumiere
+            </a>
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
+                <form role="search" class="flex min-w-0 rounded-md border border-gray-300 bg-white">
+                    <label for="site-search" class="sr-only">Search products</label>
+                    <input id="site-search" name="search" type="search" placeholder="Search coats, shirts, denim" class="min-h-11 w-full min-w-0 rounded-l-md px-4 text-sm outline-none focus:ring-2 focus:ring-gray-950 sm:w-72">
+                    <button class="min-h-11 rounded-r-md bg-gray-950 px-4 text-sm font-bold text-white" type="submit">Search</button>
+                </form>
+                <ul class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-bold text-gray-700">
+                    <li><a class="hover:text-gray-950" href="catalog.html">Catalog</a></li>
+                    <li><a class="hover:text-gray-950" href="product.html">Product</a></li>
+                    <li><a class="hover:text-gray-950" href="cart.html">Cart</a></li>
+                    <li><a class="hover:text-gray-950" href="checkout.html">Checkout</a></li>
+                    <li><a class="rounded-md border border-gray-300 px-3 py-2 hover:border-gray-950" href="#">Account</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+
+    <main id="main-content">
+        <section class="bg-white" aria-labelledby="hero-title">
+            <div class="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 md:grid-cols-[1fr_0.9fr] md:items-center lg:px-8">
+                <div>
+                    <p class="text-sm font-bold uppercase tracking-wide text-rose-700">Spring capsule now available</p>
+                    <h1 id="hero-title" class="mt-4 max-w-3xl text-4xl font-black leading-tight text-gray-950 sm:text-5xl lg:text-6xl">Parisian essentials made for everyday movement</h1>
+                    <p class="mt-6 max-w-2xl text-lg leading-8 text-gray-700">Explore tailored layers, crisp shirts, relaxed denim, and compact accessories from Maison Lumiere's latest city collection.</p>
+                    <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+                        <a href="catalog.html" class="inline-flex min-h-12 items-center justify-center rounded-md bg-gray-950 px-6 py-3 font-bold text-white hover:bg-rose-800">Shop catalog</a>
+                        <a href="product.html" class="inline-flex min-h-12 items-center justify-center rounded-md border border-gray-300 px-6 py-3 font-bold text-gray-900 hover:border-gray-950">View featured coat</a>
+                    </div>
+                </div>
+                <figure class="overflow-hidden rounded-md border border-gray-200 bg-gray-100">
+                    <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?auto=format&fit=crop&w=1200&q=80" alt="Model wearing neutral French fashion layers outdoors" class="h-full max-h-[620px] w-full object-cover">
+                    <figcaption class="px-4 py-3 text-sm text-gray-600">Campaign preview for the Maison Lumiere spring capsule.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <section class="py-14 sm:py-16" aria-labelledby="new-arrivals-title">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex items-end justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-bold uppercase tracking-wide text-rose-700">Fresh edit</p>
+                        <h2 id="new-arrivals-title" class="mt-2 text-3xl font-black">New arrivals</h2>
+                    </div>
+                    <a href="catalog.html" class="hidden text-sm font-bold text-gray-700 hover:text-gray-950 sm:inline">View all</a>
+                </div>
+                <div class="mt-8 flex gap-5 overflow-x-auto pb-4" aria-label="New arrivals product list">
+                    <article class="min-w-64 rounded-md border border-gray-200 bg-white">
+                        <a href="product.html"><img src="https://images.unsplash.com/photo-1539533018447-63fcce2678e3?auto=format&fit=crop&w=600&q=80" alt="Camel trench coat" class="h-72 w-full rounded-t-md object-cover"></a>
+                        <div class="p-4"><h3 class="font-bold">Rivoli Trench Coat</h3><p class="mt-1 text-sm text-gray-600">Outerwear</p><p class="mt-3 font-black">$189.00</p></div>
+                    </article>
+                    <article class="min-w-64 rounded-md border border-gray-200 bg-white">
+                        <img src="https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=600&q=80" alt="White cotton shirt" class="h-72 w-full rounded-t-md object-cover">
+                        <div class="p-4"><h3 class="font-bold">Marais Poplin Shirt</h3><p class="mt-1 text-sm text-gray-600">Shirts</p><p class="mt-3 font-black">$76.00</p></div>
+                    </article>
+                    <article class="min-w-64 rounded-md border border-gray-200 bg-white">
+                        <img src="https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=600&q=80" alt="Dark straight-leg jeans" class="h-72 w-full rounded-t-md object-cover">
+                        <div class="p-4"><h3 class="font-bold">Seine Straight Denim</h3><p class="mt-1 text-sm text-gray-600">Pants</p><p class="mt-3 font-black">$98.00</p></div>
+                    </article>
+                    <article class="min-w-64 rounded-md border border-gray-200 bg-white">
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80" alt="Minimal leather sneakers" class="h-72 w-full rounded-t-md object-cover">
+                        <div class="p-4"><h3 class="font-bold">Canal Leather Sneaker</h3><p class="mt-1 text-sm text-gray-600">Footwear</p><p class="mt-3 font-black">$124.00</p></div>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white py-14 sm:py-16" aria-labelledby="best-sellers-title">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex items-end justify-between gap-4">
+                    <div>
+                        <p class="text-sm font-bold uppercase tracking-wide text-rose-700">Client favorites</p>
+                        <h2 id="best-sellers-title" class="mt-2 text-3xl font-black">Best sellers</h2>
+                    </div>
+                    <a href="catalog.html" class="hidden text-sm font-bold text-gray-700 hover:text-gray-950 sm:inline">Shop best sellers</a>
+                </div>
+                <div class="mt-8 flex gap-5 overflow-x-auto pb-4" aria-label="Best sellers product list">
+                    <article class="min-w-64 rounded-md border border-gray-200 bg-stone-50">
+                        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80" alt="Black tailored jacket" class="h-72 w-full rounded-t-md object-cover">
+                        <div class="p-4"><h3 class="font-bold">Opera Tailored Jacket</h3><p class="mt-1 text-sm text-gray-600">Outerwear</p><p class="mt-3 font-black">$168.00</p></div>
+                    </article>
+                    <article class="min-w-64 rounded-md border border-gray-200 bg-stone-50">
+                        <img src="https://images.unsplash.com/photo-1506629905607-d405d7d3b0d2?auto=format&fit=crop&w=600&q=80" alt="Silk scarf accessory" class="h-72 w-full rounded-t-md object-cover">
+                        <div class="p-4"><h3 class="font-bold">Louvre Silk Scarf</h3><p class="mt-1 text-sm text-gray-600">Accessories</p><p class="mt-3 font-black">$54.00</p></div>
+                    </article>
+                    <article class="min-w-64 rounded-md border border-gray-200 bg-stone-50">
+                        <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&q=80" alt="Brown leather jacket" class="h-72 w-full rounded-t-md object-cover">
+                        <div class="p-4"><h3 class="font-bold">Bastille Leather Jacket</h3><p class="mt-1 text-sm text-gray-600">Outerwear</p><p class="mt-3 font-black">$248.00</p></div>
+                    </article>
+                    <article class="min-w-64 rounded-md border border-gray-200 bg-stone-50">
+                        <img src="https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=600&q=80" alt="Striped cotton shirt" class="h-72 w-full rounded-t-md object-cover">
+                        <div class="p-4"><h3 class="font-bold">Montmartre Stripe Tee</h3><p class="mt-1 text-sm text-gray-600">Shirts</p><p class="mt-3 font-black">$42.00</p></div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-gray-200 bg-gray-950 text-white">
+        <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+            <section><h2 class="text-lg font-black">Maison Lumiere</h2><p class="mt-3 text-sm leading-6 text-gray-300">French-inspired clothing prototype built with semantic HTML and Tailwind CSS.</p></section>
+            <section><h2 class="font-bold">Categories</h2><ul class="mt-3 space-y-2 text-sm text-gray-300"><li><a href="catalog.html">Footwear</a></li><li><a href="catalog.html">Shirts</a></li><li><a href="catalog.html">Pants</a></li><li><a href="catalog.html">Accessories</a></li></ul></section>
+            <section><h2 class="font-bold">Legal</h2><ul class="mt-3 space-y-2 text-sm text-gray-300"><li><a href="#">Terms and conditions</a></li><li><a href="#">Privacy policy</a></li><li><a href="#">About the brand</a></li></ul></section>
+            <section><h2 class="font-bold">Contact</h2><address class="mt-3 not-italic text-sm leading-6 text-gray-300">12 Rue de Rivoli, Paris<br><a href="mailto:hello@maisonlumiere.example">hello@maisonlumiere.example</a><br><a href="tel:+33123456789">+33 1 23 45 67 89</a></address></section>
+        </div>
+    </footer>
+</body>
+</html>

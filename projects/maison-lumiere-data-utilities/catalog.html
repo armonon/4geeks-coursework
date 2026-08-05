@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catalog | Maison Lumiere</title>
+    <meta name="description" content="Browse the Maison Lumiere catalog with category and size filters across footwear, shirts, pants, outerwear, and accessories.">
+    <meta name="author" content="Maison Lumiere">
+    <meta name="theme-color" content="#111827">
+    <link rel="stylesheet" href="assets/tailwind.css">
+</head>
+<body class="bg-stone-50 text-gray-950 antialiased">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-white focus:px-4 focus:py-3 focus:font-semibold">Skip to main content</a>
+    <header class="sticky top-0 z-40 border-b border-gray-200 bg-white/95 backdrop-blur">
+        <nav class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8" aria-label="Primary navigation">
+            <a href="index.html" class="inline-flex items-center gap-3 text-xl font-black tracking-wide"><span class="flex h-10 w-10 items-center justify-center rounded bg-gray-950 text-sm text-white">ML</span>Maison Lumiere</a>
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
+                <form role="search" class="flex rounded-md border border-gray-300 bg-white"><label for="site-search" class="sr-only">Search products</label><input id="site-search" type="search" placeholder="Search the catalog" class="min-h-11 w-full rounded-l-md px-4 text-sm outline-none focus:ring-2 focus:ring-gray-950 sm:w-72"><button class="rounded-r-md bg-gray-950 px-4 text-sm font-bold text-white">Search</button></form>
+                <ul class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-bold text-gray-700"><li><a class="text-gray-950" aria-current="page" href="catalog.html">Catalog</a></li><li><a href="product.html">Product</a></li><li><a href="cart.html">Cart</a></li><li><a href="checkout.html">Checkout</a></li><li><a class="rounded-md border border-gray-300 px-3 py-2" href="#">Account</a></li></ul>
+            </div>
+        </nav>
+    </header>
+
+    <main id="main-content" class="py-10 sm:py-14">
+        <section class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8" aria-labelledby="catalog-title">
+            <p class="text-sm font-bold uppercase tracking-wide text-rose-700">20-piece reference grid</p>
+            <h1 id="catalog-title" class="mt-3 text-4xl font-black sm:text-5xl">Catalog</h1>
+            <form class="mt-8 grid gap-4 rounded-md border border-gray-200 bg-white p-4 sm:grid-cols-3" aria-label="Catalog filters">
+                <div>
+                    <label for="category" class="block text-sm font-bold text-gray-800">Category</label>
+                    <select id="category" class="mt-2 w-full rounded-md border border-gray-300 bg-white px-4 py-3"><option>All categories</option><option>Footwear</option><option>Shirts</option><option>Pants</option><option>Accessories</option><option>Outerwear</option></select>
+                </div>
+                <div>
+                    <label for="size" class="block text-sm font-bold text-gray-800">Size</label>
+                    <select id="size" class="mt-2 w-full rounded-md border border-gray-300 bg-white px-4 py-3"><option>All sizes</option><option>XS</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>42</option></select>
+                </div>
+                <button class="self-end rounded-md bg-gray-950 px-5 py-3 font-bold text-white" type="submit">Apply filters</button>
+            </form>
+
+            <div class="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4" aria-label="Product grid">
+                <article class="rounded-md border border-gray-200 bg-white"><a href="product.html"><img src="https://images.unsplash.com/photo-1539533018447-63fcce2678e3?auto=format&fit=crop&w=600&q=80" alt="Rivoli Trench Coat" class="h-64 w-full rounded-t-md object-cover"></a><div class="p-4"><h2 class="font-bold">Rivoli Trench Coat</h2><p class="text-sm text-gray-600">Outerwear | M</p><p class="mt-3 font-black">$189.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=600&q=80" alt="Marais Poplin Shirt" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Marais Poplin Shirt</h2><p class="text-sm text-gray-600">Shirts | S</p><p class="mt-3 font-black">$76.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=600&q=80" alt="Seine Straight Denim" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Seine Straight Denim</h2><p class="text-sm text-gray-600">Pants | 32</p><p class="mt-3 font-black">$98.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80" alt="Canal Leather Sneaker" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Canal Leather Sneaker</h2><p class="text-sm text-gray-600">Footwear | 42</p><p class="mt-3 font-black">$124.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80" alt="Opera Tailored Jacket" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Opera Tailored Jacket</h2><p class="text-sm text-gray-600">Outerwear | L</p><p class="mt-3 font-black">$168.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1506629905607-d405d7d3b0d2?auto=format&fit=crop&w=600&q=80" alt="Louvre Silk Scarf" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Louvre Silk Scarf</h2><p class="text-sm text-gray-600">Accessories | One size</p><p class="mt-3 font-black">$54.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&q=80" alt="Bastille Leather Jacket" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Bastille Leather Jacket</h2><p class="text-sm text-gray-600">Outerwear | M</p><p class="mt-3 font-black">$248.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=600&q=80" alt="Montmartre Stripe Tee" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Montmartre Stripe Tee</h2><p class="text-sm text-gray-600">Shirts | M</p><p class="mt-3 font-black">$42.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?auto=format&fit=crop&w=600&q=80" alt="Sorbonne Knit Polo" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Sorbonne Knit Polo</h2><p class="text-sm text-gray-600">Shirts | L</p><p class="mt-3 font-black">$64.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1506629905607-d405d7d3b0d2?auto=format&fit=crop&w=600&q=80" alt="Tuileries Belt Bag" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Tuileries Belt Bag</h2><p class="text-sm text-gray-600">Accessories | One size</p><p class="mt-3 font-black">$88.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1560769629-975ec94e6a86?auto=format&fit=crop&w=600&q=80" alt="Left Bank Loafer" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Left Bank Loafer</h2><p class="text-sm text-gray-600">Footwear | 41</p><p class="mt-3 font-black">$132.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1511556820780-d912e42b4980?auto=format&fit=crop&w=600&q=80" alt="Noir City Tote" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Noir City Tote</h2><p class="text-sm text-gray-600">Accessories | One size</p><p class="mt-3 font-black">$118.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1473966968600-fa801b869a1a?auto=format&fit=crop&w=600&q=80" alt="Vendome Pleated Trouser" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Vendome Pleated Trouser</h2><p class="text-sm text-gray-600">Pants | M</p><p class="mt-3 font-black">$112.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&q=80" alt="Latin Quarter Tee" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Latin Quarter Tee</h2><p class="text-sm text-gray-600">Shirts | S</p><p class="mt-3 font-black">$38.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=600&q=80" alt="Bercy Runner" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Bercy Runner</h2><p class="text-sm text-gray-600">Footwear | 43</p><p class="mt-3 font-black">$116.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=600&q=80" alt="Madeleine Midi Skirt" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Madeleine Midi Skirt</h2><p class="text-sm text-gray-600">Pants | M</p><p class="mt-3 font-black">$92.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=600&q=80" alt="Palais Wrap Dress" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Palais Wrap Dress</h2><p class="text-sm text-gray-600">Dresses | M</p><p class="mt-3 font-black">$138.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=600&q=80" alt="Rue Linen Overshirt" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Rue Linen Overshirt</h2><p class="text-sm text-gray-600">Shirts | XL</p><p class="mt-3 font-black">$84.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=600&q=80" alt="Etoile Wool Coat" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Etoile Wool Coat</h2><p class="text-sm text-gray-600">Outerwear | L</p><p class="mt-3 font-black">$214.00</p></div></article>
+                <article class="rounded-md border border-gray-200 bg-white"><img src="https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=600&q=80" alt="Concorde Watch" class="h-64 w-full rounded-t-md object-cover"><div class="p-4"><h2 class="font-bold">Concorde Watch</h2><p class="text-sm text-gray-600">Accessories | One size</p><p class="mt-3 font-black">$146.00</p></div></article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-gray-200 bg-gray-950 text-white">
+        <div class="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+            <section><h2 class="text-lg font-black">Maison Lumiere</h2><p class="mt-3 text-sm leading-6 text-gray-300">Responsive e-commerce prototype built only with HTML and Tailwind CSS.</p></section>
+            <section><h2 class="font-bold">Categories</h2><ul class="mt-3 space-y-2 text-sm text-gray-300"><li>Footwear</li><li>Shirts</li><li>Pants</li><li>Accessories</li></ul></section>
+            <section><h2 class="font-bold">Legal</h2><ul class="mt-3 space-y-2 text-sm text-gray-300"><li>Terms and conditions</li><li>Privacy policy</li><li>About the brand</li></ul></section>
+            <section><h2 class="font-bold">Contact</h2><address class="mt-3 not-italic text-sm leading-6 text-gray-300">12 Rue de Rivoli, Paris<br>hello@maisonlumiere.example<br>+33 1 23 45 67 89</address></section>
+        </div>
+    </footer>
+</body>
+</html>
