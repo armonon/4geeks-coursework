@@ -1,0 +1,15 @@
+{
+  "title": {
+    "en": "Maison Lumiere e-commerce prototype",
+    "es": "Prototipo e-commerce Maison Lumiere"
+  },
+  "description": {
+    "us": "Responsive French clothing store prototype with home, catalog, product, cart, and checkout views using semantic HTML, Tailwind CSS, and Schema.org markup.",
+    "es": "Prototipo responsive de tienda de ropa francesa con vistas de inicio, catálogo, producto, carrito y checkout usando HTML semántico, Tailwind CSS y Schema.org."
+  },
+  "repository": "https://github.com/armonon/maison-lumiere-ecommerce",
+  "preview": "",
+  "projectType": "project",
+  "difficulty": "beginner",
+  "technologies": ["HTML", "Tailwind CSS"]
+}
