@@ -1,0 +1,15 @@
+{
+  "title": {
+    "en": "Influencer Ads Dashboard",
+    "es": "Dashboard de anuncios para influencer"
+  },
+  "description": {
+    "us": "A responsive dashboard built with semantic HTML and Tailwind CSS v4 using the 4Geeks Academy html-hello template environment.",
+    "es": "Un dashboard responsive creado con HTML semántico y Tailwind CSS v4 usando el entorno de la plantilla html-hello de 4Geeks Academy."
+  },
+  "repository": "https://github.com/armonon/influencer-dashboard",
+  "preview": "https://repository-images.githubusercontent.com/183094552/ef3d4980-78e0-11ea-8f81-31089e626628",
+  "projectType": "project",
+  "difficulty": "beginner",
+  "technologies": ["HTML", "CSS", "Tailwind CSS"]
+}
