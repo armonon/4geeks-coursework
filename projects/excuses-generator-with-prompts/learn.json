@@ -1,0 +1,38 @@
+{
+	"gitpod": true,
+	"title": {
+		"us": "Code an Excuse Generator in JavaScript with Prompts",
+		"es": "Crea un Generador de Excusas en JavaScript con Prompts"
+	},
+	"status": "published",
+	"video": {
+		"solution": {
+			"us": "https://www.youtube.com/watch?v=n43ORx4GMJ0"
+		}
+	},
+	"solution": "",
+	"duration": 4,
+	"template_url" : "https://github.com/4GeeksAcademy/excuses-generator-with-prompts",
+	"preview": "",
+	"translations": ["es", "us"],
+	"difficulty": "beginner",
+	"technologies": ["javascript", "copilot", "nodejs"],
+	"description": {
+		"us": "Disneyland for procrastinators! Create an Excuse Generator in JavaScript just by writing 8 prompts. This beginner-friendly project teaches arrays, random number generation, and string concatenation while building a tool to generate excuses.",
+		"es": "¡Disneylandia para procrastinadores! Crea un generador de excusas en JavaScript escribiendo solo 8 prompts. Este proyecto apto para principiantes enseña arreglos, generación de números aleatorios y concatenación de cadenas, mientras construyes una herramienta para generar excusas."
+	},
+	"talents": [
+		{ "badge": "indentator", "points": 6 },
+		{ "badge": "tag-master", "points": 3 },
+		{ "badge": "window-lover", "points": 3 },
+		{ "badge": "mouse-god", "points": 3 },
+		{ "badge": "source-inspector", "points": 5 },
+		{ "badge": "abc", "points": 5 },
+		{ "badge": "functional-developer", "points": 5 }
+	],
+	"autoPlay": false,
+	"projectType": "project",
+    "telemetry": {
+	"batch": "https://breathecode.herokuapp.com/v1/assignment/me/telemetry?asset_id=180"
+    }
+}
