@@ -1,0 +1,17 @@
+{
+  "name": "cinema-seat-manager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A TypeScript command-line prototype for managing cinema seat reservations.",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "build": "tsc",
+    "test": "node --import tsx --test tests/**/*.test.ts",
+    "check": "npm run build && npm test"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.3"
+  }
+}
