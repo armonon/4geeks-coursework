@@ -1,0 +1,32 @@
+[project]
+name = "trackflow-api"
+version = "0.1.0"
+description = "TrackFlow backend API — Phase 2 host for incident-analyzer + freight-quote."
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "python-multipart>=0.0.20",
+    # incident-analyzer is installed separately from the local monorepo
+    # (`pip install -e packages/incident_analyzer` from the repo root).
+    # See services/api/README.md for the two-command bootstrap.
+    "incident-analyzer",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "httpx>=0.27",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["incident_api*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
