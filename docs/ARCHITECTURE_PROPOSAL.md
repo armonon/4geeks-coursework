@@ -11,6 +11,18 @@
 > installed or the project runs is out of scope; the goal is a
 > shared architecture picture the team can build against._
 
+## Contents
+
+1. [What TrackFlow actually is (as it shapes architecture)](#1-what-trackflow-actually-is-as-it-shapes-architecture)
+2. [Chosen pattern — Modular Monolith](#2-chosen-pattern--modular-monolith-package-by-feature-with-a-thin-layered-spine)
+3. [Proposed folder and module structure](#3-proposed-folder-and-module-structure)
+4. [FastAPI endpoint / router organisation](#4-fastapi-endpoint--router-organisation)
+5. [Community research (cited, with source→convention mapping)](#5-what-the-fastapi-community-actually-does-research-cited)
+6. [Frontend / backend coexistence (CORS, env vars, monorepo trade)](#6-how-frontend-and-backend-coexist-as-separate-systems)
+7. [Concrete technical decisions (async, DB, auth, obs, deploy, CI)](#7-concrete-technical-decisions)
+8. [Risks and points of attention (six risks, six guardrails)](#8-risks-and-points-of-attention)
+9. [Summary — one paragraph for the CTO](#9-summary--one-paragraph-for-the-cto)
+
 ---
 
 ## 1. What TrackFlow actually is (as it shapes architecture)
@@ -108,6 +120,24 @@ review-tax when a change crosses features (services calling other
 services, or a new cross-cutting middleware). That's the trade
 we want: local speed, global discipline.
 
+### 2.5 Why Python / FastAPI specifically
+
+- **FastAPI is the course's chosen framework** and the one the
+  team is upskilling on. Picking anything else here would burn
+  the ramp-up already paid for.
+- **Native async support** means one process can hold many
+  in-flight requests without the thread-per-request tax — good
+  fit for dispatcher dashboards that hold long-poll / SSE
+  connections alongside warehouse-scanner bursts.
+- **Pydantic-first schemas** give us request validation,
+  response serialization, and OpenAPI generation from the same
+  type declarations — the frontends already consume typed
+  responses (see `uis/backoffice` in Milestone 4), so parity of
+  types across the wire is essentially free.
+- **Automatic `/docs` (Swagger UI)** and `/redoc` mean the
+  frontend team never asks "what does this endpoint return" —
+  the contract is the code.
+
 ---
 
 ## 3. Proposed folder and module structure
@@ -186,7 +216,28 @@ services/api/
   business-rule dumping ground.
 - A `Shipment` type — that's `shipments/schemas.py`.
 
-### 3.3 Where the freight-quote formula lives
+### 3.3 Testing layout (mirrors the source)
+
+Tests live under `services/api/tests/`, with the same folder
+shape as the source so a reviewer opening `shipments/service.py`
+knows to check `tests/shipments/test_service.py`. The pyramid:
+
+- **Unit tests** on `service.py` and helpers in `shared/` — no DB,
+  no HTTP, no network. Fast.
+- **Repository tests** on `repository.py` — hit a **real**
+  Postgres (test-container in CI), never a mock. Mocks here
+  historically hide join / transaction / migration bugs (learned
+  the hard way on prior projects — see rule `TEST-1` in
+  `.agents/rules/`).
+- **HTTP tests** on `router.py` via `fastapi.testclient.TestClient`
+  — cover routing, auth dependencies, validation, response
+  shape.
+- **Contract tests** on `pricing/` specifically — run
+  `.agents/skills/freight-quote-invariants/scripts/verify.mjs`
+  in CI whenever a file under `pricing/` changes (rule `MONO-1`
+  guardrail).
+
+### 3.4 Where the freight-quote formula lives
 
 **Not here.** The `pricing/` feature is a *bridge* — it accepts an
 HTTP request, validates it with Pydantic, and delegates to the
@@ -258,32 +309,56 @@ crammed into `routes/`).
 
 ## 5. What the FastAPI community actually does (research, cited)
 
-Reading these before writing the proposal shaped the decisions
-above. All three are the current consensus references for
-production FastAPI layout:
+Three references shaped this proposal. Each one is named below,
+with the specific convention it contributed and the section of
+this document where the convention shows up. That mapping is the
+audit trail: nothing in our folder tree or router setup is a
+personal preference — it traces back to a source.
 
-1. **Official FastAPI — "Bigger Applications" guide.** Establishes
-   the `APIRouter` per feature pattern and the app-factory
-   convention. This is where the "one router per bounded context,
-   `include_router` in `main.py`" idea comes from.
-2. **`zhanymkanov/fastapi-best-practices`** (community-maintained
-   reference on GitHub, ~11k stars at time of writing). This is
-   where the *inside-a-feature* split — `router.py`, `schemas.py`,
-   `service.py`, `models.py`, `repository.py`, `dependencies.py`
-   — has become the de-facto template. The layout in §3 mirrors
-   it deliberately so a new hire recognises the shape immediately.
-3. **`tiangolo/full-stack-fastapi-template`** (from FastAPI's
-   author). Contributes: the `src/<pkg>/` src-layout, Pydantic
-   `Settings` in `config.py`, JWT security in a single module,
-   Alembic migrations at the service root.
+### 5.1 Sources
 
-Where our proposal deviates from these references, it says so:
+1. **FastAPI Official Docs — "Bigger Applications — Multiple Files".**
+   <https://fastapi.tiangolo.com/tutorial/bigger-applications/>
+   The canonical FastAPI guide for organising a real project.
+2. **`zhanymkanov/fastapi-best-practices`.**
+   <https://github.com/zhanymkanov/fastapi-best-practices>
+   The community-maintained reference for production FastAPI
+   layout; ~11k stars, quoted in most FastAPI onboarding docs.
+3. **`tiangolo/full-stack-fastapi-template`.**
+   <https://github.com/tiangolo/full-stack-fastapi-template>
+   The official full-stack template maintained by FastAPI's
+   author (Sebastián Ramírez / `tiangolo`).
 
-- We keep `/api/v1` versioning from day one (the FastAPI template
-  omits it); rationale in §4.1.
-- We deliberately keep the `pricing/` feature thin because our
-  authoritative business logic is a JavaScript package in
-  `packages/` (rule `MONO-1`), not native Python.
+### 5.2 Which convention came from which source
+
+| Convention adopted here                                                 | Source                                       | Where in this doc |
+| ----------------------------------------------------------------------- | -------------------------------------------- | ----------------- |
+| One `APIRouter` per feature; `include_router` in `main.py`              | FastAPI official — "Bigger Applications"     | §4.1              |
+| App factory in `main.py` mounting CORS + routers                         | FastAPI official — "Bigger Applications"     | §3 tree, §6.2     |
+| Split each feature into `router.py` / `schemas.py` / `service.py` / `repository.py` / `models.py` / `dependencies.py` | `zhanymkanov/fastapi-best-practices`         | §3 tree, §3.1     |
+| Package **by feature** at the top, not by technical layer               | `zhanymkanov/fastapi-best-practices`         | §2, §3            |
+| Async-first handlers, sync fallback documented                          | `zhanymkanov/fastapi-best-practices`         | §7.1 (below)      |
+| `src/<pkg>/` src-layout                                                 | `tiangolo/full-stack-fastapi-template`       | §3 tree           |
+| Pydantic `Settings` in `config.py`, `.env.example` mirrored             | `tiangolo/full-stack-fastapi-template`       | §3 tree, §6.3     |
+| JWT security concentrated in a single module (`security.py`)             | `tiangolo/full-stack-fastapi-template`       | §3 tree, §6.1     |
+| Alembic migrations at the service root                                   | `tiangolo/full-stack-fastapi-template`       | §7.2 (below)      |
+
+### 5.3 Deliberate deviations
+
+Where our proposal deviates from these references, we say so:
+
+- **`/api/v1` versioning from day one** — the FastAPI template
+  omits it. Rationale in §4.1: we already know a driver-mobile
+  client is coming and will need contract breakage room.
+- **`pricing/` is a thin wrapper**, not a native Python
+  implementation — because the authoritative freight-quote formula
+  is a JavaScript workspace (`@trackflow/business-logic`) and rule
+  `MONO-1` forbids parallel implementations. See §3.4.
+- **No `crud.py`** — the templates sometimes use `crud.py` for
+  DB helpers; we call it `repository.py` because CRUD is a
+  vocabulary of the persistence layer, not of the business, and
+  most of our repositories will do more than the four CRUD verbs
+  (filtered lists, aggregate reads for dispatch).
 
 ---
 
@@ -341,18 +416,133 @@ Coupling stays at the API contract. A backend deploy does not
 require a frontend redeploy (except when the OpenAPI schema
 changes shape — that goes through the versioning gate in §4.1).
 
-### 6.5 Repo layout stays a monorepo (no split)
+### 6.5 Repo layout — monorepo vs. split (explicit trade)
 
-We already have shared packages (`packages/business-logic`)
-consumed by frontends today. A repo split would need a private
-registry plus release cadence for those packages. Not worth it
-until we hit a team-size boundary the monorepo can't hold.
+The brief specifically asks us to consider the trade-off. Here it
+is, in one table, ending with our call and the reversal criterion.
+
+| Dimension                | **Monorepo** (chosen)                                        | **Split repos** (rejected for now)                             |
+| ------------------------ | ------------------------------------------------------------ | -------------------------------------------------------------- |
+| Shared code (`packages/business-logic`) | Imported directly by workspace resolution.                   | Requires a private registry + release cadence per change.      |
+| Atomic cross-cutting change (rename a domain field) | One PR, one review, one CI run.                              | N PRs, dependency version bumps, coordination overhead.       |
+| CI cost                  | One matrix, cached workspaces.                               | N pipelines, N caches.                                        |
+| Independent deploys      | Yes — each workspace has its own Dockerfile / Vercel project. | Yes.                                                          |
+| Access control granularity | Repo-wide (fine at our team size).                          | Per-repo (needed only at multi-team scale).                    |
+| Onboarding a new engineer | One clone, one `npm install`.                                | N clones, credential setup per repo.                           |
+
+**Decision.** Monorepo, matching what the repo already is.
+Revisit only when (a) an outside team needs write access to one
+service but not others, or (b) CI wall-clock exceeds ~15 minutes
+per commit. Neither is close today.
+
+### 6.6 What each side owns at the boundary
+
+Codifying who is responsible for what, to prevent the classic
+"backend returns raw numbers but frontend forgot to format them
+per country" bug:
+
+- **Backend owns:** all business logic, all persistence, all
+  authorization, all validation of inbound data, and the OpenAPI
+  schema. Returns raw numbers + currency codes (never `"$"`),
+  ISO-8601 UTC timestamps.
+- **Frontend owns:** the whole rendering layer — currency
+  formatting per tenant country, timezone conversion, empty /
+  loading / error states, accessibility. Never invents domain
+  rules; if it needs one, it calls the backend or reads
+  `@trackflow/business-logic`.
+- **Contract:** the generated OpenAPI schema + the Pydantic
+  models. Any change to a response shape is a schema change, and
+  a schema change either bumps `/api/v1` → `/api/v2` (breaking)
+  or is additive-only (non-breaking).
 
 ---
 
-## 7. Risks and points of attention
+## 7. Concrete technical decisions
 
-At least two, per the brief — five here because they're the ones
+Explicit choices that a new hire would otherwise have to guess.
+None contradict the course content; each names the alternative
+it beats and the reversal signal.
+
+### 7.1 Async-first, sync where needed
+
+- **Every route handler is `async def`** by default. FastAPI's
+  event loop can hold many in-flight requests per worker.
+- **DB access uses `SQLAlchemy 2.0` async** (`AsyncSession`)
+  where the driver supports it (`asyncpg`). If a specific
+  query is easier expressed sync, wrap it in
+  `run_in_threadpool()` — do not block the loop.
+- **Reversal signal:** if p95 latency stalls on sync-only I/O
+  we haven't isolated, drop to sync + gunicorn workers per
+  request; this trades throughput for simplicity.
+
+### 7.2 Persistence: PostgreSQL + SQLAlchemy 2.0 + Alembic
+
+- **PostgreSQL 16** — one shared DB, `tenant_id` on every row,
+  RLS (row-level security) policies as a defence-in-depth layer
+  behind the repository-layer filter (see risk R3).
+- **SQLAlchemy 2.0** ORM in `models.py`; queries in
+  `repository.py`. No raw SQL scattered across handlers.
+- **Alembic migrations** at `services/api/alembic/`, one
+  migration per PR that touches a `models.py`. Migrations run
+  automatically as an init container in CI/staging, manually
+  gated in prod.
+- **Not chosen:** Django ORM (framework mismatch),
+  Tortoise / Piccolo (smaller ecosystems), MongoDB (relational
+  data with strict tenant boundaries — the wrong shape).
+
+### 7.3 AuthN / AuthZ
+
+- **AuthN:** short-lived JWT (15 min) in `Authorization: Bearer`,
+  HTTP-only rotating refresh cookie. Issuer: **self-hosted**
+  first (`security.py` handles issue + verify), with a documented
+  migration path to a hosted provider (WorkOS, Clerk, Auth0)
+  when SSO becomes a customer requirement.
+- **AuthZ:** every endpoint uses `Depends(current_tenant)`;
+  cross-tenant reads are impossible by construction because
+  `tenant_id` is derived server-side from the JWT claim and
+  passed into every repository call.
+
+### 7.4 Observability
+
+- **Structured JSON logs** to stdout via `structlog` (one line per
+  request with `trace_id`, `tenant_id`, `route`, `status`,
+  `latency_ms`).
+- **OpenTelemetry** for traces exported to whichever backend the
+  ops team picks (Grafana Tempo, Honeycomb, Datadog — decision
+  deferred, does not affect code shape).
+- **Metrics:** `prometheus_fastapi_instrumentator` at
+  `/metrics` scraped by whatever runs the deploy target.
+
+### 7.5 Deployment target
+
+- **Container-first.** `services/api/Dockerfile` produces one
+  image, published on merge to `main`.
+- **Runtime:** whichever container platform the ops team
+  standardises on (Fly.io / Render / a small Kubernetes cluster
+  are all fine for our volume shape). The architecture doesn't
+  depend on the choice.
+- **Frontends:** each `uis/*` deploys independently via its
+  hosting platform's Next.js pipeline (Vercel default).
+- **Rollback:** container image tags are immutable; rollback is
+  a redeploy of the previous tag, not a git revert.
+
+### 7.6 CI gates (before any PR merges)
+
+1. `npm run typecheck` + `npm run test` at the monorepo root
+   (already established by AGENTS.md § 2).
+2. `pytest` inside `services/api/` — unit + repo + HTTP tests.
+3. `alembic upgrade head` against a throwaway Postgres — proves
+   the migration graph applies from scratch.
+4. `.agents/skills/freight-quote-invariants/scripts/verify.mjs`
+   whenever `services/api/src/trackflow_api/pricing/` changed
+   (enforces rule `MONO-1`).
+5. Docker image builds and passes a `curl /health` smoke test.
+
+---
+
+## 8. Risks and points of attention
+
+At least two, per the brief — six here because they're the ones
 most likely to cause real pain if the team doesn't follow the
 structure above.
 
@@ -417,22 +607,36 @@ timezone live on the JWT and are applied in the UI. Two
 enforce this at the boundary and are the *only* helpers allowed
 to touch either concern.
 
+### R6 — Observability deferred until "we need it"
+
+**What goes wrong:** structlog and the OpenTelemetry hooks in
+§7.4 are trivial to add on day one, hard to retrofit after the
+first production incident. If we ship without them, we'll
+diagnose the first outage from Cloudflare logs and guesses.
+**Guardrail:** the first PR that adds a real handler under
+`services/api/` must also add the log middleware, the
+`prometheus_fastapi_instrumentator` mount, and the OTLP exporter
+wiring — even if the collector endpoint is a no-op in dev.
+Reviewers block otherwise.
+
 ---
 
-## 8. Summary — one paragraph for the CTO
+## 9. Summary — one paragraph for the CTO
 
 TrackFlow is a mid-market, multi-tenant SaaS with a handful of
 distinct bounded contexts, and its authoritative business logic
 already lives in `@trackflow/business-logic`. The right backend
 shape for that is a **modular monolith organised by feature**,
-built on **FastAPI**, with an internal seam per feature
+built on **FastAPI + async SQLAlchemy 2.0 + PostgreSQL + Alembic**,
+with an internal seam per feature
 (`router`/`service`/`repository`/`schemas`/`models`) that mirrors
 the community reference layouts (`zhanymkanov/fastapi-best-practices`,
 FastAPI's own "Bigger Applications" guide, and
 `tiangolo/full-stack-fastapi-template`). URLs are versioned
 under `/api/v1`; frontends and backend coexist in the monorepo
-but ship as independent artefacts with explicit CORS origins and
-env-var-declared secrets. The main risks are all discipline risks —
-`shared/` bloat, business-logic drift, tenant-scope leaks,
-cross-feature import creep, and ad-hoc formatting — and each has
-a named guardrail above.
+(explicit trade in §6.5) but ship as independent Docker /
+Next.js artefacts with explicit CORS origins and env-var-declared
+secrets. The main risks are all discipline risks — `shared/`
+bloat, business-logic drift, tenant-scope leaks, cross-feature
+import creep, ad-hoc formatting, and deferred observability —
+and each has a named guardrail above.
