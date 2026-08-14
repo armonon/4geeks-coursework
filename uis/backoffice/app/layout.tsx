@@ -42,18 +42,21 @@ export default function RootLayout({
             <nav className="flex flex-col gap-1 p-3 text-sm">
               <Link
                 href="/"
-                className="rounded-md bg-white/10 px-3 py-2 text-white"
+                className="rounded-md px-3 py-2 text-slate-100 hover:bg-white/10"
               >
                 Freight quote
+              </Link>
+              <Link
+                href="/incidents"
+                className="rounded-md px-3 py-2 text-slate-100 hover:bg-white/10"
+              >
+                Incident analysis
               </Link>
               <span className="rounded-md px-3 py-2 text-slate-400">
                 Tenants <em className="text-xs">(soon)</em>
               </span>
               <span className="rounded-md px-3 py-2 text-slate-400">
                 Dispatch <em className="text-xs">(soon)</em>
-              </span>
-              <span className="rounded-md px-3 py-2 text-slate-400">
-                Incidents <em className="text-xs">(soon)</em>
               </span>
             </nav>
           </aside>

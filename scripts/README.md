@@ -1,8 +1,27 @@
-# `scripts` folder
+# `scripts/`
 
-This folder contains **helper scripts** for the monorepo: development automation, maintenance utilities, repetitive tasks (setup, lint, migrations, data generation, etc.), and internal tooling.
+Standalone scripts. Currently one:
 
-- **Main purpose**: group support tools that do not belong to a specific app, agent, or pipeline but make the team’s work easier.
-- **Recommendation**: document each script (what it does, parameters, requirements, usage examples) and keep them reproducible (and safe) across environments.
+## `analyze.py` — Incident Report Analyser (Phase 1)
 
-> _Spanish version: [README.es.md](./README.es.md)._
+```bash
+python scripts/analyze.py scripts/incidents-trackflow.csv
+```
+
+Reads the CSV, validates every row against the rules in
+[`CONTEXT.md`](../CONTEXT.md), prints the summary, and offers to
+export a CSV with one row per metric.
+
+Uses the shared `incident_analyzer` package (under
+[`../packages/incident_analyzer`](../packages/incident_analyzer)),
+which is the same module the API imports — analysis and validation
+logic is not duplicated.
+
+Flags:
+- `--out results.csv` — where to write the exported CSV
+  (default `results.csv`).
+- `--no-prompt` — skip the y/n export prompt (used by CI).
+
+The bundled `incidents-trackflow.csv` is the 100-row sample from the
+syllabus. Expected values are documented in `CONTEXT.md`
+(§ Data Distribution).

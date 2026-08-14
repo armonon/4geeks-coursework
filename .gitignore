@@ -9,3 +9,10 @@ coverage/
 *.log
 .turbo/
 next-env.d.ts
+
+# Python build/test artefacts
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.venv/

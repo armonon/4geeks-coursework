@@ -1,0 +1,374 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { API_BASE_URL, type AnalysisResponse } from "@/lib/api";
+
+// Public URL of the sample CSV in the syllabus repo. Used by ?sample=1
+// for repro-friendly demos and screenshots — never called otherwise.
+const SAMPLE_CSV_URL =
+  "https://raw.githubusercontent.com/4GeeksAcademy/ai-engineering-syllabus/main/content/contexts/incidents-file-analysis/incidents-trackflow.csv";
+
+interface Outcome {
+  ok: true;
+  data: AnalysisResponse;
+  filename: string;
+}
+interface Failure {
+  ok: false;
+  status: number;
+  message: string;
+}
+type UiState =
+  | { kind: "idle" }
+  | { kind: "loading"; filename: string }
+  | { kind: "result"; outcome: Outcome | Failure };
+
+export function IncidentAnalyzer() {
+  const [state, setState] = useState<UiState>({ kind: "idle" });
+  const [dragOver, setDragOver] = useState(false);
+
+  const upload = useCallback(async (file: File) => {
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      setState({
+        kind: "result",
+        outcome: {
+          ok: false,
+          status: 400,
+          message: `Selected file "${file.name}" is not a .csv — please pick a CSV export.`,
+        },
+      });
+      return;
+    }
+
+    setState({ kind: "loading", filename: file.name });
+
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await fetch(`${API_BASE_URL}/api/incidents/analyze`, {
+        method: "POST",
+        body,
+      });
+      if (!res.ok) {
+        let message = `Analyse request failed (${res.status}).`;
+        try {
+          const err = await res.json();
+          if (err?.detail) message = String(err.detail);
+        } catch {
+          /* body wasn't JSON — keep the generic message */
+        }
+        setState({
+          kind: "result",
+          outcome: { ok: false, status: res.status, message },
+        });
+        return;
+      }
+      const data = (await res.json()) as AnalysisResponse;
+      setState({
+        kind: "result",
+        outcome: { ok: true, data, filename: file.name },
+      });
+    } catch (err: unknown) {
+      setState({
+        kind: "result",
+        outcome: {
+          ok: false,
+          status: 0,
+          message:
+            err instanceof Error
+              ? err.message
+              : "Network error reaching the analysis API.",
+        },
+      });
+    }
+  }, []);
+
+  // Load the syllabus sample CSV when the URL contains ?sample=1.
+  // Runs once per mount and is a no-op without the query param.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("sample") !== "1") return;
+    (async () => {
+      try {
+        const r = await fetch(SAMPLE_CSV_URL);
+        if (!r.ok) return;
+        const bytes = await r.arrayBuffer();
+        const file = new File([bytes], "incidents-trackflow.csv", {
+          type: "text/csv",
+        });
+        void upload(file);
+      } catch {
+        /* silently ignore — sample loading is best-effort */
+      }
+    })();
+  }, [upload]);
+
+  return (
+    <div className="space-y-6">
+      <UploadArea
+        dragOver={dragOver}
+        setDragOver={setDragOver}
+        loading={state.kind === "loading"}
+        loadingFilename={state.kind === "loading" ? state.filename : undefined}
+        onFile={upload}
+      />
+
+      {state.kind === "result" && !state.outcome.ok && (
+        <div
+          role="alert"
+          className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-800"
+        >
+          <p className="font-medium">Analysis failed</p>
+          <p className="mt-1">
+            HTTP {state.outcome.status}: {state.outcome.message}
+          </p>
+        </div>
+      )}
+
+      {state.kind === "result" && state.outcome.ok && (
+        <ResultView
+          filename={state.outcome.filename}
+          data={state.outcome.data}
+        />
+      )}
+    </div>
+  );
+}
+
+function UploadArea({
+  dragOver,
+  setDragOver,
+  loading,
+  loadingFilename,
+  onFile,
+}: {
+  dragOver: boolean;
+  setDragOver: (v: boolean) => void;
+  loading: boolean;
+  loadingFilename?: string;
+  onFile: (file: File) => void;
+}) {
+  return (
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDragOver(true);
+      }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDragOver(false);
+        const f = e.dataTransfer.files?.[0];
+        if (f) onFile(f);
+      }}
+      className={`flex flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed p-10 text-center transition-colors ${
+        dragOver
+          ? "border-slate-900 bg-slate-100"
+          : "border-slate-300 bg-white"
+      }`}
+    >
+      <p className="text-sm text-slate-700">
+        Drag & drop the incidents CSV here, or
+      </p>
+      <label className="cursor-pointer rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-800">
+        Choose file
+        <input
+          type="file"
+          accept=".csv"
+          className="hidden"
+          disabled={loading}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) onFile(f);
+            e.target.value = ""; // allow re-selecting the same file
+          }}
+        />
+      </label>
+      <p className="text-xs text-slate-500">
+        Never uploaded to any AI tool — analysis runs on the TrackFlow
+        backend under <code>services/api</code>.
+      </p>
+      {loading && (
+        <p className="text-xs text-slate-500">
+          Analysing <strong>{loadingFilename}</strong>…
+        </p>
+      )}
+    </div>
+  );
+}
+
+function ResultView({
+  filename,
+  data,
+}: {
+  filename: string;
+  data: AnalysisResponse;
+}) {
+  const invalidWithCounts = data.invalid_breakdown.filter((r) => r.count > 0);
+  return (
+    <div className="space-y-6">
+      <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+              Source
+            </h2>
+            <p className="mt-1 font-mono text-sm">{filename}</p>
+          </div>
+          <DownloadCsvButton />
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <StatCard label="Total records" value={data.totals.total_rows} />
+          <StatCard
+            label="Valid records"
+            value={data.totals.valid_records}
+            tone="ok"
+          />
+          <StatCard
+            label="Invalid records"
+            value={data.totals.invalid_records}
+            tone={data.totals.invalid_records ? "warn" : "ok"}
+          />
+        </div>
+      </div>
+
+      {data.totals.invalid_records > 0 && (
+        <Panel title="Invalid records breakdown">
+          {invalidWithCounts.length === 0 ? (
+            <p className="text-sm text-slate-500">No invalid records.</p>
+          ) : (
+            <ul className="divide-y divide-slate-100 text-sm">
+              {invalidWithCounts.map((row) => (
+                <li key={row.rule} className="flex justify-between py-2">
+                  <span className="text-slate-700">{row.label}</span>
+                  <span className="font-mono">{row.count}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-3 text-xs text-slate-500">
+            Invalid rows are excluded from the metrics below.
+          </p>
+        </Panel>
+      )}
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Panel title="Category breakdown (valid records)">
+          <BreakdownList entries={data.category_breakdown} total={data.totals.valid_records} />
+        </Panel>
+        <Panel title="Status breakdown (valid records)">
+          <BreakdownList entries={data.status_breakdown} total={data.totals.valid_records} />
+        </Panel>
+        <Panel title="Country breakdown (valid records)">
+          <BreakdownList entries={data.country_breakdown} total={data.totals.valid_records} />
+        </Panel>
+        <Panel title="Satisfaction (closed incidents)">
+          <div className="mb-3 flex items-baseline gap-3">
+            <span className="text-3xl font-semibold">
+              {data.satisfaction.average_score.toFixed(2)}
+            </span>
+            <span className="text-sm text-slate-500">/ 5.00 average</span>
+          </div>
+          <p className="mb-3 text-xs text-slate-500">
+            {data.satisfaction.scored_incidents} scored of{" "}
+            {data.satisfaction.closed_incidents} closed incidents
+          </p>
+          <ul className="space-y-1 text-sm">
+            {[1, 2, 3, 4, 5].map((score) => (
+              <li key={score} className="flex justify-between">
+                <span className="text-slate-700">Score {score}</span>
+                <span className="font-mono">
+                  {data.satisfaction.per_score[String(score)] ?? 0}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      </div>
+    </div>
+  );
+}
+
+function Panel({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+      <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+        {title}
+      </h3>
+      <div className="mt-3">{children}</div>
+    </div>
+  );
+}
+
+function StatCard({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone?: "ok" | "warn";
+}) {
+  const toneCls =
+    tone === "ok"
+      ? "text-emerald-700"
+      : tone === "warn"
+        ? "text-amber-700"
+        : "text-slate-900";
+  return (
+    <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
+      <p className="text-xs uppercase tracking-wider text-slate-500">{label}</p>
+      <p className={`mt-1 text-3xl font-semibold tracking-tight ${toneCls}`}>
+        {value}
+      </p>
+    </div>
+  );
+}
+
+function BreakdownList({
+  entries,
+  total,
+}: {
+  entries: Record<string, number>;
+  total: number;
+}) {
+  const items = Object.entries(entries);
+  if (items.length === 0) {
+    return <p className="text-sm text-slate-500">No data.</p>;
+  }
+  return (
+    <ul className="space-y-1 text-sm">
+      {items.map(([label, count]) => {
+        const pct = total > 0 ? ((count / total) * 100).toFixed(1) : "0.0";
+        return (
+          <li key={label} className="flex justify-between gap-4">
+            <span className="text-slate-700">{label}</span>
+            <span className="font-mono text-slate-800">
+              {count}{" "}
+              <span className="text-slate-500">({pct}%)</span>
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function DownloadCsvButton() {
+  return (
+    <a
+      href={`${API_BASE_URL}/api/incidents/results/export`}
+      className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50"
+    >
+      Download results CSV
+    </a>
+  );
+}
