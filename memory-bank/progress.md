@@ -4,6 +4,41 @@ Rolling log of substantive changes. Newest first.
 
 ---
 
+## 2026-08-14 · Fold Milestone 2 into `packages/programming-fundamentals`
+
+**Branch:** `milestone-2-fold-in`
+
+Prior work from the draft PR `milestone-2-programming-fundamentals`
+(dated 2026-08-05) had been sitting open. Rather than closing and
+discarding it, the salvageable pieces landed in their proper homes
+under the Milestone 4 workspace layout:
+
+- `packages/programming-fundamentals/` — new `@trackflow/programming-fundamentals`
+  workspace with the M2 domain types (Product, Shipment, Carrier,
+  InventoryMovement), collection filters, search helpers,
+  transformations (shipping cost, carrier scoring, aggregations),
+  and business-rule validations. 24 `node --test` tests pass.
+- `docs/company-context/` — the M2 briefings
+  (00-trackflow-company-briefing, 01-web-fundamentals,
+  02-coding-fundamentals) kept as reference material.
+- Root `package.json` bootstrap / test scripts extended to cover
+  the new workspace.
+
+**Dropped from the original PR:**
+- `uis/website/*.html|*.js` — Milestone 4 already provides a
+  Next.js website at `uis/website/`; keeping the old static
+  version would overwrite it.
+- `packages/shared/package.json` change — Milestone 4 conventions
+  use `@trackflow/<workspace>` scoping; the template's stub
+  `@repo/shared-types` stays grandfathered (MONO-3).
+- Root-level `src/` — the code lives in a workspace now, not at
+  the tree root.
+
+Delivery workflow: `npm run bootstrap && npm run test && npm run demo:programming-fundamentals`
+all exit 0.
+
+---
+
 ## 2026-08-02 · Milestone 4 — AI-driven engineering infrastructure
 
 **Branch:** `milestone-4`
