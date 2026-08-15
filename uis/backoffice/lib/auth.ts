@@ -16,7 +16,17 @@ import { API_BASE_URL } from "@/lib/api";
 export const TOKEN_KEY = "trackflow.backoffice.token";
 
 /** Routes reachable without a session. Everything else is guarded. */
-export const PUBLIC_ROUTES = ["/login", "/register"] as const;
+/**
+ * Routes reachable without a session. The password-recovery pages
+ * must be public by definition — a user who cannot sign in has to be
+ * able to reach them.
+ */
+export const PUBLIC_ROUTES = [
+  "/login",
+  "/register",
+  "/forgot-password",
+  "/reset-password",
+] as const;
 
 export interface Profile {
   id: number;
@@ -220,4 +230,62 @@ export function updateMyProfile(patch: {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(patch),
   });
+}
+
+
+// ---------------------------------------------------------------------------
+// Password recovery / change (AUTH-03)
+// ---------------------------------------------------------------------------
+
+interface MessageResponse {
+  message: string;
+}
+
+/**
+ * Ask for a reset link.
+ *
+ * The API answers 200 with the same body whether or not the address is
+ * registered, so this never reveals which emails exist — the caller
+ * shows one confirmation message regardless.
+ */
+export async function forgotPassword(email: string): Promise<string> {
+  const res = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) throw new Error(await readApiError(res));
+  const data = (await res.json()) as MessageResponse;
+  return data.message;
+}
+
+/** Set a new password using the token from the reset link. */
+export async function resetPassword(
+  token: string,
+  newPassword: string,
+): Promise<string> {
+  const res = await fetch(`${API_BASE_URL}/auth/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
+  if (!res.ok) throw new Error(await readApiError(res));
+  const data = (await res.json()) as MessageResponse;
+  return data.message;
+}
+
+/** Change the password of the signed-in user. Requires a session. */
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+): Promise<string> {
+  const data = await authJson<MessageResponse>("/auth/change-password", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      current_password: currentPassword,
+      new_password: newPassword,
+    }),
+  });
+  return data.message;
 }

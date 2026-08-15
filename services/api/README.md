@@ -110,6 +110,69 @@ tokens. `GET /` is the health check.
 - **403** — the caller is authenticated but acting on someone else's
   account, or a non-admin trying to change a `role`.
 
+
+## Password reset and change (AUTH-03)
+
+| Method | Endpoint | Access |
+| ------ | -------- | ------ |
+| `POST` | `/auth/forgot-password` | public — **always 200** |
+| `POST` | `/auth/reset-password` | public — consumes a single-use token |
+| `POST` | `/auth/change-password` | protected — verifies the current password |
+
+### Email provider
+
+**Resend** (<https://resend.com>). Chosen over SendGrid because its
+shared onboarding sender (`onboarding@resend.dev`) delivers to the
+account owner's address in development **without** verifying a domain
+in DNS — the step that most often blocks this exercise.
+
+Set the key in `services/api/.env`:
+
+```
+RESEND_API_KEY=your_key_here
+```
+
+**Without the key the flow still works**: the reset link is printed to
+the server log instead of being emailed, clearly labelled so it cannot
+be mistaken for real delivery. That keeps the whole journey testable
+locally with no credentials.
+
+| Variable | Purpose |
+| -------- | ------- |
+| `RESEND_API_KEY` | Resend API key. Unset → console fallback. |
+| `EMAIL_FROM` | Sender. Defaults to Resend's onboarding sender. |
+| `FRONTEND_BASE_URL` | Where the reset link points. Defaults to `http://localhost:3100`. |
+| `RESET_TOKEN_EXPIRE_MINUTES` | Link lifetime. Defaults to 30, clamped to 5–120. |
+
+### Why tokens are stored server-side
+
+A JWT carrying only an `exp` claim **cannot be invalidated after use** —
+anyone holding it could replay it until expiry. So each issued token
+gets a row in the `password_resets` table recording its expiry and
+whether it has been used, and the row is marked used the moment a reset
+succeeds.
+
+What is stored is the **SHA-256 hash** of the token, never the token
+itself: a database leak does not hand an attacker a working reset link.
+The same reasoning that applies to passwords.
+
+Also enforced:
+
+- Requesting a new link **invalidates the previous one**, so an old
+  email stops being a live key to the account.
+- Changing the password invalidates every outstanding reset link.
+- Unknown, expired, and already-used tokens all return an **identical**
+  400, so a caller cannot probe which tokens ever existed.
+- The check-then-mark-used sequence holds a lock, so two simultaneous
+  submissions of the same link cannot both succeed.
+
+### No enumeration
+
+`/auth/forgot-password` returns the same 200 and the same body whether
+or not the address is registered. Combined with the identical 401 on
+login for unknown-email vs wrong-password, neither endpoint can be used
+to discover which addresses have accounts.
+
 ## Supplier directory
 
 Data model, valid categories, allowed statuses, and the seed data all
@@ -186,9 +249,8 @@ Carried over from the previous milestone, now mounted as a router:
 uv run pytest
 ```
 
-92 tests — 46 for auth (user CRUD, profiles, login, token validation,
-401/403 separation, and route protection), 39 for the supplier
-directory, and 7 for incident analysis.
+117 tests — 51 for auth, 20 for password reset/change, 39 for the
+supplier directory, and 7 for incident analysis.
 
 ## CORS
 

@@ -316,3 +316,43 @@ class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
     expires_in: int = Field(..., description="Token lifetime in seconds.")
+
+
+# ---------------------------------------------------------------------------
+# Password reset / change (AUTH-03)
+# ---------------------------------------------------------------------------
+
+
+class ForgotPasswordRequest(BaseModel):
+    """POST /auth/forgot-password.
+
+    The response is always 200 regardless of whether this address is
+    registered, so the endpoint cannot be used to enumerate accounts.
+    """
+
+    email: EmailStr
+
+    @field_validator("email")
+    @classmethod
+    def _normalise_email(cls, value: str) -> str:
+        return value.strip().lower()
+
+
+class ResetPasswordRequest(BaseModel):
+    """POST /auth/reset-password."""
+
+    token: str = Field(..., min_length=1, description="Token from the reset link.")
+    new_password: str = Field(
+        ..., min_length=8, description="Plain text in, hashed before storage."
+    )
+
+
+class ChangePasswordRequest(BaseModel):
+    """POST /auth/change-password — requires a valid session."""
+
+    current_password: str = Field(..., min_length=1)
+    new_password: str = Field(..., min_length=8)
+
+
+class MessageResponse(BaseModel):
+    message: str

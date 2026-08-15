@@ -10,6 +10,7 @@ const NAV = [
   { href: "/incidents", label: "Incident analysis" },
   { href: "/suppliers", label: "Supplier directory" },
   { href: "/account/profile", label: "My profile" },
+  { href: "/account/change-password", label: "Change password" },
 ];
 
 /**
