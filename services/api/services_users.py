@@ -7,14 +7,13 @@ without HTTP and reusable from anywhere.
 
 from __future__ import annotations
 
-import threading
 from typing import Any
 
 from fastapi import HTTPException, status
 from tinydb import Query
 from tinydb.table import Document
 
-from database import profiles_table, users_table
+from database import db_transaction, profiles_table, users_table
 from models import (
     ProfileOut,
     ProfileUpdate,
@@ -27,14 +26,14 @@ from models import (
 )
 from security import hash_password
 
-# Guards the read-then-write sequences below. TinyDB has no unique
-# constraint, so "is this email taken?" followed by "insert" is a
-# check-then-act race: FastAPI runs sync handlers in a threadpool, and
-# without this lock concurrent registrations of the same address all
-# pass the check and all insert. Measured: 12 simultaneous requests
-# produced 11 duplicate accounts, and only the first one's password
-# could ever log in.
-_write_lock = threading.Lock()
+# The read-then-write sequences below use `db_transaction()`, the same
+# database-wide lock every other table operation takes.
+#
+# TinyDB has no unique constraint, so "is this email taken?" followed by
+# "insert" is a check-then-act race: FastAPI runs sync handlers in a
+# threadpool. Measured before this was guarded: 12 simultaneous
+# registrations of one address produced 11 duplicate accounts, and only
+# the first one's password could ever log in.
 
 # ---------------------------------------------------------------------------
 # Mapping helpers
@@ -100,11 +99,12 @@ def create_user(payload: UserCreate, role: Role = Role.USER) -> UserOut:
     `role` defaults to `user`; the public POST /users route never
     passes anything else.
     """
-    # Hash outside the lock — bcrypt is deliberately slow and holding
-    # the lock through it would serialise every registration.
+    # Hash outside the transaction — bcrypt is deliberately slow and
+    # holding the database lock through it would serialise every
+    # registration.
     hashed = hash_password(payload.password)
 
-    with _write_lock:
+    with db_transaction():
         if get_user_by_email(payload.email) is not None:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -154,7 +154,7 @@ def update_user(user_id: int, payload: UserUpdate, *, allow_role: bool) -> UserO
 
     # Same check-then-act hazard as create_user: the email uniqueness
     # check and the write must not be separable.
-    with _write_lock:
+    with db_transaction():
         existing = get_user_by_id(user_id)
         if existing is None:
             raise HTTPException(

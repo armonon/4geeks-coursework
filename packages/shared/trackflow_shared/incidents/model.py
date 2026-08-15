@@ -186,6 +186,31 @@ def validate_category(value: object) -> Category:
     return _validate_enum(value, Category, "category")
 
 
+def validate_new_status(value: object) -> Status:
+    """Status for a *newly registered* incident.
+
+    CONTEXT is explicit that the lifecycle starts at `open`, so this is
+    not a free field. Left to the caller, a client could POST
+    `status: "resolved"` and mint an incident straight into a final
+    state — one that no transition can ever leave, and that lands in the
+    CEO's summary as work that was never actually done.
+
+    Omitting it is the normal case. Sending `open` explicitly is fine;
+    anything else is rejected rather than silently rewritten, so a
+    caller doing it wrong finds out.
+    """
+    if value is None or _clean(value) == "":
+        return Status.OPEN
+    status = validate_status(value)
+    if status is not Status.OPEN:
+        raise FieldError(
+            "status",
+            f"New incidents always start as '{Status.OPEN.value}'. "
+            f"Register it first, then move it to '{status.value}'.",
+        )
+    return status
+
+
 def validate_incident(payload: dict) -> dict:
     """Validate a whole incident. Raises FieldError on the first problem.
 
@@ -193,12 +218,17 @@ def validate_incident(payload: dict) -> dict:
     `branch` is required for every origin — CONTEXT says to use
     `central` when the report is not tied to a facility, rather than
     leaving it blank.
+
+    This is the *registration* validator, so `status` is pinned to
+    `open`; changing status afterwards goes through the lifecycle rules
+    above. The seeder does not use this function — historical rows carry
+    their own already-final statuses from the CSV.
     """
     return {
         "title": validate_title(payload.get("title")),
         "description": validate_description(payload.get("description")),
         "category": validate_category(payload.get("category")),
-        "status": validate_status(payload.get("status", Status.OPEN.value)),
+        "status": validate_new_status(payload.get("status")),
         "origin": validate_origin(payload.get("origin")),
         "branch": validate_branch(payload.get("branch")),
     }

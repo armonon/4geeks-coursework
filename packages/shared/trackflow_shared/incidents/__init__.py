@@ -24,6 +24,7 @@ from .model import (
     validate_category,
     validate_description,
     validate_incident,
+    validate_new_status,
     validate_origin,
     validate_status,
     validate_title,
@@ -35,6 +36,7 @@ __all__ = [
     "TITLE_MAX_LENGTH", "Branch", "Category", "FieldError", "MappedRow",
     "Origin", "Status", "can_transition", "is_final", "map_row",
     "transition_error", "validate_branch", "validate_category",
-    "validate_description", "validate_incident", "validate_origin",
+    "validate_description", "validate_incident", "validate_new_status",
+    "validate_origin",
     "validate_status", "validate_title",
 ]

@@ -35,7 +35,7 @@ from trackflow_shared.incidents import (
     validate_status,
 )
 
-from database import incidents_table
+from database import db_transaction, incidents_table
 from models import UserInDB
 from security import get_current_user
 
@@ -210,31 +210,37 @@ def update_incident_status(
     from the current state, so the caller can recover without reading
     the spec.
     """
-    document = _get_or_404(incident_id)
-
     try:
         target = validate_status(payload.get("status"))
     except FieldError as exc:
         raise _field_error(exc) from None
 
-    try:
-        current = Status(document["status"])
-    except (KeyError, ValueError):
-        raise HTTPException(
-            status_code=http_status.HTTP_400_BAD_REQUEST,
-            detail={
-                "field": "status",
-                "message": "This incident has an unreadable current status.",
-            },
-        ) from None
+    # The whole check-then-write runs under one lock. Two operators
+    # acting on the same open incident at the same moment — one picking
+    # it up, one dismissing it — would otherwise both read `open`, both
+    # pass the transition check, and both write: two mutually exclusive
+    # transitions each reporting success.
+    with db_transaction():
+        document = _get_or_404(incident_id)
 
-    if not can_transition(current, target):
-        raise HTTPException(
-            status_code=http_status.HTTP_400_BAD_REQUEST,
-            detail={"field": "status", "message": transition_error(current, target)},
+        try:
+            current = Status(document["status"])
+        except (KeyError, ValueError):
+            raise HTTPException(
+                status_code=http_status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "field": "status",
+                    "message": "This incident has an unreadable current status.",
+                },
+            ) from None
+
+        if not can_transition(current, target):
+            raise HTTPException(
+                status_code=http_status.HTTP_400_BAD_REQUEST,
+                detail={"field": "status", "message": transition_error(current, target)},
+            )
+
+        incidents_table().update(
+            {"status": target.value, "updated_at": _now_iso()}, doc_ids=[incident_id]
         )
-
-    incidents_table().update(
-        {"status": target.value, "updated_at": _now_iso()}, doc_ids=[incident_id]
-    )
-    return _to_out(_get_or_404(incident_id))
+        return _to_out(_get_or_404(incident_id))

@@ -451,3 +451,130 @@ def test_seeded_timestamps_are_midnight_utc(seeded: TestClient) -> None:
     assert "T00:00:00" in incident["created_at"]
     # CONTEXT: updated_at matches created_at on insert.
     assert incident["updated_at"] == incident["created_at"]
+
+
+# ---------------------------------------------------------------------------
+# Registration cannot bypass the lifecycle
+#
+# Found by probing the create endpoint: it accepted a client-supplied
+# `status`, so `POST {"status": "resolved"}` minted an incident directly
+# into a final state — one no transition could ever leave, sitting in the
+# CEO's summary as work that was never done.
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("forbidden", ["resolved", "discarded", "in_progress"])
+def test_cannot_register_an_incident_into_a_non_open_status(
+    client: TestClient, forbidden: str
+) -> None:
+    r = client.post("/api/incidents", json={**VALID, "status": forbidden})
+    assert r.status_code == 400, r.text
+    detail = r.json()["detail"]
+    assert detail["field"] == "status"
+    assert "open" in detail["message"]
+
+
+def test_registering_without_a_status_starts_open(client: TestClient) -> None:
+    assert create(client)["status"] == "open"
+
+
+def test_registering_with_an_explicit_open_status_is_accepted(
+    client: TestClient,
+) -> None:
+    """Sending the correct value is not an error — only a wrong one is."""
+    r = client.post("/api/incidents", json={**VALID, "status": "open"})
+    assert r.status_code == 201, r.text
+    assert r.json()["status"] == "open"
+
+
+def test_a_final_status_is_unreachable_at_registration_time(
+    client: TestClient,
+) -> None:
+    """The summary must never gain a resolved incident without a transition."""
+    client.post("/api/incidents", json={**VALID, "status": "resolved"})
+    assert client.get("/api/incidents/summary").json()["by_status"]["resolved"] == 0
+
+
+# ---------------------------------------------------------------------------
+# Concurrency
+#
+# TinyDB reads the whole JSON file, mutates it in memory, and writes it
+# back, with no concurrency control. FastAPI runs sync handlers in a
+# threadpool, so two simultaneous requests really do interleave those
+# steps. Before `database` serialised access, the test below corrupted
+# the file outright — every later read died with JSONDecodeError.
+# ---------------------------------------------------------------------------
+
+
+def test_concurrent_writes_do_not_corrupt_the_database(client: TestClient) -> None:
+    import json
+    from concurrent.futures import ThreadPoolExecutor
+
+    from database import db_path
+
+    def work(i: int) -> int:
+        if i % 3 == 0:
+            return client.post("/api/incidents", json={**VALID, "title": f"C{i}"}).status_code
+        if i % 3 == 1:
+            return client.get("/api/incidents").status_code
+        return client.get("/api/incidents/summary").status_code
+
+    with ThreadPoolExecutor(max_workers=16) as pool:
+        codes = list(pool.map(work, range(60)))
+
+    assert set(codes) <= {200, 201}, f"unexpected responses: {sorted(set(codes))}"
+
+    # The file must still be valid JSON, not a truncated fragment.
+    with db_path().open(encoding="utf-8") as handle:
+        json.load(handle)
+
+    expected = sum(1 for i in range(60) if i % 3 == 0)
+    listed = client.get("/api/incidents").json()
+    assert len([i for i in listed if i["title"].startswith("C")]) == expected
+    # Interleaved inserts previously handed two rows the same document id.
+    assert len({i["id"] for i in listed}) == len(listed)
+
+
+def test_two_exclusive_final_transitions_cannot_both_succeed(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """`resolved` and `discarded` are both final: exactly one must win.
+
+    The check-then-write window is tight in normal operation, so this
+    widens it deliberately — otherwise the test would pass even with the
+    transaction removed and would guard nothing. With `db_transaction()`
+    neutralised this fails on every run.
+    """
+    import time
+    from concurrent.futures import ThreadPoolExecutor
+
+    import routes.incidents_manager as manager
+
+    real_now = manager._now_iso
+
+    def slow_now() -> str:
+        # Called between the transition check and the write.
+        time.sleep(0.05)
+        return real_now()
+
+    monkeypatch.setattr(manager, "_now_iso", slow_now)
+
+    incident_id = create(client)["id"]
+    client.patch(f"/api/incidents/{incident_id}/status", json={"status": "in_progress"})
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        codes = list(
+            pool.map(
+                lambda target: client.patch(
+                    f"/api/incidents/{incident_id}/status", json={"status": target}
+                ).status_code,
+                ["resolved", "discarded"],
+            )
+        )
+
+    assert codes.count(200) == 1, f"both transitions were accepted: {codes}"
+    assert codes.count(400) == 1
+    assert client.get(f"/api/incidents/{incident_id}").json()["status"] in {
+        "resolved",
+        "discarded",
+    }
