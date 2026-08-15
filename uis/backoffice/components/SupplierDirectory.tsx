@@ -26,6 +26,8 @@ export function SupplierDirectory() {
   const [rowBusy, setRowBusy] = useState<number | null>(null);
   const [rowError, setRowError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  // id of the row whose rate is being edited inline
+  const [editingRate, setEditingRate] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -52,24 +54,14 @@ export function SupplierDirectory() {
   }, []);
 
   const handleRate = useCallback(
-    async (supplier: Supplier) => {
-      const input = window.prompt(
-        `New rate for ${supplier.name} (${supplier.currency}):`,
-        String(supplier.rate_per_shipment),
-      );
-      if (input === null) return;
-
-      const value = Number(input);
-      if (!Number.isFinite(value) || value <= 0) {
-        setRowError("Rate must be a number greater than zero.");
-        return;
-      }
-
+    async (supplier: Supplier, value: number) => {
       setRowBusy(supplier.id);
       setRowError(null);
       try {
         replaceRow(await updateRate(supplier.id, value));
+        setEditingRate(null);
       } catch (err) {
+        // Surface the API's own message (e.g. the 422 detail) verbatim.
         setRowError(err instanceof Error ? err.message : "Rate update failed.");
       } finally {
         setRowBusy(null);
@@ -260,7 +252,16 @@ export function SupplierDirectory() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-right font-mono">
-                        {formatRate(s)}
+                        {editingRate === s.id ? (
+                          <RateEditor
+                            supplier={s}
+                            busy={rowBusy === s.id}
+                            onCancel={() => setEditingRate(null)}
+                            onSave={(value) => handleRate(s, value)}
+                          />
+                        ) : (
+                          formatRate(s)
+                        )}
                       </td>
                       <td className="px-4 py-3">
                         <StatusBadge status={s.status} />
@@ -270,7 +271,12 @@ export function SupplierDirectory() {
                           <button
                             type="button"
                             disabled={rowBusy === s.id}
-                            onClick={() => handleRate(s)}
+                            aria-label={`Edit rate for ${s.name}`}
+                            onClick={() =>
+                              setEditingRate((cur) =>
+                                cur === s.id ? null : s.id,
+                              )
+                            }
                             className="rounded-md border border-slate-300 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
                           >
                             Edit rate
@@ -297,6 +303,72 @@ export function SupplierDirectory() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function RateEditor({
+  supplier,
+  busy,
+  onSave,
+  onCancel,
+}: {
+  supplier: Supplier;
+  busy: boolean;
+  onSave: (value: number) => void;
+  onCancel: () => void;
+}) {
+  const [value, setValue] = useState(String(supplier.rate_per_shipment));
+  const [error, setError] = useState<string | null>(null);
+
+  function submit() {
+    const parsed = Number(value);
+    // Mirror the API rule (gt=0) client-side so the obvious mistake is
+    // caught without a round-trip; the server still enforces it.
+    if (value.trim() === "" || !Number.isFinite(parsed) || parsed <= 0) {
+      setError("Must be greater than 0");
+      return;
+    }
+    setError(null);
+    onSave(parsed);
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-1">
+      <div className="flex items-center gap-1">
+        <input
+          autoFocus
+          type="number"
+          min="0.01"
+          step="0.01"
+          value={value}
+          disabled={busy}
+          aria-label={`New rate for ${supplier.name}`}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") submit();
+            if (e.key === "Escape") onCancel();
+          }}
+          className="w-24 rounded-md border border-slate-300 px-2 py-1 text-right text-xs focus:outline-none focus:ring-2 focus:ring-slate-400"
+        />
+        <button
+          type="button"
+          disabled={busy}
+          onClick={submit}
+          className="rounded-md bg-slate-900 px-2 py-1 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+        >
+          {busy ? "…" : "Save"}
+        </button>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onCancel}
+          className="rounded-md border border-slate-300 px-2 py-1 text-xs text-slate-600 hover:bg-slate-50"
+        >
+          Cancel
+        </button>
+      </div>
+      {error && <span className="text-xs text-red-600">{error}</span>}
     </div>
   );
 }
@@ -470,7 +542,13 @@ function RegisterSupplierForm({
         </Field>
       </div>
 
-      <Field label="Categories * (at least one)" error={clientErrors.categories}>
+      {/* A fieldset, not a <label>: these are eight toggle buttons, and a
+          <label> may only be associated with a single form control.
+          Wrapping them in one breaks the accessible name of every button. */}
+      <fieldset className="block text-sm">
+        <legend className="mb-1 block font-medium text-slate-700">
+          Categories * (at least one)
+        </legend>
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((c) => {
             const on = selected.includes(c);
@@ -495,7 +573,12 @@ function RegisterSupplierForm({
             );
           })}
         </div>
-      </Field>
+        {clientErrors.categories && (
+          <span className="mt-1 block text-xs text-red-600">
+            {clientErrors.categories}
+          </span>
+        )}
+      </fieldset>
 
       <Field label="Notes">
         <textarea
