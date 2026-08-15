@@ -218,3 +218,84 @@ Four bugs the tests found, all fixed here:
   about whether the API agrees; those paths are covered by Playwright
   against a running backend. `errors.ts` — the part Jest is right for —
   is at 97%.
+
+---
+
+## Tracker build fix (`fix/tracker-build`)
+
+`uis/talent-pipeline-tracker` did not build. It had not built for several
+milestones, and each PR since has carried the failure as a disclosed,
+pre-existing problem. Fixed here.
+
+### The actual cause
+
+The monorepo was running **two majors of Next and two minors of React**:
+
+| Workspace | Next | React |
+|---|---|---|
+| `uis/backoffice` | 15.5.22 | 19.1.0 |
+| `uis/talent-pipeline-tracker` | 16.2.12 | 19.2.4 |
+
+npm hoists one version to the repo root and nests the other inside the
+workspace. `next@15` won the root, so the tracker got
+`uis/talent-pipeline-tracker/node_modules/next` — while `next`'s own
+dependencies stayed hoisted at the root.
+
+Turbopack could not resolve those hoisted dependencies from a
+workspace-nested package. The errors arrived one at a time —
+`picocolors`, then `source-map-js`, then
+`@swc/helpers/_/_interop_require_default` — which made it look like a
+missing-dependency problem. It was not: every one of them was installed,
+just one directory level further up than turbopack would look.
+
+Backoffice has a nested `postcss` too and builds fine, because its copy
+sits at `<root>/node_modules/next/node_modules/postcss`. Only the
+*workspace*-nested case fails.
+
+### The fix
+
+One version of each framework package across the monorepo. The tracker
+moves to `next@15.5.22` and `react@19.1.0`, matching the backoffice, so
+nothing nests: **all three `uis/*` workspaces now have zero nested
+packages.**
+
+Three consequential edits came with it:
+
+- `app/error.tsx` / `app/global-error.tsx` — the error boundary callback
+  is `reset` on Next 15 and `unstable_retry` on Next 16. Reverted to
+  `reset`.
+- `eslint.config.mjs` — rewritten to the `FlatCompat` style the backoffice
+  uses. The extensionless `eslint-config-next/core-web-vitals` imports are
+  a Next 16 packaging detail and do not resolve on 15.
+- `tsconfig.json` — `next build` rewrote `jsx` from `react-jsx` to
+  `preserve`, which is what Next 15 wants.
+
+### Things to be honest about
+
+- **The tracker gives up Next 16.** The alternative — upgrading the
+  backoffice to 16 — unifies forward instead and keeps the newer
+  framework, but it means a major upgrade of the primary app (auth,
+  incident manager, suppliers, analyzer) to fix a build in a secondary
+  one. That trade is available if the team would rather go forward; the
+  change would be the same three edits in the opposite direction.
+- **The tracker's 5 eslint errors disappeared without the code changing.**
+  They were `react-hooks` "setState synchronously within an effect"
+  violations, and that rule ships with `eslint-config-next@16`. On 15 the
+  rule does not run. The patterns are still in the code. Verified eslint
+  is genuinely checking these files by planting a violation and watching
+  it get caught.
+- `overrides` was tried first and npm 11.12.1 silently ignored it — it
+  never appeared in the lockfile, even after regenerating from scratch.
+
+### Verification
+
+- `npm run build` exit 0, **all three** Next apps compile — the tracker
+  produces all 6 routes.
+- `npm run typecheck` exit 0 across 5 workspaces; `npm run test` 64
+  passing; 286 backend tests; ruff and eslint clean.
+- A passing build is not a working app, so both were driven in a browser:
+  the tracker renders, and a controlled input updates (proving there is
+  one React instance and hooks work — the duplicate-React failure showed
+  up precisely as `Cannot read properties of null (reading 'useContext')`
+  during prerender). The backoffice's 56 error-handling assertions and the
+  supplier directory check were re-run against the shared hoisted React.
