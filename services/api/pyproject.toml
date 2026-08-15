@@ -43,3 +43,33 @@ pythonpath = ["."]
 
 [tool.uv.sources]
 incident-analyzer = { path = "../../packages/incident_analyzer", editable = true }
+
+[tool.ruff]
+extend-exclude = [".venv"]
+# The seed data is transcribed verbatim from CONTEXT.md; a few of those
+# note strings run past 88 columns and reflowing them would obscure that
+# they are copied exactly.
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "RUF"]
+ignore = [
+    # `class Status(str, Enum)` is the idiom FastAPI's own docs use for
+    # path/query enums. StrEnum would work on 3.11+ but this is the
+    # shape every FastAPI reader expects.
+    "UP042",
+]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency-injection idiom puts Query()/File()/Depends()
+# in argument defaults on purpose. B008 exists for mutable defaults;
+# these are not that.
+extend-immutable-calls = [
+    "fastapi.Query",
+    "fastapi.File",
+    "fastapi.Depends",
+    "fastapi.Body",
+    "fastapi.Path",
+    "fastapi.Header",
+    "fastapi.Form",
+]

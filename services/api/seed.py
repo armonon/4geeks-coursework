@@ -218,7 +218,7 @@ def main() -> int:
 
     try:
         inserted, skipped = seed()
-    except Exception as exc:  # noqa: BLE001 — surface the cause plainly
+    except Exception as exc:
         print(f"\n  FAILED: {exc}", file=sys.stderr)
         return 1
 

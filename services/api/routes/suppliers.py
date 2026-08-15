@@ -18,7 +18,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query, status as http_status
+from fastapi import APIRouter, HTTPException, Query
+from fastapi import status as http_status
 from tinydb.table import Document
 
 from database import suppliers_table
@@ -28,9 +29,9 @@ from models import (
     DeleteResponse,
     RateUpdate,
     Status,
+    StatusUpdate,
     SupplierCreate,
     SupplierOut,
-    StatusUpdate,
     utcnow,
 )
 

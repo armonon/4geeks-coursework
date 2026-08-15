@@ -11,7 +11,6 @@ from typing import Any
 
 from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from fastapi.responses import Response
-
 from incident_analyzer import AnalysisResult, analyse
 from incident_analyzer.analyzer import RULE_LABELS
 from incident_analyzer.csv_io import (
@@ -80,7 +79,9 @@ async def analyze_incidents(file: UploadFile = File(...)) -> dict[str, Any]:
 
     if not rows:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            # 422 — the constant was renamed in Starlette; use the literal
+            # so this keeps working across both naming eras.
+            status_code=422,
             detail="CSV had a header but no data rows.",
         )
 

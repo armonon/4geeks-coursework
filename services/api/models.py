@@ -8,11 +8,10 @@ depend on these exact strings.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import Enum
 
 from pydantic import BaseModel, Field, field_validator, model_validator
-
 
 # ---------------------------------------------------------------------------
 # Enumerations — the closed value sets from CONTEXT.md
@@ -64,7 +63,7 @@ CURRENCY_FOR_COUNTRY: dict[Country, Currency] = {
 
 
 def utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 # ---------------------------------------------------------------------------
@@ -126,7 +125,7 @@ class SupplierBase(BaseModel):
         return seen
 
     @model_validator(mode="after")
-    def _currency_matches_country(self) -> "SupplierBase":
+    def _currency_matches_country(self) -> SupplierBase:
         expected = CURRENCY_FOR_COUNTRY[self.country]
         if self.currency != expected:
             raise ValueError(

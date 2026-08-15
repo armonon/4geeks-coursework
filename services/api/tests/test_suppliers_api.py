@@ -64,7 +64,7 @@ def test_create_returns_complete_object_with_id(client: TestClient) -> None:
     assert body["currency"] == "EUR"
     assert body["status"] == "active"
     # updated_at is system-generated, never sent by the client.
-    assert "updated_at" in body and body["updated_at"]
+    assert body.get("updated_at")
 
 
 def test_updated_at_is_ignored_if_client_sends_it(client: TestClient) -> None:
