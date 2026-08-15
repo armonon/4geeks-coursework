@@ -105,3 +105,59 @@ self-contained and reflects TrackFlow rather than a generic company.
 When earlier milestones land, `MONO-1` (single source of truth) is
 the guardrail that keeps the imports pointed at
 `packages/business-logic`.
+
+---
+
+## Error handling audit (`feature/error-handling-audit`)
+
+Cross-cutting pass over the whole repository. No new features: the
+deliverable is the same platform, failing better. Full report in
+[`docs/ERROR_HANDLING_AUDIT.md`](../docs/ERROR_HANDLING_AUDIT.md).
+
+### Behaviour that changed
+
+- **`services/api/main.py` now has a global `Exception` handler.** Every
+  error response from the API is JSON. It used to be possible to get the
+  plain-text body `Internal Server Error`, which the frontend then failed
+  to parse — surfacing to the user as `Unexpected token 'I'`.
+  Reproducible trigger: a CSV field over 128 KB uploaded to
+  `/api/incidents/analyze`.
+- **Exception text no longer reaches clients.** The real exception is
+  logged server-side; responses carry a fixed, human-readable `detail`.
+  This closed a leak where a password sent as a non-string JSON value
+  came back inside a Pydantic validation error.
+- **New incidents reject containers.** `{"title": {"a": 1}}` used to be
+  stored as the literal `"{'a': 1}"`.
+- **`AuthProvider` distinguishes a rejected token from an unreachable
+  server.** Previously any failure cleared the token, so an API blip
+  logged people out permanently. A transport failure now keeps the
+  session and renders a recoverable state with Retry.
+- **Scripts exit non-zero with advice on `stderr`**, never a traceback.
+  Unreadable input exits 2, a parse failure exits 1.
+
+### New shared module
+
+`uis/*/lib/errors.ts` — `toUserMessage(error, fallback)` and
+`readJson(res)`. Every user-facing error render goes through it. Server
+messages written for humans pass through; browser and parser noise
+(`Failed to fetch`, `Unexpected token`, stringified bodies) is replaced.
+Duplicated into both `uis/backoffice` and `uis/talent-pipeline-tracker`
+deliberately — they are separate Next apps with separate `@/` roots, and
+promoting it to `packages/` is the follow-up if a third UI appears
+(rule MONO-2).
+
+### Verification
+
+- 196 backend tests (19 new in `tests/test_error_handling.py`).
+- Every backend fix mutation-checked: reverting it makes its test fail.
+- 47 browser assertions against the running stack, including a
+  deliberately killed API, asserting no technical text ever reaches the
+  screen and every error state offers a way forward.
+
+### Deferred
+
+- The two `lib/errors.ts` copies (see above).
+- `uis/website` needs nothing — it is static and has no async work.
+- `packages/incident_analyzer` still raises precise exceptions rather
+  than handling them; that is correct for a library, and the handling
+  now lives at the route and script boundaries.

@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import { useState } from "react";
 import { candidatesService } from "@/services/candidates";
 import {
@@ -42,7 +43,7 @@ export function StatusStageControls({
       onUpdated({ status: updated.status });
       onSuccess("Status updated");
     } catch (e) {
-      onError(e instanceof Error ? e.message : "Failed to update status");
+      onError(toUserMessage(e, "Failed to update status"));
     } finally {
       setSavingField(null);
     }
@@ -58,7 +59,7 @@ export function StatusStageControls({
       onUpdated({ stage: updated.stage });
       onSuccess("Stage updated");
     } catch (e) {
-      onError(e instanceof Error ? e.message : "Failed to update stage");
+      onError(toUserMessage(e, "Failed to update stage"));
     } finally {
       setSavingField(null);
     }

@@ -1,4 +1,5 @@
 import { authFetch, readApiError } from "@/lib/auth";
+import { readJson } from "@/lib/errors";
 
 /**
  * Incident manager client.
@@ -155,13 +156,13 @@ export async function fetchIncidents(
   const qs = params.toString();
   const res = await authFetch(`/api/incidents${qs ? `?${qs}` : ""}`);
   if (!res.ok) await raise(res);
-  return res.json();
+  return readJson(res);
 }
 
 export async function fetchSummary(): Promise<IncidentSummary> {
   const res = await authFetch("/api/incidents/summary");
   if (!res.ok) await raise(res);
-  return res.json();
+  return readJson(res);
 }
 
 export async function createIncident(
@@ -173,7 +174,7 @@ export async function createIncident(
     body: JSON.stringify(payload),
   });
   if (!res.ok) await raise(res);
-  return res.json();
+  return readJson(res);
 }
 
 export async function updateIncidentStatus(
@@ -186,7 +187,7 @@ export async function updateIncidentStatus(
     body: JSON.stringify({ status }),
   });
   if (!res.ok) await raise(res);
-  return res.json();
+  return readJson(res);
 }
 
 export function formatDate(iso: string): string {

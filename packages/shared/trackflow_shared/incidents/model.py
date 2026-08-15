@@ -139,7 +139,23 @@ def _clean(value: object) -> str:
     return "" if value is None else str(value).strip()
 
 
+def _reject_containers(value: object, field: str) -> None:
+    """Refuse a list or object before `str()` flattens it into a repr.
+
+    Without this, `{"title": {"a": 1}}` was accepted and stored as the
+    literal `"{'a': 1}"` — a 201 for a record nobody can use. Verified
+    against the running API before the guard existed.
+    """
+    if isinstance(value, dict | list | tuple | set):
+        raise FieldError(
+            field,
+            f"{field.capitalize()} must be a single text value, "
+            "not a list or an object.",
+        )
+
+
 def validate_title(value: object) -> str:
+    _reject_containers(value, "title")
     title = _clean(value)
     if not title:
         raise FieldError("title", "Title is required.")
@@ -151,6 +167,7 @@ def validate_title(value: object) -> str:
 
 
 def validate_description(value: object) -> str:
+    _reject_containers(value, "description")
     description = _clean(value)
     if not description:
         raise FieldError("description", "Description is required.")
@@ -158,6 +175,7 @@ def validate_description(value: object) -> str:
 
 
 def _validate_enum(raw: object, enum_cls, field: str):
+    _reject_containers(raw, field)
     value = _clean(raw)
     if not value:
         raise FieldError(field, f"{field.capitalize()} is required.")

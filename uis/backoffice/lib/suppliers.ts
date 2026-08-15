@@ -1,4 +1,5 @@
 import { authFetch, readApiError } from "@/lib/auth";
+import { readJson } from "@/lib/errors";
 
 // Mirrors CONTEXT.md § Supplier model. Keep these unions in step with
 // services/api/models.py — they are the same closed value sets.
@@ -80,7 +81,7 @@ export async function fetchSuppliers(
 
   const res = await authFetch(`/suppliers${qs ? `?${qs}` : ""}`);
   if (!res.ok) throw new Error(await readApiError(res));
-  return res.json();
+  return readJson(res);
 }
 
 export async function createSupplier(payload: SupplierCreate): Promise<Supplier> {
@@ -90,7 +91,7 @@ export async function createSupplier(payload: SupplierCreate): Promise<Supplier>
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error(await readApiError(res));
-  return res.json();
+  return readJson(res);
 }
 
 export async function updateRate(id: number, rate: number): Promise<Supplier> {
@@ -100,7 +101,7 @@ export async function updateRate(id: number, rate: number): Promise<Supplier> {
     body: JSON.stringify({ rate_per_shipment: rate }),
   });
   if (!res.ok) throw new Error(await readApiError(res));
-  return res.json();
+  return readJson(res);
 }
 
 export async function updateStatus(
@@ -113,5 +114,5 @@ export async function updateStatus(
     body: JSON.stringify({ status }),
   });
   if (!res.ok) throw new Error(await readApiError(res));
-  return res.json();
+  return readJson(res);
 }

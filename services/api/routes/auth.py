@@ -7,6 +7,7 @@ Stateless JWT only. POST /auth/login accepts either an OAuth2 form
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
+from pydantic import ValidationError
 
 from database import users_table
 from email_service import send_password_reset
@@ -55,10 +56,20 @@ async def _read_credentials(request: Request) -> tuple[str, str]:
         raw = await request.body()
         try:
             parsed = LoginRequest.model_validate_json(raw)
-        except Exception as exc:
+        except ValidationError as exc:
+            # The message is fixed and derived from nothing in the
+            # request. A Pydantic v2 error embeds the *input* it
+            # rejected, so interpolating it here would return the
+            # submitted password to the caller — and into the access log
+            # — whenever the body was malformed.
             raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Invalid login body: {exc}",
+                # 422 — the Starlette constant was renamed; the literal
+                # keeps working across both naming eras.
+                status_code=422,
+                detail=(
+                    "The sign-in request was malformed. It needs an email "
+                    "and a password."
+                ),
             ) from exc
         return parsed.email, parsed.password
 

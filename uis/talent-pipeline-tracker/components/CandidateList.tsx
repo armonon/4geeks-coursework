@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -41,7 +42,7 @@ export function CandidateList() {
       })
       .catch((err: Error) => {
         if (cancelled) return;
-        setError(err.message || "Failed to load candidates");
+        setError(toUserMessage(err, "Failed to load candidates"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

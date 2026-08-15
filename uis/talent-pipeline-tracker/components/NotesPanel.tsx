@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import { FormEvent, useEffect, useState } from "react";
 import { candidatesService } from "@/services/candidates";
 import type { Note } from "@/types";
@@ -28,7 +29,7 @@ export function NotesPanel({ candidateId, onError, onSuccess }: Props) {
         if (!cancelled) setNotes(res);
       })
       .catch((e: Error) => {
-        if (!cancelled) setLoadError(e.message || "Failed to load notes");
+        if (!cancelled) setLoadError(toUserMessage(e, "Failed to load notes"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -49,7 +50,7 @@ export function NotesPanel({ candidateId, onError, onSuccess }: Props) {
       setDraft("");
       onSuccess("Note added");
     } catch (err) {
-      onError(err instanceof Error ? err.message : "Failed to add note");
+      onError(toUserMessage(err, "Failed to add note"));
     } finally {
       setAdding(false);
     }
@@ -62,7 +63,7 @@ export function NotesPanel({ candidateId, onError, onSuccess }: Props) {
       setNotes((prev) => prev.filter((n) => n.id !== noteId));
       onSuccess("Note deleted");
     } catch (err) {
-      onError(err instanceof Error ? err.message : "Failed to delete note");
+      onError(toUserMessage(err, "Failed to delete note"));
     } finally {
       setDeletingId(null);
     }

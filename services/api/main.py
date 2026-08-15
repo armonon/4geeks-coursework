@@ -12,8 +12,11 @@ Run it:
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+import logging
+
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from routes.auth import router as auth_router
 from routes.incidents import router as incidents_router
@@ -49,6 +52,41 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+logger = logging.getLogger("trackflow.api")
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Last line of defence for anything no route caught.
+
+    Two things were wrong without this. Starlette's default body for an
+    unhandled exception is the plain text `Internal Server Error`, but
+    every frontend caller parses responses as JSON — so a backend bug
+    surfaced to the user as
+    `SyntaxError: Unexpected token 'I' ... is not valid JSON`, which
+    tells them nothing and looks like a frontend crash.
+
+    And the detail of the failure belongs in the server log, not in the
+    response: exception text routinely carries filesystem paths, query
+    fragments, and library internals.
+
+    So: the real exception is logged with its traceback here, and the
+    client gets a fixed, structured, human-readable body.
+    """
+    logger.exception(
+        "Unhandled exception on %s %s", request.method, request.url.path, exc_info=exc
+    )
+    return JSONResponse(
+        status_code=500,
+        content={
+            "detail": (
+                "Something went wrong on our end. The team has been notified — "
+                "please try again, and contact support if it keeps happening."
+            )
+        },
+    )
+
 
 app.include_router(auth_router)
 app.include_router(users_router)

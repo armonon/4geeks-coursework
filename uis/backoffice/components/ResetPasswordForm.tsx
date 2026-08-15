@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -43,9 +44,7 @@ export function ResetPasswordForm() {
       router.replace("/login?reset=1");
     } catch (err) {
       setApiError(
-        err instanceof Error
-          ? err.message
-          : "This reset link is invalid or has expired.",
+        toUserMessage(err, "This reset link is invalid or has expired."),
       );
     } finally {
       setSubmitting(false);

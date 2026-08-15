@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -38,7 +39,7 @@ export function LoginForm() {
       router.replace("/");
     } catch (err) {
       setApiError(
-        err instanceof Error ? err.message : "Could not sign in. Try again.",
+        toUserMessage(err, "Could not sign in. Try again."),
       );
     } finally {
       setSubmitting(false);

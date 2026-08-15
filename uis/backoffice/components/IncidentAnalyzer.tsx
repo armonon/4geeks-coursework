@@ -1,8 +1,9 @@
 "use client";
 
+import { readJson, toUserMessage } from "@/lib/errors";
 import { useCallback, useEffect, useState } from "react";
 import { type AnalysisResponse } from "@/lib/api";
-import { authFetch } from "@/lib/auth";
+import { authFetch, readApiError } from "@/lib/auth";
 
 // Public URL of the sample CSV in the syllabus repo. Used by ?sample=1
 // for repro-friendly demos and screenshots — never called otherwise.
@@ -16,7 +17,6 @@ interface Outcome {
 }
 interface Failure {
   ok: false;
-  status: number;
   message: string;
 }
 type UiState =
@@ -27,15 +27,18 @@ type UiState =
 export function IncidentAnalyzer() {
   const [state, setState] = useState<UiState>({ kind: "idle" });
   const [dragOver, setDragOver] = useState(false);
+  // Kept so the error panel can offer a real retry rather than asking
+  // the user to find the file again.
+  const [lastFile, setLastFile] = useState<File | null>(null);
 
   const upload = useCallback(async (file: File) => {
+    setLastFile(file);
     if (!file.name.toLowerCase().endsWith(".csv")) {
       setState({
         kind: "result",
         outcome: {
           ok: false,
-          status: 400,
-          message: `Selected file "${file.name}" is not a .csv — please pick a CSV export.`,
+          message: `"${file.name}" isn't a .csv file. Pick the CSV export from your incident system and try again.`,
         },
       });
       return;
@@ -53,20 +56,16 @@ export function IncidentAnalyzer() {
         body,
       });
       if (!res.ok) {
-        let message = `Analyse request failed (${res.status}).`;
-        try {
-          const err = await res.json();
-          if (err?.detail) message = String(err.detail);
-        } catch {
-          /* body wasn't JSON — keep the generic message */
-        }
+        // readApiError handles every detail shape the API produces —
+        // string, Pydantic array, and the {field, message} object that
+        // `String(err.detail)` used to render as "[object Object]".
         setState({
           kind: "result",
-          outcome: { ok: false, status: res.status, message },
+          outcome: { ok: false, message: await readApiError(res) },
         });
         return;
       }
-      const data = (await res.json()) as AnalysisResponse;
+      const data = await readJson<AnalysisResponse>(res);
       setState({
         kind: "result",
         outcome: { ok: true, data, filename: file.name },
@@ -76,11 +75,10 @@ export function IncidentAnalyzer() {
         kind: "result",
         outcome: {
           ok: false,
-          status: 0,
-          message:
-            err instanceof Error
-              ? err.message
-              : "Network error reaching the analysis API.",
+          message: toUserMessage(
+            err,
+            "We couldn't analyse that file. Please try again.",
+          ),
         },
       });
     }
@@ -93,16 +91,29 @@ export function IncidentAnalyzer() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("sample") !== "1") return;
     (async () => {
+      // Best-effort, but not silent: leaving the user on an empty page
+      // with no explanation was its own small failure.
+      const explain = (message: string) =>
+        setState({ kind: "result", outcome: { ok: false, message } });
       try {
         const r = await fetch(SAMPLE_CSV_URL);
-        if (!r.ok) return;
+        if (!r.ok) {
+          explain(
+            "The sample CSV couldn't be downloaded. Upload your own export instead.",
+          );
+          return;
+        }
         const bytes = await r.arrayBuffer();
-        const file = new File([bytes], "incidents-trackflow.csv", {
-          type: "text/csv",
-        });
-        void upload(file);
-      } catch {
-        /* silently ignore — sample loading is best-effort */
+        void upload(
+          new File([bytes], "incidents-trackflow.csv", { type: "text/csv" }),
+        );
+      } catch (err) {
+        explain(
+          toUserMessage(
+            err,
+            "The sample CSV couldn't be downloaded. Upload your own export instead.",
+          ),
+        );
       }
     })();
   }, [upload]);
@@ -122,10 +133,26 @@ export function IncidentAnalyzer() {
           role="alert"
           className="rounded-md border border-red-300 bg-red-50 p-4 text-sm text-red-800"
         >
-          <p className="font-medium">Analysis failed</p>
-          <p className="mt-1">
-            HTTP {state.outcome.status}: {state.outcome.message}
-          </p>
+          <p className="font-medium">We couldn&apos;t analyse that file</p>
+          <p className="mt-1">{state.outcome.message}</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {lastFile && (
+              <button
+                type="button"
+                onClick={() => void upload(lastFile)}
+                className="rounded-md border border-red-400 bg-white px-3 py-1.5 text-sm font-medium text-red-800 hover:bg-red-100"
+              >
+                Try again
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setState({ kind: "idle" })}
+              className="rounded-md border border-red-300 bg-white px-3 py-1.5 text-sm font-medium text-red-800 hover:bg-red-100"
+            >
+              Choose a different file
+            </button>
+          </div>
         </div>
       )}
 
@@ -393,7 +420,7 @@ function DownloadCsvButton() {
       a.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Export failed.");
+      setError(toUserMessage(err, "Export failed."));
     } finally {
       setBusy(false);
     }

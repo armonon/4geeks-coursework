@@ -107,10 +107,38 @@ def main(argv: list[str] | None = None) -> int:
         print(f"\n  FAILED: no such file: {args.csv}", file=sys.stderr)
         return 1
 
+    # Scoped to the failures this call actually has, and each one says
+    # what to do next. A blanket `except Exception` here reported a bug
+    # in the mapping logic identically to a missing file, and printed the
+    # raw exception — which for an OSError carries the absolute path.
     try:
         inserted, skipped, rejected, reasons = seed(args.csv)
-    except Exception as exc:
-        print(f"\n  FAILED: {exc}", file=sys.stderr)
+    except IsADirectoryError:
+        print(f"\n  FAILED: {args.csv} is a directory, not a CSV file.", file=sys.stderr)
+        return 2
+    except PermissionError:
+        print(
+            f"\n  FAILED: no permission to read {args.csv.name}.", file=sys.stderr
+        )
+        return 2
+    except OSError as exc:
+        print(
+            f"\n  FAILED: could not read {args.csv.name} ({exc.strerror}).",
+            file=sys.stderr,
+        )
+        return 2
+    except UnicodeDecodeError:
+        print(
+            f"\n  FAILED: {args.csv.name} is not UTF-8 text. Re-export it as "
+            "CSV UTF-8 and try again.",
+            file=sys.stderr,
+        )
+        return 1
+    except csv.Error:
+        print(
+            f"\n  FAILED: {args.csv.name} could not be parsed as CSV.",
+            file=sys.stderr,
+        )
         return 1
 
     total = len(incidents_table())

@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/components/AuthProvider";
 import { updateMyProfile } from "@/lib/auth";
@@ -45,7 +46,7 @@ export function ProfileView() {
       await refresh();
       setSaved(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save changes.");
+      setError(toUserMessage(err, "Could not save changes."));
     } finally {
       setSaving(false);
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -59,7 +60,7 @@ export function RegisterForm() {
       router.replace("/");
     } catch (err) {
       setApiError(
-        err instanceof Error ? err.message : "Could not create the account.",
+        toUserMessage(err, "Could not create the account."),
       );
     } finally {
       setSubmitting(false);

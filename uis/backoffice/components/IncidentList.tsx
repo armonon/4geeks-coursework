@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import { useCallback, useEffect, useState } from "react";
 import {
   ALLOWED_TRANSITIONS,
@@ -98,9 +99,7 @@ export function IncidentList({ reloadKey = 0 }: { reloadKey?: number }) {
             : current,
         );
         setRowError(
-          err instanceof Error
-            ? err.message
-            : "That status change was rejected.",
+          toUserMessage(err, "That status change was rejected."),
         );
       } finally {
         setBusyId(null);

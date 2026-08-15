@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   CATEGORIES,
@@ -35,7 +36,7 @@ export function SupplierDirectory() {
     try {
       setSuppliers(await fetchSuppliers({ country, category }));
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "Failed to load suppliers.");
+      setLoadError(toUserMessage(err, "Failed to load suppliers."));
     } finally {
       setLoading(false);
     }
@@ -62,7 +63,7 @@ export function SupplierDirectory() {
         setEditingRate(null);
       } catch (err) {
         // Surface the API's own message (e.g. the 422 detail) verbatim.
-        setRowError(err instanceof Error ? err.message : "Rate update failed.");
+        setRowError(toUserMessage(err, "Rate update failed."));
       } finally {
         setRowBusy(null);
       }
@@ -78,7 +79,7 @@ export function SupplierDirectory() {
       try {
         replaceRow(await updateStatus(supplier.id, next));
       } catch (err) {
-        setRowError(err instanceof Error ? err.message : "Status change failed.");
+        setRowError(toUserMessage(err, "Status change failed."));
       } finally {
         setRowBusy(null);
       }
@@ -451,7 +452,7 @@ function RegisterSupplierForm({
       onCreated(created);
     } catch (err) {
       // Surface exactly what the API said — e.g. the 422 detail.
-      setApiError(err instanceof Error ? err.message : "Registration failed.");
+      setApiError(toUserMessage(err, "Registration failed."));
     } finally {
       setSubmitting(false);
     }

@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import { useState } from "react";
 import { changePassword } from "@/lib/auth";
 
@@ -50,7 +51,7 @@ export function ChangePasswordForm() {
       setConfirm("");
     } catch (err) {
       setApiError(
-        err instanceof Error ? err.message : "Could not change your password.",
+        toUserMessage(err, "Could not change your password."),
       );
     } finally {
       setSubmitting(false);

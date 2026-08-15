@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
@@ -31,7 +32,7 @@ export default function EditCandidatePage({ params }: PageProps) {
         if (!cancelled) setCandidate(c);
       })
       .catch((e: Error) => {
-        if (!cancelled) setError(e.message || "Failed to load candidate");
+        if (!cancelled) setError(toUserMessage(e, "Failed to load candidate"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -86,7 +87,7 @@ export default function EditCandidatePage({ params }: PageProps) {
               } catch (e) {
                 setToast({
                   kind: "error",
-                  text: e instanceof Error ? e.message : "Failed to update",
+                  text: toUserMessage(e, "Failed to update"),
                 });
               }
             }}
