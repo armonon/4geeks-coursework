@@ -173,6 +173,59 @@ or not the address is registered. Combined with the identical 401 on
 login for unknown-email vs wrong-password, neither endpoint can be used
 to discover which addresses have accounts.
 
+
+## Incident manager
+
+| Method | Endpoint | Purpose |
+| ------ | -------- | ------- |
+| `POST` | `/api/incidents` | Register an incident. 400 naming the bad field. |
+| `GET` | `/api/incidents` | List, filterable by `status`, `origin`, `branch`, `category`. |
+| `GET` | `/api/incidents/summary` | Totals by status, category, origin, and branch. |
+| `GET` | `/api/incidents/{id}` | Detail. 404 if unknown. |
+| `PATCH` | `/api/incidents/{id}/status` | Advance the lifecycle. 400 on an illegal transition. |
+
+All five require a valid token.
+
+### Lifecycle
+
+`open → in_progress → resolved`, with `discarded` reachable from either
+non-final state. `resolved` and `discarded` are final. An illegal
+transition returns 400 whose message says what *is* allowed from the
+current state, so the caller can recover without reading the spec.
+
+### Validation errors
+
+Every validation failure returns 400 with
+`{"detail": {"field": ..., "message": ...}}` so the UI can put the
+message next to the offending input. No endpoint returns a stack trace.
+
+### Shared domain rules
+
+The value sets, the lifecycle, and the CSV transformation live in
+[`packages/shared`](../../packages/shared) (`trackflow_shared`), which
+both this service and `scripts/seed_incidents.py` import. Neither owns
+a private copy, so the seeded data and the API cannot disagree about
+what is valid.
+
+Row-level CSV validity is *not* re-implemented either — the shared
+package calls `validate_record` from `incident_analyzer`, written for
+the analyzer milestone.
+
+### Seeding history
+
+```bash
+uv run seed-incidents
+```
+
+Loads `scripts/incidents-trackflow.csv` as `origin: "customer"`
+incidents, applying the CONTEXT transformations. Idempotent (matched on
+the CSV's `incident_id`), and every rejected row is reported with its
+reason rather than dropped silently.
+
+Against the shipped CSV: **95 inserted, 5 rejected**, and the summary
+then matches the CONTEXT expected totals exactly — status 29/52/14 and
+category 14/45/19/17.
+
 ## Supplier directory
 
 Data model, valid categories, allowed statuses, and the seed data all
@@ -249,8 +302,9 @@ Carried over from the previous milestone, now mounted as a router:
 uv run pytest
 ```
 
-117 tests — 51 for auth, 20 for password reset/change, 39 for the
-supplier directory, and 7 for incident analysis.
+169 tests — 52 for the incident manager, 51 for auth, 20 for password
+reset/change, 39 for the supplier directory, and 7 for incident
+analysis.
 
 ## CORS
 

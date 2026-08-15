@@ -26,6 +26,7 @@ SUPPLIERS_TABLE = "suppliers"
 USERS_TABLE = "users"
 PROFILES_TABLE = "profiles"
 PASSWORD_RESETS_TABLE = "password_resets"
+INCIDENTS_TABLE = "incidents"
 
 # TinyDB's JSON storage is not safe against concurrent writers; FastAPI
 # runs sync handlers in a threadpool, so serialise access here.
@@ -69,6 +70,12 @@ def users_table() -> Table:
 def profiles_table() -> Table:
     """Profiles are one-to-one with users, keyed by `user_id`."""
     return get_db().table(PROFILES_TABLE)
+
+
+def incidents_table() -> Table:
+    """Incidents registered through the manager, plus the historical
+    rows loaded by scripts/seed_incidents.py."""
+    return get_db().table(INCIDENTS_TABLE)
 
 
 def password_resets_table() -> Table:

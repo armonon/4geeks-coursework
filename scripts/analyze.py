@@ -32,7 +32,6 @@ from incident_analyzer import (  # noqa: E402  (import after sys.path edit)
 )
 from incident_analyzer.csv_io import write_csv_bytes  # noqa: E402
 
-
 DEFAULT_EXPORT_PATH = Path("results.csv")
 
 

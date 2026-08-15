@@ -17,6 +17,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from routes.auth import router as auth_router
 from routes.incidents import router as incidents_router
+from routes.incidents_manager import router as incidents_manager_router
 from routes.profiles import router as profiles_router
 from routes.suppliers import router as suppliers_router
 from routes.users import router as users_router
@@ -53,6 +54,7 @@ app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(profiles_router)
 app.include_router(suppliers_router)
+app.include_router(incidents_manager_router)
 app.include_router(incidents_router)
 
 
