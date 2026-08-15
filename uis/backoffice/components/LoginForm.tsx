@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { login } from "@/lib/auth";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // Set by /reset-password after a successful reset.
+  const justReset = searchParams.get("reset") === "1";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -56,6 +59,15 @@ export function LoginForm() {
       }
     >
       <form onSubmit={onSubmit} noValidate className="space-y-4">
+        {justReset && !apiError && (
+          <div
+            role="status"
+            className="rounded-md border border-emerald-300 bg-emerald-50 p-3 text-sm text-emerald-800"
+          >
+            Your password has been updated. Sign in with your new password.
+          </div>
+        )}
+
         {apiError && (
           <div
             role="alert"
@@ -86,6 +98,15 @@ export function LoginForm() {
             placeholder="••••••••"
           />
         </Field>
+
+        <div className="flex justify-end">
+          <Link
+            href="/forgot-password"
+            className="text-xs font-medium text-slate-600 underline hover:text-slate-900"
+          >
+            Forgot your password?
+          </Link>
+        </div>
 
         <button
           type="submit"

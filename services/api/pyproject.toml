@@ -64,6 +64,12 @@ ignore = [
     "UP042",
 ]
 
+[tool.ruff.lint.per-file-ignores]
+# The reset email is inline-styled HTML: email clients strip <style>
+# blocks, so the styles must live in long style="" attributes. Wrapping
+# them would either break the attribute or hurt readability.
+"email_service.py" = ["E501"]
+
 [tool.ruff.lint.flake8-bugbear]
 # FastAPI's dependency-injection idiom puts Query()/File()/Depends()
 # in argument defaults on purpose. B008 exists for mutable defaults;

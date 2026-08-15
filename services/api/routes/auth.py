@@ -8,14 +8,27 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 
-from models import LoginRequest, MeOut, Token, UserInDB
+from database import users_table
+from email_service import send_password_reset
+from models import (
+    ChangePasswordRequest,
+    ForgotPasswordRequest,
+    LoginRequest,
+    MeOut,
+    MessageResponse,
+    ResetPasswordRequest,
+    Token,
+    UserInDB,
+)
+from password_reset import consume_token, invalidate_all_for_user, issue_token
 from security import (
     access_token_expire_minutes,
     create_access_token,
     get_current_user,
+    hash_password,
     verify_password,
 )
-from services_users import get_profile_by_user_id, get_user_by_email
+from services_users import get_profile_by_user_id, get_user_by_email, get_user_by_id
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -92,3 +105,102 @@ def read_me(caller: UserInDB = Depends(get_current_user)) -> MeOut:
         is_active=caller.is_active,
         profile=get_profile_by_user_id(caller.id),
     )
+
+
+# ---------------------------------------------------------------------------
+# Password reset / change (AUTH-03)
+# ---------------------------------------------------------------------------
+
+# One message for every outcome of /auth/forgot-password. Saying
+# "no such account" would let anyone test which addresses are
+# registered, so the response never varies.
+_FORGOT_PASSWORD_MESSAGE = (
+    "If that address is registered, you'll receive a link shortly."
+)
+
+
+@router.post(
+    "/forgot-password",
+    response_model=MessageResponse,
+    summary="Request a password-reset link (always returns 200)",
+)
+def forgot_password(payload: ForgotPasswordRequest) -> MessageResponse:
+    """Email a reset link to the address if it belongs to an account.
+
+    Always 200, always the same body. The work below happens only when
+    the user exists, but the caller cannot tell the difference.
+    """
+    user = get_user_by_email(payload.email)
+
+    if user is not None and user.is_active:
+        raw_token, ttl_minutes = issue_token(user.id)
+        # Delivery failures are logged inside the sender and never
+        # surface here — a provider outage must not turn into a signal
+        # about whether the address exists.
+        send_password_reset(user.email, raw_token, ttl_minutes)
+
+    return MessageResponse(message=_FORGOT_PASSWORD_MESSAGE)
+
+
+@router.post(
+    "/reset-password",
+    response_model=MessageResponse,
+    summary="Set a new password using a reset token",
+)
+def reset_password(payload: ResetPasswordRequest) -> MessageResponse:
+    """Consume the token and set the new password.
+
+    400 for a token that is unknown, expired, or already used — the
+    three are reported identically so a caller cannot probe which
+    tokens ever existed.
+    """
+    outcome = consume_token(payload.token)
+    if not outcome.ok or outcome.user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This reset link is invalid or has expired. Request a new one.",
+        )
+
+    user = get_user_by_id(outcome.user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This reset link is invalid or has expired. Request a new one.",
+        )
+
+    users_table().update(
+        {"hashed_password": hash_password(payload.new_password)},
+        doc_ids=[user.id],
+    )
+    # Any other outstanding link for this account dies with the reset.
+    invalidate_all_for_user(user.id)
+
+    return MessageResponse(
+        message="Your password has been updated. You can now sign in."
+    )
+
+
+@router.post(
+    "/change-password",
+    response_model=MessageResponse,
+    summary="Change your password while signed in (protected)",
+)
+def change_password(
+    payload: ChangePasswordRequest,
+    caller: UserInDB = Depends(get_current_user),
+) -> MessageResponse:
+    """Verify the current password, then set the new one."""
+    if not verify_password(payload.current_password, caller.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Your current password is incorrect.",
+        )
+
+    users_table().update(
+        {"hashed_password": hash_password(payload.new_password)},
+        doc_ids=[caller.id],
+    )
+    # Changing the password should kill any reset link already in flight.
+    invalidate_all_for_user(caller.id)
+
+    return MessageResponse(message="Your password has been changed.")
