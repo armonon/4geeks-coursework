@@ -13,6 +13,7 @@ imports the exact same module so numbers cannot diverge.
 from __future__ import annotations
 
 import argparse
+import csv
 import sys
 from pathlib import Path
 
@@ -55,8 +56,53 @@ def main(argv: list[str] | None = None) -> int:
         print(f"error: file not found: {args.csv}", file=sys.stderr)
         return 2
 
-    rows = read_csv(args.csv)
-    result = analyse(rows)
+    # Reading is three distinct failures wearing one coat — the path is
+    # unusable, the bytes are not UTF-8, or the text is not CSV. Each
+    # gets its own handler and its own advice, because "check the file"
+    # is not advice. An unreadable input is exit 2; a file we could read
+    # but not parse is exit 1.
+    try:
+        rows = read_csv(args.csv)
+    except IsADirectoryError:
+        print(f"error: {args.csv} is a directory, not a CSV file.", file=sys.stderr)
+        return 2
+    except PermissionError:
+        print(
+            f"error: no permission to read {args.csv}. Check the file's "
+            "ownership and permissions.",
+            file=sys.stderr,
+        )
+        return 2
+    except OSError as exc:
+        # Broken symlink, I/O error, name too long. errno is the useful
+        # part; the full exception may carry an absolute path.
+        print(f"error: could not read {args.csv} ({exc.strerror}).", file=sys.stderr)
+        return 2
+    except UnicodeDecodeError:
+        print(
+            f"error: {args.csv.name} is not UTF-8 text. Re-export it as "
+            "CSV UTF-8 and try again.",
+            file=sys.stderr,
+        )
+        return 1
+    except csv.Error:
+        print(
+            f"error: {args.csv.name} could not be parsed as CSV — a row may be "
+            "malformed, or a single field may exceed the parser's limit.",
+            file=sys.stderr,
+        )
+        return 1
+
+    try:
+        result = analyse(rows)
+    except (ValueError, TypeError, KeyError):
+        print(
+            f"error: {args.csv.name} parsed as CSV but its columns do not match "
+            "the expected incident export.",
+            file=sys.stderr,
+        )
+        return 1
+
     print(render_console(result, args.csv.name))
 
     if args.no_prompt:
@@ -69,9 +115,30 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if answer == "y":
-        data = write_csv_bytes(result_to_csv_rows(result))
-        args.out.write_bytes(data)
-        print(f"Wrote {len(result_to_csv_rows(result))} rows to {args.out}")
+        rows_out = result_to_csv_rows(result)
+        data = write_csv_bytes(rows_out)
+        # Only the write is guarded — serialising the rows above cannot
+        # fail on anything the user controls, and wrapping it too would
+        # hide a genuine bug behind a filesystem message.
+        try:
+            args.out.write_bytes(data)
+        except IsADirectoryError:
+            print(
+                f"error: {args.out} is a directory. Pass a file path to --out.",
+                file=sys.stderr,
+            )
+            return 1
+        except PermissionError:
+            print(
+                f"error: no permission to write {args.out}. Choose another "
+                "path with --out.",
+                file=sys.stderr,
+            )
+            return 1
+        except OSError as exc:
+            print(f"error: could not write {args.out} ({exc.strerror}).", file=sys.stderr)
+            return 1
+        print(f"Wrote {len(rows_out)} rows to {args.out}")
 
     return 0
 

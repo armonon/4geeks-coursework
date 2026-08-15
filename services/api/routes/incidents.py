@@ -7,6 +7,7 @@ rule — see docs/ARCHITECTURE_PROPOSAL.md § MONO-1.
 
 from __future__ import annotations
 
+import csv
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
@@ -75,12 +76,32 @@ async def analyze_incidents(
             detail="Uploaded file is empty.",
         )
 
+    # Decoding and parsing fail in different ways and need different
+    # advice, so they are caught separately rather than under one
+    # `except Exception`. The exception text itself is never forwarded —
+    # it carries byte offsets and codec internals that mean nothing to
+    # the person who uploaded the file.
     try:
         rows = read_csv_bytes(payload)
     except UnicodeDecodeError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"CSV must be UTF-8 encoded: {exc}",
+            detail=(
+                "This file isn't UTF-8 text. Re-export it as CSV UTF-8 "
+                "from your spreadsheet tool and upload it again."
+            ),
+        ) from exc
+    except csv.Error as exc:
+        # Reachable: the csv module refuses fields over 128 KB, and also
+        # raises here on embedded NUL bytes and broken quoting. Before
+        # this existed it escaped as a 500 with a plain-text body.
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "This file isn't readable as CSV — a row may be malformed "
+                "or a single field may be unusually large. Check the export "
+                "and try again."
+            ),
         ) from exc
 
     if not rows:
@@ -91,7 +112,19 @@ async def analyze_incidents(
             detail="CSV had a header but no data rows.",
         )
 
-    result = analyse(rows)
+    try:
+        result = analyse(rows)
+    except (ValueError, TypeError, KeyError) as exc:
+        # The analyser expects the documented column set. Shaped-wrong
+        # data is the uploader's problem to fix, so it gets a 422 that
+        # says so rather than an anonymous 500.
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "The file was read, but its columns don't match the expected "
+                "incident export. Compare it against the sample CSV and try again."
+            ),
+        ) from exc
     _LAST_RESULT = result
     return _serialize(result)
 

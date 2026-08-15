@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "@/lib/api";
+import { readJson } from "@/lib/errors";
 
 /**
  * Token lifecycle for the backoffice.
@@ -91,6 +92,16 @@ export class UnauthorizedError extends Error {
   }
 }
 
+/**
+ * Used whenever the response carries nothing a person can act on. It
+ * deliberately omits the status code: "Request failed (500)" tells the
+ * reader nothing they can do, and the ticket asks for an exit, not a
+ * number.
+ */
+const GENERIC_REQUEST_FAILURE =
+  "That request didn't go through. Please try again — if it keeps " +
+  "happening, contact support.";
+
 /** Turn a FastAPI error body into one readable line. */
 export async function readApiError(res: Response): Promise<string> {
   try {
@@ -108,9 +119,18 @@ export async function readApiError(res: Response): Promise<string> {
         })
         .join(" · ");
     }
-    return JSON.stringify(body);
+    // An object detail — the incident manager returns
+    // {field, message}. Read the message out of it; stringifying the
+    // body used to put raw JSON on the screen.
+    if (detail && typeof detail === "object") {
+      const message = (detail as { message?: unknown }).message;
+      if (typeof message === "string" && message.trim()) return message;
+    }
+    return GENERIC_REQUEST_FAILURE;
   } catch {
-    return `Request failed (${res.status}).`;
+    // The body was not JSON at all — an error page or a truncated
+    // response. Its content is no use to the reader.
+    return GENERIC_REQUEST_FAILURE;
   }
 }
 
@@ -159,7 +179,7 @@ export async function authJson<T>(
 ): Promise<T> {
   const res = await authFetch(path, init);
   if (!res.ok) throw new Error(await readApiError(res));
-  return res.json() as Promise<T>;
+  return readJson<T>(res);
 }
 
 // ---------------------------------------------------------------------------
@@ -182,7 +202,7 @@ export async function login(email: string, password: string): Promise<string> {
   });
   if (!res.ok) throw new Error(await readApiError(res));
 
-  const data = (await res.json()) as TokenResponse;
+  const data = await readJson<TokenResponse>(res);
   setToken(data.access_token);
   return data.access_token;
 }
@@ -255,7 +275,7 @@ export async function forgotPassword(email: string): Promise<string> {
     body: JSON.stringify({ email }),
   });
   if (!res.ok) throw new Error(await readApiError(res));
-  const data = (await res.json()) as MessageResponse;
+  const data = await readJson<MessageResponse>(res);
   return data.message;
 }
 
@@ -270,7 +290,7 @@ export async function resetPassword(
     body: JSON.stringify({ token, new_password: newPassword }),
   });
   if (!res.ok) throw new Error(await readApiError(res));
-  const data = (await res.json()) as MessageResponse;
+  const data = await readJson<MessageResponse>(res);
   return data.message;
 }
 

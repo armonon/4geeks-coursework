@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import { useMemo, useState } from "react";
 import {
   quoteShipment,
@@ -46,9 +47,15 @@ export function QuoteCalculator() {
     try {
       return { ok: true, quote: quoteShipment(input) };
     } catch (err) {
+      // quoteShipment throws validation messages written for humans, so
+      // they pass through. The old `String(err)` fallback rendered
+      // "[object Object]" for anything that was not an Error.
       return {
         ok: false,
-        error: err instanceof Error ? err.message : String(err),
+        error: toUserMessage(
+          err,
+          "Those inputs don't produce a quote. Adjust the distance or weight and try again.",
+        ),
       };
     }
   }, [input]);

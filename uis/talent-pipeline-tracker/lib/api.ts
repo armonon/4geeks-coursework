@@ -1,6 +1,21 @@
+import {
+  NETWORK_MESSAGE,
+  UserFacingError,
+  toUserMessage,
+} from "@/lib/errors";
+
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ??
   "https://playground.4geeks.com/tracker/api/v1";
+
+/**
+ * Shown when the response carries nothing a person can act on. The
+ * status code is deliberately absent — "Request failed (500)" gives the
+ * reader no way forward.
+ */
+const GENERIC_REQUEST_FAILURE =
+  "That request didn't go through. Please try again — if it keeps " +
+  "happening, contact support.";
 
 export class ApiError extends Error {
   status: number;
@@ -16,15 +31,22 @@ export async function apiFetch<T>(
   path: string,
   init: RequestInit = {}
 ): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-      ...(init.headers ?? {}),
-    },
-    cache: "no-store",
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${API_URL}${path}`, {
+      ...init,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...(init.headers ?? {}),
+      },
+      cache: "no-store",
+    });
+  } catch (err) {
+    // fetch() rejects only when the request never reached the server.
+    // Left alone this surfaced as the browser's raw "Failed to fetch".
+    throw new UserFacingError(toUserMessage(err, NETWORK_MESSAGE));
+  }
 
   const text = await res.text();
   const body = text ? safeJson(text) : null;
@@ -33,7 +55,7 @@ export async function apiFetch<T>(
     const msg =
       (body && typeof body === "object" && "detail" in body
         ? formatDetail((body as { detail: unknown }).detail)
-        : null) ?? `Request failed (${res.status})`;
+        : null) ?? GENERIC_REQUEST_FAILURE;
     throw new ApiError(res.status, msg, body);
   }
 

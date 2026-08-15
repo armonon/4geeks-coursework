@@ -11,12 +11,14 @@ import {
 } from "react";
 import {
   PUBLIC_ROUTES,
+  UnauthorizedError,
   clearToken,
   fetchCurrentUser,
   getToken,
   setUnauthorizedHandler,
   type CurrentUser,
 } from "@/lib/auth";
+import { toUserMessage } from "@/lib/errors";
 
 interface AuthContextValue {
   user: CurrentUser | null;
@@ -58,6 +60,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const [user, setUser] = useState<CurrentUser | null>(null);
   const [loading, setLoading] = useState(true);
+  // The third state. The session check used to be binary — signed in or
+  // signed out — which forced "we could not ask" into "signed out".
+  const [sessionError, setSessionError] = useState<string | null>(null);
 
   const publicRoute = isPublicRoute(pathname);
 
@@ -76,10 +81,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     try {
       setUser(await fetchCurrentUser());
-    } catch {
-      // Token present but rejected (expired, tampered, account gone).
-      clearToken();
-      setUser(null);
+      setSessionError(null);
+    } catch (err) {
+      if (err instanceof UnauthorizedError) {
+        // The server actually rejected the token — expired, tampered
+        // with, or the account is gone. Signing out is correct.
+        clearToken();
+        setUser(null);
+        setSessionError(null);
+      } else {
+        // We could not reach the server, or could not read its reply.
+        // That says nothing about whether the session is valid, so the
+        // token is KEPT. Clearing it here logged people out of a working
+        // session every time the API blinked, and they had to sign in
+        // again even once it came back.
+        setSessionError(
+          toUserMessage(
+            err,
+            "We couldn't reach the server to confirm your session.",
+          ),
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -102,9 +124,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Redirect unauthenticated users away from guarded routes.
   useEffect(() => {
-    if (loading || publicRoute) return;
+    if (loading || publicRoute || sessionError) return;
     if (!getToken()) router.replace("/login");
-  }, [loading, publicRoute, router, user]);
+  }, [loading, publicRoute, router, sessionError, user]);
 
   const value = useMemo(
     () => ({ user, loading, refresh, logout }),
@@ -122,6 +144,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50">
         <p className="text-sm text-slate-500">Checking your session…</p>
+      </div>
+    );
+  }
+
+  // Rejected: we could not confirm the session. The token is still
+  // here, so this is recoverable — say so and offer the retry, rather
+  // than dumping the user on the sign-in page with no explanation.
+  if (sessionError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
+        <div
+          role="alert"
+          className="w-full max-w-md rounded-lg border border-amber-300 bg-amber-50 p-6 text-sm text-amber-900"
+        >
+          <p className="font-medium">We can&apos;t reach TrackFlow right now</p>
+          <p className="mt-1">{sessionError}</p>
+          <p className="mt-1">
+            You are still signed in — this is a connection problem, not a
+            session problem.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setLoading(true);
+                void refresh();
+              }}
+              className="rounded-md border border-amber-400 bg-white px-3 py-1.5 font-medium hover:bg-amber-100"
+            >
+              Try again
+            </button>
+            <button
+              type="button"
+              onClick={logout}
+              className="rounded-md border border-amber-300 bg-white px-3 py-1.5 font-medium hover:bg-amber-100"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

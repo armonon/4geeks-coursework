@@ -13,6 +13,7 @@ not create duplicates. It reports exactly what it did.
 
 from __future__ import annotations
 
+import json
 import sys
 from typing import Any
 
@@ -216,10 +217,30 @@ def main() -> int:
     print("TrackFlow — supplier directory seeder")
     print(f"  database: {db_path()}")
 
+    # `seed()` reads and writes the TinyDB file; the failures that are
+    # not bugs are all filesystem ones, and a corrupt database file is
+    # its own case with its own remedy. Anything else is a real defect
+    # and should surface as a traceback rather than be flattened into a
+    # one-line "FAILED".
     try:
         inserted, skipped = seed()
-    except Exception as exc:
-        print(f"\n  FAILED: {exc}", file=sys.stderr)
+    except PermissionError:
+        print(
+            f"\n  FAILED: no permission to write {db_path()}.", file=sys.stderr
+        )
+        return 2
+    except OSError as exc:
+        print(
+            f"\n  FAILED: could not open the database ({exc.strerror}).",
+            file=sys.stderr,
+        )
+        return 2
+    except json.JSONDecodeError:
+        print(
+            f"\n  FAILED: the database file at {db_path()} is not valid JSON. "
+            "Move it aside and re-run to start fresh.",
+            file=sys.stderr,
+        )
         return 1
 
     total = len(suppliers_table())

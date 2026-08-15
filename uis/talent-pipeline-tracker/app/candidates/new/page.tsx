@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -43,9 +44,7 @@ export default function NewCandidatePage() {
               setToast({
                 kind: "error",
                 text:
-                  e instanceof Error
-                    ? e.message
-                    : "Failed to register candidate",
+                  toUserMessage(e, "Failed to register candidate"),
               });
             }
           }}

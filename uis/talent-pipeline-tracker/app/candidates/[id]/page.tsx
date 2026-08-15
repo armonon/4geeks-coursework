@@ -1,5 +1,6 @@
 "use client";
 
+import { toUserMessage } from "@/lib/errors";
 import Link from "next/link";
 import { use, useCallback, useEffect, useState } from "react";
 import { NotesPanel } from "@/components/NotesPanel";
@@ -31,7 +32,7 @@ export default function CandidateDetailPage({ params }: PageProps) {
         if (!cancelled) setCandidate(c);
       })
       .catch((e: Error) => {
-        if (!cancelled) setError(e.message || "Failed to load candidate");
+        if (!cancelled) setError(toUserMessage(e, "Failed to load candidate"));
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
