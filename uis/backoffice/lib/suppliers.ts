@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "@/lib/api";
+import { authFetch, readApiError } from "@/lib/auth";
 
 // Mirrors CONTEXT.md § Supplier model. Keep these unions in step with
 // services/api/models.py — they are the same closed value sets.
@@ -53,29 +53,6 @@ export interface SupplierCreate {
   notes?: string | null;
 }
 
-/** Turn a FastAPI error body into one readable line for the user. */
-export async function readApiError(res: Response): Promise<string> {
-  try {
-    const body = await res.json();
-    const detail = body?.detail;
-    if (typeof detail === "string") return detail;
-    if (Array.isArray(detail)) {
-      // Pydantic 422: [{loc: [...], msg: "..."}]
-      return detail
-        .map((d: { loc?: unknown[]; msg?: string }) => {
-          const field = Array.isArray(d.loc)
-            ? d.loc.filter((p) => p !== "body").join(".")
-            : "";
-          return field ? `${field}: ${d.msg}` : String(d.msg ?? "");
-        })
-        .join(" · ");
-    }
-    return JSON.stringify(body);
-  } catch {
-    return `Request failed (${res.status}).`;
-  }
-}
-
 export function humanCategory(category: string): string {
   return category.replace(/_/g, " ");
 }
@@ -101,13 +78,13 @@ export async function fetchSuppliers(
   if (filters.category) params.set("category", filters.category);
   const qs = params.toString();
 
-  const res = await fetch(`${API_BASE_URL}/suppliers${qs ? `?${qs}` : ""}`);
+  const res = await authFetch(`/suppliers${qs ? `?${qs}` : ""}`);
   if (!res.ok) throw new Error(await readApiError(res));
   return res.json();
 }
 
 export async function createSupplier(payload: SupplierCreate): Promise<Supplier> {
-  const res = await fetch(`${API_BASE_URL}/suppliers`, {
+  const res = await authFetch("/suppliers", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
@@ -117,7 +94,7 @@ export async function createSupplier(payload: SupplierCreate): Promise<Supplier>
 }
 
 export async function updateRate(id: number, rate: number): Promise<Supplier> {
-  const res = await fetch(`${API_BASE_URL}/suppliers/${id}/rate`, {
+  const res = await authFetch(`/suppliers/${id}/rate`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ rate_per_shipment: rate }),
@@ -130,7 +107,7 @@ export async function updateStatus(
   id: number,
   status: SupplierStatus,
 ): Promise<Supplier> {
-  const res = await fetch(`${API_BASE_URL}/suppliers/${id}/status`, {
+  const res = await authFetch(`/suppliers/${id}/status`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status }),

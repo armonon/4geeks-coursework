@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { API_BASE_URL, type AnalysisResponse } from "@/lib/api";
+import { type AnalysisResponse } from "@/lib/api";
+import { authFetch } from "@/lib/auth";
 
 // Public URL of the sample CSV in the syllabus repo. Used by ?sample=1
 // for repro-friendly demos and screenshots — never called otherwise.
@@ -45,7 +46,9 @@ export function IncidentAnalyzer() {
     try {
       const body = new FormData();
       body.append("file", file);
-      const res = await fetch(`${API_BASE_URL}/api/incidents/analyze`, {
+      // authFetch attaches the bearer token and turns a 401 into a
+      // session clear + redirect, handled centrally in AuthProvider.
+      const res = await authFetch("/api/incidents/analyze", {
         method: "POST",
         body,
       });
@@ -363,12 +366,50 @@ function BreakdownList({
 }
 
 function DownloadCsvButton() {
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  /**
+   * The export endpoint is protected, and a plain <a href> cannot send
+   * an Authorization header — it would just 401. So fetch the CSV with
+   * the token attached and hand the browser a blob URL instead.
+   */
+  async function download() {
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await authFetch("/api/incidents/results/export");
+      if (!res.ok) {
+        setError(`Export failed (${res.status}).`);
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "trackflow-incidents-results.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Export failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <a
-      href={`${API_BASE_URL}/api/incidents/results/export`}
-      className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50"
-    >
-      Download results CSV
-    </a>
+    <div className="flex flex-col items-end gap-1">
+      <button
+        type="button"
+        onClick={download}
+        disabled={busy}
+        className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-800 hover:bg-slate-50 disabled:opacity-60"
+      >
+        {busy ? "Preparing…" : "Download results CSV"}
+      </button>
+      {error && <span className="text-xs text-red-600">{error}</span>}
+    </div>
   );
 }
