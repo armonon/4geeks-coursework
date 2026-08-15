@@ -52,6 +52,12 @@ export default function RootLayout({
               >
                 Incident analysis
               </Link>
+              <Link
+                href="/suppliers"
+                className="rounded-md px-3 py-2 text-slate-100 hover:bg-white/10"
+              >
+                Supplier directory
+              </Link>
               <span className="rounded-md px-3 py-2 text-slate-400">
                 Tenants <em className="text-xs">(soon)</em>
               </span>
@@ -62,9 +68,9 @@ export default function RootLayout({
           </aside>
           <div className="flex min-h-screen flex-1 flex-col">
             <header className="flex h-14 items-center justify-between border-b border-slate-200 bg-white px-4 md:px-6">
-              <h1 className="text-sm font-semibold text-slate-900">
-                Freight quote
-              </h1>
+              <span className="text-sm font-semibold text-slate-900">
+                TrackFlow Backoffice
+              </span>
               <span className="text-xs text-slate-500">
                 Signed in as <strong>account-manager@trackflow</strong>
               </span>

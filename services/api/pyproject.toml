@@ -1,17 +1,22 @@
 [project]
 name = "trackflow-api"
-version = "0.1.0"
-description = "TrackFlow backend API — Phase 2 host for incident-analyzer + freight-quote."
+version = "1.0.0"
+description = "TrackFlow backend API — supplier directory (TinyDB) + incident analysis."
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
     "python-multipart>=0.0.20",
-    # incident-analyzer is installed separately from the local monorepo
-    # (`pip install -e packages/incident_analyzer` from the repo root).
-    # See services/api/README.md for the two-command bootstrap.
+    "tinydb>=4.8",
+    # incident-analyzer is installed from the local monorepo:
+    #   pip install -e packages/incident_analyzer
+    # See README.md for the bootstrap.
     "incident-analyzer",
 ]
+
+[project.scripts]
+# Enables `uv run seed`.
+seed = "seed:main"
 
 [dependency-groups]
 dev = [
@@ -23,10 +28,18 @@ dev = [
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+# Flat layout: the milestone specifies main.py / models.py / database.py /
+# seed.py at services/api/ with routes/ beside them.
+py-modules = ["main", "models", "database", "seed"]
+
 [tool.setuptools.packages.find]
-where = ["src"]
-include = ["incident_api*"]
+include = ["routes*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+pythonpath = ["."]
+
+[tool.uv.sources]
+incident-analyzer = { path = "../../packages/incident_analyzer", editable = true }

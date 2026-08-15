@@ -7,7 +7,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from incident_api.main import app
+from main import app
 
 client = TestClient(app)
 
@@ -75,7 +75,7 @@ def test_analyze_rejects_header_only_csv() -> None:
 
 
 def test_export_before_any_analysis_returns_404() -> None:
-    from incident_api import main as api_main
+    import routes.incidents as api_main
 
     api_main._LAST_RESULT = None
     r = client.get("/api/incidents/results/export")
