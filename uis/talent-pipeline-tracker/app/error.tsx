@@ -19,16 +19,17 @@ import Link from "next/link";
  * Nothing here is a substitute for handling errors where they happen —
  * this is the net under the trapeze, for the cases nobody predicted.
  *
- * This app runs Next 16, which renamed the recovery callback from
- * `reset` to `unstable_retry`. uis/backoffice is still on Next 15 and its
- * copy uses `reset` — the two are not interchangeable.
+ * The recovery callback is `reset`. Next 16 renames it to
+ * `unstable_retry`; this app was moved back to Next 15 so the monorepo
+ * runs one version of the framework — see the build fix in
+ * memory-bank/progress.md.
  */
 export default function Error({
   error,
-  unstable_retry,
+  reset,
 }: {
   error: Error & { digest?: string };
-  unstable_retry: () => void;
+  reset: () => void;
 }) {
   useEffect(() => {
     // The detail belongs in the console and the error reporter, not on
@@ -50,7 +51,7 @@ export default function Error({
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={unstable_retry}
+            onClick={reset}
             className="rounded-md border border-red-400 bg-white px-3 py-1.5 font-medium hover:bg-red-100"
           >
             Try again
