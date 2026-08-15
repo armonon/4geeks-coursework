@@ -8,23 +8,27 @@
     "start": "next start --port 3100",
     "lint": "eslint",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "test": "echo 'no tests yet' && exit 0"
+    "test": "jest"
   },
   "dependencies": {
-    "react": "19.1.0",
-    "react-dom": "19.1.0",
+    "@trackflow/business-logic": "*",
     "next": "15.5.22",
-    "@trackflow/business-logic": "*"
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.5.22",
-    "@eslint/eslintrc": "^3"
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
+    "tailwindcss": "^4",
+    "ts-jest": "^29.4.12",
+    "typescript": "^5"
   }
 }

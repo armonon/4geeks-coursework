@@ -463,11 +463,25 @@ def test_at_least_five_non_auth_routes_are_protected() -> None:
     assert len(PROTECTED_EXISTING) >= 5
 
 
-def test_public_routes_stay_public(client: TestClient) -> None:
-    """Reads stay open so the backoffice list keeps working until the
-    frontend starts sending tokens."""
+def test_only_the_service_root_is_public(client: TestClient) -> None:
+    """Supplier reads used to be open too.
+
+    That was a deliberate, documented exemption from AUTH-01 — the
+    backoffice did not yet send tokens, so closing the reads would have
+    broken the list. The exemption was written to last "until the
+    frontend starts sending tokens", and that has since happened: every
+    supplier call in uis/backoffice/lib/suppliers.ts now goes through
+    `authFetch`.
+
+    So the condition expired, and the directory — negotiated carrier
+    rates and supplier contact emails — is no longer readable by anyone
+    who can reach the API. This test now pins the closed state, so the
+    exemption cannot quietly come back.
+    """
     assert client.get("/").status_code == 200
-    assert client.get("/suppliers").status_code == 200
+
+    assert client.get("/suppliers").status_code == 401
+    assert client.get("/suppliers/1").status_code == 401
 
 
 def test_protected_supplier_write_still_works_with_a_valid_token(

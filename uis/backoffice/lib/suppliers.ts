@@ -59,11 +59,19 @@ export function humanCategory(category: string): string {
 }
 
 export function formatRate(supplier: Supplier): string {
+  const rate = supplier.rate_per_shipment;
+
+  // Intl.NumberFormat renders undefined/null/NaN as the literal "NaN",
+  // so a supplier row with a missing rate printed "NaN €" at the user.
+  // Note the check is on finiteness, not truthiness: 0 is a legitimate
+  // rate and must still format.
+  if (typeof rate !== "number" || !Number.isFinite(rate)) return "—";
+
   return new Intl.NumberFormat(supplier.currency === "EUR" ? "es-ES" : "en-US", {
     style: "currency",
     currency: supplier.currency,
     maximumFractionDigits: 2,
-  }).format(supplier.rate_per_shipment);
+  }).format(rate);
 }
 
 export interface SupplierFilters {

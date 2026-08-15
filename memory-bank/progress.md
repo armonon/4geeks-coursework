@@ -167,3 +167,54 @@ promoting it to `packages/` is the follow-up if a third UI appears
 - `packages/incident_analyzer` still raises precise exceptions rather
   than handling them; that is correct for a library, and the handling
   now lives at the route and script boundaries.
+
+---
+
+## AUTH-088 test suite (`feature/auth-test-suite`)
+
+Unit tests for the authentication API, plus the two backlog tickets.
+Plan, run instructions, and results in [`TESTING.md`](../TESTING.md).
+
+### What was added
+
+- `services/api/tests/conftest.py` — shared fixtures; each test gets its
+  own TinyDB file.
+- Six per-endpoint modules (`test_register`, `test_login`, `test_token`,
+  `test_forgot_password`, `test_reset_password`, `test_change_password`),
+  73 tests, three tiers each.
+- `test_suppliers_business_rules.py` — 17 tests for API-042.
+- **Jest**, which did not exist before: `uis/backoffice/jest.config.ts`
+  plus `__tests__/` with 35 tests for the utility layer (FE-019).
+- `pytest-cov` and `httpx` as dev dependencies.
+
+### Behaviour that changed
+
+Four bugs the tests found, all fixed here:
+
+1. **`/auth/forgot-password` leaked account existence on a mail failure.**
+   The route trusted the sender to swallow its own errors; the sender only
+   catches `httpx.RequestError`. Anything else made a *registered* address
+   return 500 while an unknown one returned 200 — an enumeration oracle
+   that appears during a provider incident. The send is now guarded in the
+   route, where the security property lives.
+2. **`formatRate` rendered "NaN €"** for a supplier with a missing rate.
+   Guard checks `Number.isFinite`, not truthiness — 0 is a real rate.
+3. **`formatDate` rendered "Invalid Date"**, and its `try/catch` could
+   never fire: `new Date("nonsense")` does not throw. The error-handling
+   audit walked past this one.
+4. **The supplier directory was readable without a token.** This was a
+   deliberate AUTH-01 exemption, kept open "until the frontend starts
+   sending tokens" — a condition that has since been met, so both reads
+   are now protected. Checked in a browser afterwards: the directory page
+   still loads, because the frontend was already sending the token.
+
+### Notes
+
+- The root `npm run test` script hardcoded two workspaces, so the new Jest
+  suite never ran from the root. It now uses `--workspaces --if-present`,
+  matching `typecheck` and `build`.
+- Jest reports 46% on `lib/` because the uncovered lines are the `fetch`
+  wrappers. Mocking `fetch` to raise that number would assert nothing
+  about whether the API agrees; those paths are covered by Playwright
+  against a running backend. `errors.ts` — the part Jest is right for —
+  is at 97%.

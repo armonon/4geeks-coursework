@@ -89,7 +89,9 @@ def verify_password(plain: str, hashed: str) -> bool:
 def _guard_password_length(plain: str) -> None:
     if len(plain.encode("utf-8")) > MAX_PASSWORD_BYTES:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            # 422 — the Starlette constant was renamed; the literal keeps
+            # working across both naming eras.
+            status_code=422,
             detail=(
                 f"Password must be at most {MAX_PASSWORD_BYTES} bytes; "
                 "bcrypt silently truncates beyond that."
