@@ -235,7 +235,25 @@ function ResultView({
   filename: string;
   data: AnalysisResponse;
 }) {
-  const invalidWithCounts = data.invalid_breakdown.filter((r) => r.count > 0);
+  // Defensive reads. The API always sends the full shape, but a render
+  // crash here takes the whole page down (it used to show Next's
+  // "Application error: a client-side exception has occurred"), and a
+  // truncated or proxied response is not worth that. Missing numbers
+  // render as zero; the page stays usable.
+  const totals = data?.totals ?? {
+    total_rows: 0,
+    valid_records: 0,
+    invalid_records: 0,
+  };
+  const satisfaction = data?.satisfaction ?? {
+    scored_incidents: 0,
+    closed_incidents: 0,
+    average_score: 0,
+    per_score: {},
+  };
+  const invalidWithCounts = (data?.invalid_breakdown ?? []).filter(
+    (r) => r.count > 0,
+  );
   return (
     <div className="space-y-6">
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
@@ -250,21 +268,21 @@ function ResultView({
         </div>
 
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <StatCard label="Total records" value={data.totals.total_rows} />
+          <StatCard label="Total records" value={totals.total_rows} />
           <StatCard
             label="Valid records"
-            value={data.totals.valid_records}
+            value={totals.valid_records}
             tone="ok"
           />
           <StatCard
             label="Invalid records"
-            value={data.totals.invalid_records}
-            tone={data.totals.invalid_records ? "warn" : "ok"}
+            value={totals.invalid_records}
+            tone={totals.invalid_records ? "warn" : "ok"}
           />
         </div>
       </div>
 
-      {data.totals.invalid_records > 0 && (
+      {totals.invalid_records > 0 && (
         <Panel title="Invalid records breakdown">
           {invalidWithCounts.length === 0 ? (
             <p className="text-sm text-slate-500">No invalid records.</p>
@@ -286,31 +304,31 @@ function ResultView({
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="Category breakdown (valid records)">
-          <BreakdownList entries={data.category_breakdown} total={data.totals.valid_records} />
+          <BreakdownList entries={data?.category_breakdown ?? {}} total={totals.valid_records} />
         </Panel>
         <Panel title="Status breakdown (valid records)">
-          <BreakdownList entries={data.status_breakdown} total={data.totals.valid_records} />
+          <BreakdownList entries={data?.status_breakdown ?? {}} total={totals.valid_records} />
         </Panel>
         <Panel title="Country breakdown (valid records)">
-          <BreakdownList entries={data.country_breakdown} total={data.totals.valid_records} />
+          <BreakdownList entries={data?.country_breakdown ?? {}} total={totals.valid_records} />
         </Panel>
         <Panel title="Satisfaction (closed incidents)">
           <div className="mb-3 flex items-baseline gap-3">
             <span className="text-3xl font-semibold">
-              {data.satisfaction.average_score.toFixed(2)}
+              {(satisfaction.average_score ?? 0).toFixed(2)}
             </span>
             <span className="text-sm text-slate-500">/ 5.00 average</span>
           </div>
           <p className="mb-3 text-xs text-slate-500">
-            {data.satisfaction.scored_incidents} scored of{" "}
-            {data.satisfaction.closed_incidents} closed incidents
+            {satisfaction.scored_incidents} scored of{" "}
+            {satisfaction.closed_incidents} closed incidents
           </p>
           <ul className="space-y-1 text-sm">
             {[1, 2, 3, 4, 5].map((score) => (
               <li key={score} className="flex justify-between">
                 <span className="text-slate-700">Score {score}</span>
                 <span className="font-mono">
-                  {data.satisfaction.per_score[String(score)] ?? 0}
+                  {satisfaction.per_score?.[String(score)] ?? 0}
                 </span>
               </li>
             ))}

@@ -55,6 +55,39 @@ straight through. `analyse(rows)` on line 97 is not guarded at all.
 **Fix:** catch `csv.Error` alongside `UnicodeDecodeError` and return 400;
 guard `analyse` and return 422 for data it cannot process.
 
+### C3 — A render-time exception blanks the entire page
+
+Neither Next app had an `error.tsx` or `global-error.tsx`, so there was no
+error boundary anywhere. Any exception thrown while rendering unmounted the
+whole tree and left Next's own fallback:
+
+```
+Application error: a client-side exception has occurred while
+loading 127.0.0.1 (see the browser console for more information).
+```
+
+Reproduced by serving a 200 whose body was missing a nested object the
+analyzer view reads (`data.totals.total_rows` → *Cannot read properties of
+null*). The navigation vanished, the page was 127 characters long, and the
+only instruction was to open a developer console.
+
+This is the ticket's headline rule — "no error should crash the application
+or leave the user in an undefined state" — failing in the most literal way.
+
+**Fix, in two layers:**
+
+1. Defensive reads in the analyzer result view, so a partial payload renders
+   zeros instead of throwing (the ticket's optional-chaining and safe-default
+   items).
+2. `app/error.tsx` and `app/global-error.tsx` in both apps as the net for
+   what nobody predicted — a human sentence, **Try again**, and a link home.
+   Being route-scoped, the navigation stays on screen.
+
+Note the two apps are on different majors and the boundary contract differs:
+Next 15 (`uis/backoffice`) passes `reset`, Next 16
+(`uis/talent-pipeline-tracker`) renamed it `unstable_retry`. Each copy uses
+its own version's name; they are not interchangeable.
+
 ---
 
 ## HIGH

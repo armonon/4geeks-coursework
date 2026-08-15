@@ -134,6 +134,12 @@ deliverable is the same platform, failing better. Full report in
   session and renders a recoverable state with Retry.
 - **Scripts exit non-zero with advice on `stderr`**, never a traceback.
   Unreadable input exits 2, a parse failure exits 1.
+- **Both Next apps now have error boundaries** (`app/error.tsx`,
+  `app/global-error.tsx`). There were none, so a render-time exception
+  blanked the page to Next's "Application error: a client-side exception
+  has occurred (see the browser console)". Note the contract differs by
+  major: Next 15 passes `reset`, Next 16 passes `unstable_retry` — the
+  backoffice and the tracker each use their own version's name.
 
 ### New shared module
 
