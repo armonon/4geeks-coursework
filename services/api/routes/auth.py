@@ -6,6 +6,8 @@ Stateless JWT only. POST /auth/login accepts either an OAuth2 form
 
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import ValidationError
 
@@ -30,6 +32,8 @@ from security import (
     verify_password,
 )
 from services_users import get_profile_by_user_id, get_user_by_email, get_user_by_id
+
+logger = logging.getLogger("trackflow.auth")
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -145,10 +149,25 @@ def forgot_password(payload: ForgotPasswordRequest) -> MessageResponse:
 
     if user is not None and user.is_active:
         raw_token, ttl_minutes = issue_token(user.id)
-        # Delivery failures are logged inside the sender and never
-        # surface here — a provider outage must not turn into a signal
-        # about whether the address exists.
-        send_password_reset(user.email, raw_token, ttl_minutes)
+        try:
+            send_password_reset(user.email, raw_token, ttl_minutes)
+        except Exception:
+            # Deliberately broad, and deliberately here rather than only
+            # inside the sender.
+            #
+            # This endpoint's security property is that its response never
+            # varies — that is what stops it being an account-enumeration
+            # oracle. The sender guards its own transport errors, but any
+            # other failure (a misconfigured endpoint, a bug in the message
+            # builder, an unexpected library error) used to escape and turn
+            # a *registered* address into a 500 while an unknown address
+            # still got 200. A provider incident would have handed an
+            # attacker a working oracle.
+            #
+            # The property belongs to this route, so this route enforces
+            # it. The reset token stays valid; the user can request another
+            # link once delivery recovers.
+            logger.exception("Password reset email could not be sent")
 
     return MessageResponse(message=_FORGOT_PASSWORD_MESSAGE)
 

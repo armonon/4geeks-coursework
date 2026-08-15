@@ -356,6 +356,22 @@ def test_data_survives_a_server_restart(
     from main import app
 
     with TestClient(app) as fresh:
-        # GET /suppliers is public, so no token needed for this read.
-        names = {s["name"] for s in fresh.get("/suppliers").json()}
+        # Reads are authenticated now (see test_auth.py
+        # ::test_only_the_service_root_is_public), so the restarted
+        # client has to sign in before it can look. The point of the test
+        # is unchanged: the row survived the restart.
+        fresh.post(
+            "/users",
+            json={"email": "restart@trackflow.com", "password": "restart-pass-1"},
+        )
+        token = fresh.post(
+            "/auth/login",
+            json={"email": "restart@trackflow.com", "password": "restart-pass-1"},
+        ).json()["access_token"]
+        names = {
+            s["name"]
+            for s in fresh.get(
+                "/suppliers", headers={"Authorization": f"Bearer {token}"}
+            ).json()
+        }
     assert "Correos Express" in names

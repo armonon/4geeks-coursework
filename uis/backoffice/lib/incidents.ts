@@ -191,13 +191,17 @@ export async function updateIncidentStatus(
 }
 
 export function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return iso;
-  }
+  // The try/catch this replaces never fired. `new Date("nonsense")` does
+  // not throw — it returns an Invalid Date, and calling
+  // toLocaleDateString on that returns the literal string "Invalid Date",
+  // which is what the incident list was showing. The date has to be
+  // checked explicitly.
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }

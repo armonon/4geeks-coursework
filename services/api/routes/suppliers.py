@@ -113,6 +113,10 @@ def list_suppliers(
         alias="status",
         description="Optional extra filter by status.",
     ),
+    # The directory holds negotiated rates and supplier contacts. Every
+    # write here was protected; both reads were not, which left the
+    # commercial data readable by anyone who could reach the API.
+    _caller: UserInDB = Depends(get_current_user),
 ) -> list[SupplierOut]:
     """Return every supplier, narrowed by whatever filters were given.
 
@@ -138,7 +142,10 @@ def list_suppliers(
     response_model=SupplierOut,
     summary="Get one supplier by id",
 )
-def get_supplier(supplier_id: int) -> SupplierOut:
+def get_supplier(
+    supplier_id: int,
+    _caller: UserInDB = Depends(get_current_user),
+) -> SupplierOut:
     return _to_out(_get_or_404(supplier_id))
 
 
