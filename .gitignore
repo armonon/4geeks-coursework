@@ -16,3 +16,6 @@ __pycache__/
 *.egg-info/
 .pytest_cache/
 .venv/
+
+# TinyDB runtime data (regenerate with: cd services/api && uv run seed)
+services/api/data/

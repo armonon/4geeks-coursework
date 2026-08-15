@@ -30,6 +30,42 @@ This repository is the **starter template** for transversal projects. You will w
 
 ---
 
+## Running it after a fresh clone
+
+**Order matters.** The frontends import `@trackflow/business-logic`, a
+workspace package whose compiled `dist/` is git-ignored. Building a UI
+before that package is linked and compiled fails with
+`Module not found: Can't resolve '@trackflow/business-logic'`.
+
+```bash
+# 1. From the REPO ROOT — links the npm workspaces
+npm install
+
+# 2. From the REPO ROOT — compiles packages/*/dist
+npm run bootstrap
+```
+
+Only then are the UIs buildable/runnable:
+
+```bash
+npm run dev:website       # http://localhost:3000
+npm run dev:backoffice    # http://localhost:3100
+```
+
+The backend is a separate, `uv`-managed project:
+
+```bash
+cd services/api
+uv sync            # installs deps + the local incident-analyzer package
+uv run seed        # loads the CONTEXT suppliers into TinyDB
+uv run uvicorn main:app --reload    # http://127.0.0.1:8000/docs
+```
+
+> Running `npm install` *inside* `uis/backoffice` alone is not enough —
+> npm workspaces are linked from the root.
+
+---
+
 ## How to think about this monorepo
 
 You are building **one company** across many milestones and projects. Each top-level folder has a **single responsibility** — like a real engineering team repo.

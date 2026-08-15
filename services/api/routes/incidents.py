@@ -1,72 +1,33 @@
-"""TrackFlow backend — first API surface, hosts the incident analyser.
+"""Incident-analysis endpoints (Milestone: Incident Analyser).
 
-Follows the architecture proposal in docs/ARCHITECTURE_PROPOSAL.md:
-one modular monolith, package-by-feature. Incidents is the first
-feature to land; more (shipments, routes, ...) will follow.
-
-Analysis + validation is imported wholesale from
-`incident_analyzer` (packages/incident_analyzer). This service does
-NOT re-implement any rule — that is the whole point of shipping the
-package. See docs/ARCHITECTURE_PROPOSAL.md § MONO-1.
+Analysis + validation is imported wholesale from `incident_analyzer`
+(packages/incident_analyzer). This service does NOT re-implement any
+rule — see docs/ARCHITECTURE_PROPOSAL.md § MONO-1.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from fastapi import FastAPI, File, HTTPException, UploadFile, status
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter, File, HTTPException, UploadFile, status
 from fastapi.responses import Response
-
-from incident_analyzer import (
-    AnalysisResult,
-    analyse,
-)
-from incident_analyzer.csv_io import read_csv_bytes, result_to_csv_rows, write_csv_bytes
+from incident_analyzer import AnalysisResult, analyse
 from incident_analyzer.analyzer import RULE_LABELS
-
-# ---------------------------------------------------------------------------
-# App
-# ---------------------------------------------------------------------------
-
-app = FastAPI(
-    title="TrackFlow API",
-    version="0.1.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
+from incident_analyzer.csv_io import (
+    read_csv_bytes,
+    result_to_csv_rows,
+    write_csv_bytes,
 )
 
-# Match ARCHITECTURE_PROPOSAL.md § 6.2 — explicit origins, never "*".
-_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:3100",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:3100",
-]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=_ALLOWED_ORIGINS,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+router = APIRouter(prefix="/api/incidents", tags=["incidents"])
 
-
-# ---------------------------------------------------------------------------
-# In-memory cache of the most recent analysis result — used by /export.
-# Not persistent by design; the exercise doesn't ask for a DB.
-# ---------------------------------------------------------------------------
-
+# In-memory cache of the most recent analysis — used by /export.
+# Not persistent by design; the exercise doesn't ask for a DB here.
 _LAST_RESULT: AnalysisResult | None = None
 
 
 def _serialize(result: AnalysisResult) -> dict[str, Any]:
-    """Frontend-friendly JSON representation of the analysis.
-
-    Keeps every value the console version shows, plus the rule
-    labels so the UI does not have to keep its own copy of them
-    (and so a future rule rename ripples cleanly to the UI).
-    """
+    """Frontend-friendly JSON representation of the analysis."""
     return {
         "totals": {
             "total_rows": result.total_rows,
@@ -74,11 +35,7 @@ def _serialize(result: AnalysisResult) -> dict[str, Any]:
             "invalid_records": result.invalid_count,
         },
         "invalid_breakdown": [
-            {
-                "rule": rule,
-                "label": RULE_LABELS[rule],
-                "count": count,
-            }
+            {"rule": rule, "label": RULE_LABELS[rule], "count": count}
             for rule, count in result.invalid_breakdown.counts.items()
         ],
         "category_breakdown": result.category_breakdown.counts,
@@ -93,21 +50,7 @@ def _serialize(result: AnalysisResult) -> dict[str, Any]:
     }
 
 
-# ---------------------------------------------------------------------------
-# Routes
-# ---------------------------------------------------------------------------
-
-
-@app.get("/", tags=["health"])
-def health() -> dict[str, str]:
-    return {"status": "ok", "service": "trackflow-api"}
-
-
-@app.post(
-    "/api/incidents/analyze",
-    tags=["incidents"],
-    summary="Analyse an incidents CSV upload",
-)
+@router.post("/analyze", summary="Analyse an incidents CSV upload")
 async def analyze_incidents(file: UploadFile = File(...)) -> dict[str, Any]:
     """Accept a multipart CSV upload, validate + analyse, cache the
     result for a later /export call, and return the summary as JSON."""
@@ -136,7 +79,9 @@ async def analyze_incidents(file: UploadFile = File(...)) -> dict[str, Any]:
 
     if not rows:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            # 422 — the constant was renamed in Starlette; use the literal
+            # so this keeps working across both naming eras.
+            status_code=422,
             detail="CSV had a header but no data rows.",
         )
 
@@ -145,9 +90,8 @@ async def analyze_incidents(file: UploadFile = File(...)) -> dict[str, Any]:
     return _serialize(result)
 
 
-@app.get(
-    "/api/incidents/results/export",
-    tags=["incidents"],
+@router.get(
+    "/results/export",
     summary="Download the last analysis as a CSV (one row per metric)",
 )
 def export_last_results() -> Response:
