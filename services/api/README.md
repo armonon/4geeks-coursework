@@ -27,6 +27,89 @@ uv run uvicorn main:app --reload
 
 Swagger UI: <http://127.0.0.1:8000/docs>
 
+
+## Authentication
+
+Stateless JWT. No sessions, no cookies. `User` and `Profile` live in
+**TinyDB only** — other stores reference the TinyDB user `id` as
+`user_uuid` and never hold a copy of the account.
+
+### Setup
+
+```bash
+cp .env.example .env
+python -c "import secrets; print(secrets.token_hex(32))"   # paste as SECRET_KEY
+```
+
+`SECRET_KEY` has no default on purpose: a fallback would mean tokens
+signed with a publicly-known key. The app refuses to mint or verify a
+token without it.
+
+| Variable | Purpose |
+| -------- | ------- |
+| `SECRET_KEY` | JWT signing secret. Required. |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | Token lifetime. Defaults to 60. |
+
+### Endpoints
+
+| Method | Endpoint | Access |
+| ------ | -------- | ------ |
+| `POST` | `/auth/login` | public — email + password, returns a JWT |
+| `GET` | `/auth/me` | protected — credentials + linked profile |
+| `POST` | `/users` | **public** — registration; creates the linked Profile too |
+| `GET` | `/users` | protected |
+| `GET` | `/users/{id}` | protected — self or admin |
+| `PUT` | `/users/{id}` | protected — self or admin; `role` is admin-only |
+| `DELETE` | `/users/{id}` | protected — self or admin; cascades to the Profile |
+| `GET` | `/profiles/me` | protected — resolved from the token |
+| `PUT` | `/profiles/me` | protected — owner only |
+
+`POST /auth/login` accepts an OAuth2 form (so Swagger's **Authorize**
+button works) or a JSON body with `email` + `password`.
+
+### Model split
+
+`User` holds credentials only: `id`, `email`, `hashed_password`,
+`is_active`, `role`, `created_at`. Display name and contact data —
+`name`, `phone`, `address` — live on `Profile`, linked one-to-one via
+`user_id`. A test asserts the stored user record contains nothing else.
+
+`role` accepts `admin`, `manager`, or `user`. Registration always
+produces `user`: `role` is not a field on `UserCreate`, so it cannot be
+set by the caller.
+
+### Passwords
+
+Hashed with bcrypt via `libpass` (a maintained drop-in fork of
+`passlib`; the import path is still `passlib.hash`). Plain text never
+reaches TinyDB — asserted by a test that greps the stored record.
+Passwords over 72 bytes are rejected rather than silently truncated.
+
+### Which routes are protected
+
+Twelve endpoints require a valid token. Six of them sit outside
+`/users` and `/auth`, exceeding the required five:
+
+| Route | Why |
+| ----- | --- |
+| `POST /suppliers` | creates directory data |
+| `PATCH /suppliers/{id}/rate` | changes commercial terms |
+| `PATCH /suppliers/{id}/status` | suspends/activates a contract |
+| `DELETE /suppliers/{id}` | destroys a record |
+| `POST /api/incidents/analyze` | processes an uploaded incident file |
+| `GET /api/incidents/results/export` | exports analysed incident data |
+
+`GET /suppliers` and `GET /suppliers/{id}` stay public so the
+backoffice list keeps working until the frontend starts sending
+tokens. `GET /` is the health check.
+
+### 401 vs 403
+
+- **401** — no token, malformed token, bad signature, expired token, or
+  a token whose account was deleted or deactivated.
+- **403** — the caller is authenticated but acting on someone else's
+  account, or a non-admin trying to change a `role`.
+
 ## Supplier directory
 
 Data model, valid categories, allowed statuses, and the seed data all
@@ -103,9 +186,9 @@ Carried over from the previous milestone, now mounted as a router:
 uv run pytest
 ```
 
-46 tests — 39 for the supplier directory (model validation, every
-endpoint and status code, the seeder including idempotency, filters,
-and restart persistence) and 7 for incident analysis.
+92 tests — 46 for auth (user CRUD, profiles, login, token validation,
+401/403 separation, and route protection), 39 for the supplier
+directory, and 7 for incident analysis.
 
 ## CORS
 

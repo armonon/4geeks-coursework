@@ -14,8 +14,16 @@ from fastapi.testclient import TestClient
 
 @pytest.fixture
 def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
-    """Point TinyDB at a throwaway file so tests never touch real data."""
+    """An authenticated client pointed at a throwaway TinyDB.
+
+    The supplier write routes require a token since the auth milestone.
+    These tests are about supplier behaviour, not about auth, so the
+    fixture registers a user and attaches its bearer token by default.
+    The 401-without-a-token cases are covered in test_auth.py.
+    """
     monkeypatch.setenv("TINYDB_PATH", str(tmp_path / "test.json"))
+    monkeypatch.setenv("SECRET_KEY", "test-secret-not-a-real-one")
+    monkeypatch.setenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
 
     import database
 
@@ -24,6 +32,15 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     from main import app
 
     with TestClient(app) as c:
+        c.post(
+            "/users",
+            json={"email": "tester@trackflow.com", "password": "test-password-123"},
+        )
+        token = c.post(
+            "/auth/login",
+            json={"email": "tester@trackflow.com", "password": "test-password-123"},
+        ).json()["access_token"]
+        c.headers.update({"Authorization": f"Bearer {token}"})
         yield c
 
     database.close_db()
@@ -339,5 +356,6 @@ def test_data_survives_a_server_restart(
     from main import app
 
     with TestClient(app) as fresh:
+        # GET /suppliers is public, so no token needed for this read.
         names = {s["name"] for s in fresh.get("/suppliers").json()}
     assert "Correos Express" in names

@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, EmailStr, Field, field_validator, model_validator
 
 # ---------------------------------------------------------------------------
 # Enumerations — the closed value sets from CONTEXT.md
@@ -180,3 +180,139 @@ class DeleteResponse(BaseModel):
     id: int
     deleted: bool
     message: str
+
+
+# ===========================================================================
+# Authentication — User and Profile
+#
+# Both live in TinyDB only. Other stores (PostgreSQL and friends, later)
+# reference the TinyDB user `id` as `user_uuid` and never hold a copy of
+# the account itself.
+#
+# Deliberate split: `User` holds credentials, `Profile` holds who the
+# person is. Display name and contact details are on Profile, never on
+# User.
+# ===========================================================================
+
+
+class Role(str, Enum):
+    """Only these three values are accepted. New registrations default
+    to `user`; elevating a role is an admin-only action."""
+
+    ADMIN = "admin"
+    MANAGER = "manager"
+    USER = "user"
+
+
+# --- input models ----------------------------------------------------------
+
+
+class UserCreate(BaseModel):
+    """POST /users body.
+
+    Accepts optional initial profile fields so registration creates the
+    User and its linked Profile in one operation.
+    """
+
+    email: EmailStr = Field(..., description="Login identity. Must be unique.")
+    password: str = Field(
+        ..., min_length=8, description="Plain text in, hashed before storage."
+    )
+
+    # Optional initial profile — stored on Profile, not on User.
+    name: str | None = Field(default=None, description="Display name (Profile).")
+    phone: str | None = Field(default=None, description="Contact phone (Profile).")
+    address: str | None = Field(default=None, description="Contact address (Profile).")
+
+    @field_validator("email")
+    @classmethod
+    def _normalise_email(cls, value: str) -> str:
+        # Emails are case-insensitive in practice; store one canonical form
+        # so 'A@x.com' and 'a@x.com' cannot become two accounts.
+        return value.strip().lower()
+
+
+class UserUpdate(BaseModel):
+    """PUT /users/{id} body — credential fields only.
+
+    `role` is accepted here but only honoured for admin callers; the
+    route enforces that.
+    """
+
+    email: EmailStr | None = None
+    password: str | None = Field(default=None, min_length=8)
+    role: Role | None = None
+    is_active: bool | None = None
+
+    @field_validator("email")
+    @classmethod
+    def _normalise_email(cls, value: str | None) -> str | None:
+        return value.strip().lower() if value else value
+
+
+class ProfileUpdate(BaseModel):
+    """PUT /profiles/me body."""
+
+    name: str | None = None
+    phone: str | None = None
+    address: str | None = None
+
+
+class LoginRequest(BaseModel):
+    """POST /auth/login body (JSON variant)."""
+
+    email: EmailStr
+    password: str
+
+    @field_validator("email")
+    @classmethod
+    def _normalise_email(cls, value: str) -> str:
+        return value.strip().lower()
+
+
+# --- stored / output models ------------------------------------------------
+
+
+class UserInDB(BaseModel):
+    """The full stored record, hash included. Never returned by a route."""
+
+    id: int
+    email: EmailStr
+    hashed_password: str
+    is_active: bool = True
+    role: Role = Role.USER
+    created_at: datetime
+
+
+class UserOut(BaseModel):
+    """What routes return — no password material, ever."""
+
+    id: int
+    email: EmailStr
+    is_active: bool
+    role: Role
+    created_at: datetime
+
+
+class ProfileOut(BaseModel):
+    id: int
+    user_id: int
+    name: str | None = None
+    phone: str | None = None
+    address: str | None = None
+
+
+class MeOut(BaseModel):
+    """GET /auth/me — credentials plus the linked profile."""
+
+    id: int
+    email: EmailStr
+    role: Role
+    is_active: bool
+    profile: ProfileOut | None = None
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    expires_in: int = Field(..., description="Token lifetime in seconds.")

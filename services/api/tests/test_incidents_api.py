@@ -5,11 +5,41 @@ from __future__ import annotations
 import io
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from main import app
 
-client = TestClient(app)
+
+@pytest.fixture
+def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
+    """An authenticated client on a throwaway TinyDB.
+
+    The incident routes require a token since the auth milestone.
+    These tests cover analysis behaviour; the 401-without-a-token
+    cases live in test_auth.py.
+    """
+    monkeypatch.setenv("TINYDB_PATH", str(tmp_path / "incidents.json"))
+    monkeypatch.setenv("SECRET_KEY", "test-secret-not-a-real-one")
+    monkeypatch.setenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
+
+    import database
+
+    database.close_db()
+
+    with TestClient(app) as c:
+        c.post(
+            "/users",
+            json={"email": "analyst@trackflow.com", "password": "test-password-123"},
+        )
+        token = c.post(
+            "/auth/login",
+            json={"email": "analyst@trackflow.com", "password": "test-password-123"},
+        ).json()["access_token"]
+        c.headers.update({"Authorization": f"Bearer {token}"})
+        yield c
+
+    database.close_db()
 
 _FIXTURE = (
     Path(__file__).resolve().parents[3] / "scripts" / "incidents-trackflow.csv"
@@ -23,13 +53,13 @@ def _upload(client_: TestClient, payload: bytes, filename: str = "incidents.csv"
     )
 
 
-def test_health() -> None:
+def test_health(client: TestClient) -> None:
     r = client.get("/")
     assert r.status_code == 200
     assert r.json()["status"] == "ok"
 
 
-def test_analyze_returns_context_expected_values() -> None:
+def test_analyze_returns_context_expected_values(client: TestClient) -> None:
     payload = _FIXTURE.read_bytes()
     r = _upload(client, payload)
     assert r.status_code == 200
@@ -52,7 +82,7 @@ def test_analyze_returns_context_expected_values() -> None:
     assert body["satisfaction"]["closed_incidents"] == 52
 
 
-def test_analyze_rejects_non_csv() -> None:
+def test_analyze_rejects_non_csv(client: TestClient) -> None:
     r = client.post(
         "/api/incidents/analyze",
         files={"file": ("nope.txt", io.BytesIO(b"plain text"), "text/plain")},
@@ -60,7 +90,7 @@ def test_analyze_rejects_non_csv() -> None:
     assert r.status_code == 400
 
 
-def test_analyze_rejects_empty_body() -> None:
+def test_analyze_rejects_empty_body(client: TestClient) -> None:
     r = client.post(
         "/api/incidents/analyze",
         files={"file": ("empty.csv", io.BytesIO(b""), "text/csv")},
@@ -68,13 +98,13 @@ def test_analyze_rejects_empty_body() -> None:
     assert r.status_code == 400
 
 
-def test_analyze_rejects_header_only_csv() -> None:
+def test_analyze_rejects_header_only_csv(client: TestClient) -> None:
     header_only = b"incident_id,date,country\n"
     r = _upload(client, header_only)
     assert r.status_code == 422
 
 
-def test_export_before_any_analysis_returns_404() -> None:
+def test_export_before_any_analysis_returns_404(client: TestClient) -> None:
     import routes.incidents as api_main
 
     api_main._LAST_RESULT = None
@@ -82,7 +112,7 @@ def test_export_before_any_analysis_returns_404() -> None:
     assert r.status_code == 404
 
 
-def test_export_after_analysis_returns_csv() -> None:
+def test_export_after_analysis_returns_csv(client: TestClient) -> None:
     payload = _FIXTURE.read_bytes()
     _upload(client, payload)  # populate cache
 
