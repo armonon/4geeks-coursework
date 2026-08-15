@@ -185,11 +185,3 @@ def require_self_or_admin(target_user_id: int, caller: UserInDB) -> None:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You may only access your own account.",
         )
-
-
-def require_admin(caller: UserInDB) -> None:
-    if caller.role is not Role.ADMIN:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="This action requires the admin role.",
-        )

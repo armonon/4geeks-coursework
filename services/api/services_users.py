@@ -7,6 +7,7 @@ without HTTP and reusable from anywhere.
 
 from __future__ import annotations
 
+import threading
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -25,6 +26,15 @@ from models import (
     utcnow,
 )
 from security import hash_password
+
+# Guards the read-then-write sequences below. TinyDB has no unique
+# constraint, so "is this email taken?" followed by "insert" is a
+# check-then-act race: FastAPI runs sync handlers in a threadpool, and
+# without this lock concurrent registrations of the same address all
+# pass the check and all insert. Measured: 12 simultaneous requests
+# produced 11 duplicate accounts, and only the first one's password
+# could ever log in.
+_write_lock = threading.Lock()
 
 # ---------------------------------------------------------------------------
 # Mapping helpers
@@ -90,31 +100,36 @@ def create_user(payload: UserCreate, role: Role = Role.USER) -> UserOut:
     `role` defaults to `user`; the public POST /users route never
     passes anything else.
     """
-    if get_user_by_email(payload.email) is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail=f"A user with email '{payload.email}' already exists.",
-        )
+    # Hash outside the lock — bcrypt is deliberately slow and holding
+    # the lock through it would serialise every registration.
+    hashed = hash_password(payload.password)
 
-    record: dict[str, Any] = {
-        "email": payload.email,
-        "hashed_password": hash_password(payload.password),
-        "is_active": True,
-        "role": role.value,
-        "created_at": utcnow().isoformat(),
-    }
-    user_id = users_table().insert(record)
+    with _write_lock:
+        if get_user_by_email(payload.email) is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"A user with email '{payload.email}' already exists.",
+            )
 
-    # One-to-one profile, created even when no fields were supplied, so
-    # GET /profiles/me always has something to return.
-    profiles_table().insert(
-        {
-            "user_id": user_id,
-            "name": payload.name,
-            "phone": payload.phone,
-            "address": payload.address,
+        record: dict[str, Any] = {
+            "email": payload.email,
+            "hashed_password": hashed,
+            "is_active": True,
+            "role": role.value,
+            "created_at": utcnow().isoformat(),
         }
-    )
+        user_id = users_table().insert(record)
+
+        # One-to-one profile, created even when no fields were supplied,
+        # so GET /profiles/me always has something to return.
+        profiles_table().insert(
+            {
+                "user_id": user_id,
+                "name": payload.name,
+                "phone": payload.phone,
+                "address": payload.address,
+            }
+        )
 
     return to_user_out(_user_in_db(Document(record, doc_id=user_id)))
 
@@ -125,42 +140,53 @@ def update_user(user_id: int, payload: UserUpdate, *, allow_role: bool) -> UserO
     `allow_role` is decided by the route from the caller's role — a
     non-admin cannot promote themselves.
     """
-    existing = get_user_by_id(user_id)
-    if existing is None:
+    # Reject a forbidden role change before taking the lock or hashing.
+    if payload.role is not None and not allow_role:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No user with id {user_id}.",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only an admin may change a user's role.",
         )
 
-    changes: dict[str, Any] = {}
+    # Hash outside the lock; bcrypt is intentionally slow.
+    new_hash = (
+        hash_password(payload.password) if payload.password is not None else None
+    )
 
-    if payload.email is not None and payload.email != existing.email:
-        clash = get_user_by_email(payload.email)
-        if clash is not None and clash.id != user_id:
+    # Same check-then-act hazard as create_user: the email uniqueness
+    # check and the write must not be separable.
+    with _write_lock:
+        existing = get_user_by_id(user_id)
+        if existing is None:
             raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"A user with email '{payload.email}' already exists.",
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No user with id {user_id}.",
             )
-        changes["email"] = payload.email
 
-    if payload.password is not None:
-        changes["hashed_password"] = hash_password(payload.password)
+        changes: dict[str, Any] = {}
 
-    if payload.is_active is not None:
-        changes["is_active"] = payload.is_active
+        if payload.email is not None and payload.email != existing.email:
+            clash = get_user_by_email(payload.email)
+            if clash is not None and clash.id != user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail=f"A user with email '{payload.email}' already exists.",
+                )
+            changes["email"] = payload.email
 
-    if payload.role is not None:
-        if not allow_role:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only an admin may change a user's role.",
-            )
-        changes["role"] = payload.role.value
+        if new_hash is not None:
+            changes["hashed_password"] = new_hash
 
-    if changes:
-        users_table().update(changes, doc_ids=[user_id])
+        if payload.is_active is not None:
+            changes["is_active"] = payload.is_active
 
-    refreshed = get_user_by_id(user_id)
+        if payload.role is not None:
+            changes["role"] = payload.role.value
+
+        if changes:
+            users_table().update(changes, doc_ids=[user_id])
+
+        refreshed = get_user_by_id(user_id)
+
     assert refreshed is not None
     return to_user_out(refreshed)
 

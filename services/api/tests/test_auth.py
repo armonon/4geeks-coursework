@@ -534,3 +534,87 @@ def test_token_expiry_is_read_from_the_environment(
 
     monkeypatch.setenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15")
     assert security.access_token_expire_minutes() == 15
+
+
+# ---------------------------------------------------------------------------
+# JWT attack surface
+#
+# These exist because an earlier manual probe of these cases silently
+# generated EMPTY tokens (the shell used a python without python-jose),
+# so every attack "passed" for the wrong reason. Encoded as real tests
+# so that can never happen again.
+# ---------------------------------------------------------------------------
+
+
+def _unsigned_token(alg: str, claims: dict) -> str:
+    """Hand-build a token with no valid signature."""
+    import base64
+    import json as _json
+
+    def seg(data: dict) -> str:
+        raw = _json.dumps(data).encode()
+        return base64.urlsafe_b64encode(raw).rstrip(b"=").decode()
+
+    return f"{seg({'alg': alg, 'typ': 'JWT'})}.{seg(claims)}."
+
+
+def test_alg_none_token_is_rejected(client: TestClient) -> None:
+    """The classic JWT bypass: claim `alg: none` and send no signature."""
+    register(client)
+    token = _unsigned_token("none", {"sub": "1", "role": "admin"})
+    assert client.get("/auth/me", headers=auth(token)).status_code == 401
+
+
+def test_hs256_header_with_empty_signature_is_rejected(client: TestClient) -> None:
+    register(client)
+    token = _unsigned_token("HS256", {"sub": "1", "role": "admin"})
+    assert client.get("/auth/me", headers=auth(token)).status_code == 401
+
+
+def test_token_without_a_sub_claim_is_401(client: TestClient) -> None:
+    import os
+
+    from jose import jwt
+
+    register(client)
+    forged = jwt.encode({"role": "admin"}, os.environ["SECRET_KEY"], algorithm="HS256")
+    assert client.get("/auth/me", headers=auth(forged)).status_code == 401
+
+
+def test_token_for_a_nonexistent_user_id_is_401(client: TestClient) -> None:
+    import os
+
+    from jose import jwt
+
+    register(client)
+    forged = jwt.encode(
+        {"sub": "9999", "role": "admin"}, os.environ["SECRET_KEY"], algorithm="HS256"
+    )
+    assert client.get("/auth/me", headers=auth(forged)).status_code == 401
+
+
+def test_role_comes_from_the_database_not_the_token_claim(client: TestClient) -> None:
+    """A token claiming `role: admin` must not grant admin.
+
+    The role is re-read from the stored user on every request, so a
+    tampered-with (or stale) claim cannot escalate privileges.
+    """
+    import os
+
+    from jose import jwt
+
+    user = register(client)
+    claims_admin = jwt.encode(
+        {"sub": str(user["id"]), "role": "admin"},
+        os.environ["SECRET_KEY"],
+        algorithm="HS256",
+    )
+
+    me = client.get("/auth/me", headers=auth(claims_admin))
+    assert me.status_code == 200
+    assert me.json()["role"] == "user"  # from the DB, not the token
+
+    # And it confers no admin power: still 403 on someone else's account.
+    victim = register(client, email="victim@trackflow.com")
+    blocked = client.get(f"/users/{victim['id']}", headers=auth(claims_admin))
+    assert blocked.status_code == 403
