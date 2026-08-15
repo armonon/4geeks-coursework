@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi import status as http_status
 from tinydb.table import Document
 
@@ -32,8 +32,10 @@ from models import (
     StatusUpdate,
     SupplierCreate,
     SupplierOut,
+    UserInDB,
     utcnow,
 )
+from security import get_current_user
 
 router = APIRouter(prefix="/suppliers", tags=["suppliers"])
 
@@ -78,7 +80,10 @@ def _storable(payload: SupplierCreate) -> dict[str, Any]:
     status_code=http_status.HTTP_201_CREATED,
     summary="Register a new supplier",
 )
-def create_supplier(payload: SupplierCreate) -> SupplierOut:
+def create_supplier(
+    payload: SupplierCreate,
+    _caller: UserInDB = Depends(get_current_user),
+) -> SupplierOut:
     """Create a supplier and return it with its TinyDB-assigned id.
 
     Invalid input (bad status, bad category, rate <= 0, currency that
@@ -142,7 +147,11 @@ def get_supplier(supplier_id: int) -> SupplierOut:
     response_model=SupplierOut,
     summary="Update a supplier's rate and stamp updated_at",
 )
-def update_rate(supplier_id: int, payload: RateUpdate) -> SupplierOut:
+def update_rate(
+    supplier_id: int,
+    payload: RateUpdate,
+    _caller: UserInDB = Depends(get_current_user),
+) -> SupplierOut:
     """Update `rate_per_shipment` and record when it changed.
 
     CONTEXT § Business constraints: "Every update to rate_per_shipment
@@ -164,7 +173,11 @@ def update_rate(supplier_id: int, payload: RateUpdate) -> SupplierOut:
     response_model=SupplierOut,
     summary="Activate or suspend a supplier",
 )
-def update_status(supplier_id: int, payload: StatusUpdate) -> SupplierOut:
+def update_status(
+    supplier_id: int,
+    payload: StatusUpdate,
+    _caller: UserInDB = Depends(get_current_user),
+) -> SupplierOut:
     """Flip a supplier between active and suspended.
 
     Anything outside the two CONTEXT statuses is rejected with 422 by
@@ -182,7 +195,10 @@ def update_status(supplier_id: int, payload: StatusUpdate) -> SupplierOut:
     response_model=DeleteResponse,
     summary="Remove a supplier from the directory",
 )
-def delete_supplier(supplier_id: int) -> DeleteResponse:
+def delete_supplier(
+    supplier_id: int,
+    _caller: UserInDB = Depends(get_current_user),
+) -> DeleteResponse:
     """Delete a supplier.
 
     Note for operators: TrackFlow's usual workflow is to *suspend*

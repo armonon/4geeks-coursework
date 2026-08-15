@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
 from fastapi.responses import Response
 from incident_analyzer import AnalysisResult, analyse
 from incident_analyzer.analyzer import RULE_LABELS
@@ -18,6 +18,9 @@ from incident_analyzer.csv_io import (
     result_to_csv_rows,
     write_csv_bytes,
 )
+
+from models import UserInDB
+from security import get_current_user
 
 router = APIRouter(prefix="/api/incidents", tags=["incidents"])
 
@@ -51,7 +54,10 @@ def _serialize(result: AnalysisResult) -> dict[str, Any]:
 
 
 @router.post("/analyze", summary="Analyse an incidents CSV upload")
-async def analyze_incidents(file: UploadFile = File(...)) -> dict[str, Any]:
+async def analyze_incidents(
+    file: UploadFile = File(...),
+    _caller: UserInDB = Depends(get_current_user),
+) -> dict[str, Any]:
     """Accept a multipart CSV upload, validate + analyse, cache the
     result for a later /export call, and return the summary as JSON."""
     global _LAST_RESULT
@@ -94,7 +100,9 @@ async def analyze_incidents(file: UploadFile = File(...)) -> dict[str, Any]:
     "/results/export",
     summary="Download the last analysis as a CSV (one row per metric)",
 )
-def export_last_results() -> Response:
+def export_last_results(
+    _caller: UserInDB = Depends(get_current_user),
+) -> Response:
     if _LAST_RESULT is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

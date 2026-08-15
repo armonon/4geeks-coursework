@@ -23,6 +23,8 @@ from tinydb.table import Table
 _DEFAULT_DB_PATH = Path(__file__).resolve().parent / "data" / "trackflow.json"
 
 SUPPLIERS_TABLE = "suppliers"
+USERS_TABLE = "users"
+PROFILES_TABLE = "profiles"
 
 # TinyDB's JSON storage is not safe against concurrent writers; FastAPI
 # runs sync handlers in a threadpool, so serialise access here.
@@ -57,6 +59,15 @@ def get_db() -> TinyDB:
 
 def suppliers_table() -> Table:
     return get_db().table(SUPPLIERS_TABLE)
+
+
+def users_table() -> Table:
+    return get_db().table(USERS_TABLE)
+
+
+def profiles_table() -> Table:
+    """Profiles are one-to-one with users, keyed by `user_id`."""
+    return get_db().table(PROFILES_TABLE)
 
 
 def close_db() -> None:
