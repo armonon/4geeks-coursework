@@ -6,6 +6,26 @@
 -- Tip from the brief, worth following literally: before any UPDATE or
 -- DELETE, run a SELECT with the SAME WHERE clause and confirm the rows
 -- are the ones you mean. Query 8 below is written to leave room for that.
+--
+-- SCHEMA (from edutrack.sql) — the exact column names, so you are not
+-- guessing at them:
+--
+--   enrollments (
+--     id                    SERIAL PRIMARY KEY
+--     student_id            INTEGER
+--     student_name          VARCHAR(100)
+--     student_email         VARCHAR(150)      <- note: NOT "email"
+--     course_id             INTEGER
+--     course_title          VARCHAR(150)
+--     category              VARCHAR(50)
+--     enrollment_date       DATE
+--     completion_percentage INTEGER
+--     passed                BOOLEAN  NOT NULL DEFAULT FALSE
+--     monthly_fee_paid      DECIMAL(6,2)
+--     instructor            VARCHAR(100)      <- nullable
+--   )
+--
+-- 17 rows are seeded, ids 1-17. Dates run 2024-02-14 to 2025-03-05.
 
 
 -- =====================================================================
