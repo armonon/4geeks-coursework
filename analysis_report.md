@@ -99,6 +99,8 @@ instructor to UI/UX Fundamentals.
 
 ## Test accounts (@test.com) removed
 
+Result: 2 rows deleted
+
 Rows confirmed by SELECT before deleting: **2**
 
 - id 13 — James Miller — james.miller@test.com — Intro to Python
