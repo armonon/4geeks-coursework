@@ -4,7 +4,7 @@ An observable AI chat proof of concept built with Next.js, React, and the Groq C
 
 ## Features
 
-- Real Groq API requests made with native `fetch`
+- Real Groq API requests proxied through a server-only Next.js route
 - Full conversation history included with every request
 - Clear loading and human-readable error states
 - Prompt, completion, and total token tracking
@@ -32,7 +32,7 @@ An observable AI chat proof of concept built with Next.js, React, and the Groq C
 5. Replace the placeholder in `.env.local` with your key:
 
    ```env
-   NEXT_PUBLIC_GROQ_API_KEY=gsk_your_real_key
+   GROQ_API_KEY=gsk_your_real_key
    ```
 
 6. Start the app:
@@ -45,26 +45,30 @@ Then open [http://localhost:3000](http://localhost:3000).
 
 ## Implementation notes
 
-The assignment explicitly asks the browser to call Groq and suggests a `NEXT_PUBLIC_` environment variable, so this proof of concept follows that requirement. Public environment variables are included in the browser bundle. In a production application, keep `GROQ_API_KEY` server-side and proxy requests through a protected Next.js route.
+The browser sends chat messages only to the local `/api/chat` route. That
+server-side route reads `GROQ_API_KEY` and forwards the request to Groq, so the
+secret is never included in the browser bundle or exposed in network request
+headers sent by the client.
 
 The active model is `llama-3.1-8b-instant`, a production Llama 3 family model currently supported by Groq.
 
 ## API request
 
-Every request is sent directly to:
+The server-side route sends each request to:
 
 ```text
 https://api.groq.com/openai/v1/chat/completions
 ```
 
-The app manually sends both required headers:
+Only the server route sends the authorization header:
 
 ```text
 Authorization: Bearer <your_key>
 Content-Type: application/json
 ```
 
-No Groq SDK or third-party API wrapper is used.
+No Groq SDK or third-party API wrapper is used. The client calls `/api/chat`
+with conversation history and never receives the API key.
 
 ## Assignment checklist — 28/28 complete
 
@@ -72,7 +76,7 @@ No Groq SDK or third-party API wrapper is used.
 
 - [x] Create a free Groq account
 - [x] Generate an API key and store it in an environment file
-- [x] Configure a fetch call to Groq with Bearer authentication
+- [x] Configure a server-side fetch call to Groq with Bearer authentication
 
 ### Chat interface
 
@@ -104,7 +108,7 @@ No Groq SDK or third-party API wrapper is used.
 
 ### Evaluation requirements
 
-- [x] Call Groq using fetch with both required headers
+- [x] Call Groq from a server-only API route using both required headers
 - [x] Send full conversation history on every API call
 - [x] Use async/await and show loading state
 - [x] Surface API errors without crashes or silent failures
