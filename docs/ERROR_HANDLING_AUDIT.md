@@ -83,10 +83,8 @@ or leave the user in an undefined state" — failing in the most literal way.
    what nobody predicted — a human sentence, **Try again**, and a link home.
    Being route-scoped, the navigation stays on screen.
 
-Note the two apps are on different majors and the boundary contract differs:
-Next 15 (`uis/backoffice`) passes `reset`, Next 16
-(`uis/talent-pipeline-tracker`) renamed it `unstable_retry`. Each copy uses
-its own version's name; they are not interchangeable.
+All three UIs now share Next.js 16.3.3 and the same `reset` error-boundary
+contract. Keeping the copies aligned removes the former cross-major drift.
 
 ---
 

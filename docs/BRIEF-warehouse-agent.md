@@ -4,6 +4,10 @@
 **Prerequisite:** Milestone 5 (inventory + dual database) merged to `main`
 **Scenario:** TrackFlow — last-mile delivery and warehousing, Los Angeles and Zaragoza
 
+**Context authority:** for this agent, `CONTEXT.md` supplies shared TrackFlow
+rules and `docs/CONTEXT-inventory-trackflow.md` supplies the scoped inventory
+API, seed data, and `LA` / `ZGZ` facility geography.
+
 ---
 
 ## The situation
@@ -43,9 +47,10 @@ colleague, who checks the old spreadsheet, which is wrong.
 
 ### The agent
 
-An OpenClaw agent, configured through the standard files in
-`.openclaw/`, that talks to the TrackFlow inventory API as an
-authenticated user.
+An OpenClaw agent whose public, submission-safe workspace files live in
+`.openclaw/`, and which talks to the TrackFlow inventory API as an
+authenticated user. Local credentials, memory, and runtime state remain
+ignored even though the public agent contract is versioned.
 
 It should handle, in plain language:
 

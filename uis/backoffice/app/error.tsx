@@ -19,9 +19,8 @@ import Link from "next/link";
  * Nothing here is a substitute for handling errors where they happen —
  * this is the net under the trapeze, for the cases nobody predicted.
  *
- * Next 15 names the recovery callback `reset`. Next 16 renamed it to
- * `unstable_retry`; uis/talent-pipeline-tracker runs Next 16 and its copy
- * of this file uses that name.
+ * The recovery callback is `reset`, the App Router error-boundary contract
+ * used by the current shared Next.js version across all three UIs.
  */
 export default function Error({
   error,

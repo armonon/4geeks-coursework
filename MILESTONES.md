@@ -21,6 +21,16 @@ The older `milestone-2-programming-fundamentals` branch is retained as
 the original draft. Use `milestone-2-fold-in` for the version integrated
 into the monorepo architecture.
 
+Both backend architecture and inventory ORM were genuinely assigned and
+merged under the label "Milestone 5" in different coursework sequences. Use
+the full branch name—not the number alone—when submitting or discussing one
+of them. Do not rename either historical snapshot.
+
+The warehouse-agent brief on `main` is intentionally unnumbered. Create its
+milestone branch only after the 4Geeks project page supplies the official
+milestone number and slug; the branch audit treats any guessed number as an
+error.
+
 No milestone-named branches or submissions for Milestones 7 and 8 were
 found in the repository or pull-request history during the 2026-08-28
 audit. Do not relabel later feature work as those milestones until the

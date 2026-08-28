@@ -7,10 +7,12 @@
 
 ## The company
 
-**TrackFlow** is a last-mile delivery and warehousing SaaS operating
-in **Mexico** and **Spain**. It sells to mid-market retailers and
-regional logistics operators. The product is used by three kinds of
-people:
+**TrackFlow** is a last-mile delivery and warehousing SaaS whose core
+shipment-pricing product operates in **Mexico** and **Spain**. It sells to
+mid-market retailers and regional logistics operators. A later, scoped
+inventory programme manages facilities in **Los Angeles (USA)** and
+**Zaragoza (Spain)**; that programme does not change the MX/ES freight-quote
+rules below. The product is used by three kinds of people:
 
 - **Warehouse operators** — pick, pack, and load shipments; work on
   handheld scanners inside a warehouse. Their screens must be legible
@@ -31,7 +33,7 @@ paraphrase.
 | **Shipment**     | A parcel or set of parcels moving from one origin to one destination under a single tracking id. |
 | **Route**        | An ordered sequence of Shipments assigned to a Driver for a single working day.                  |
 | **Driver**       | A person authorised to execute a Route. Each Driver belongs to exactly one Warehouse.            |
-| **Warehouse**    | A physical location where shipments enter, are sorted, and depart. Has a country (`MX` / `ES`). |
+| **Warehouse**    | A physical location where shipments enter, are sorted, and depart. Core delivery warehouses use `MX` / `ES`; the scoped inventory programme uses `LA` / `ZGZ`. |
 | **Tenant**       | A retailer or operator paying for TrackFlow. Tenants have their own users, warehouses, drivers, and pricing agreement. |
 | **Service tier** | Contractual promise: `standard` (48 h), `express` (24 h), `priority` (same-day, MX metros only). |
 | **Zone**         | Geographic grouping used for pricing. Metro / regional / remote.                                 |
@@ -55,6 +57,17 @@ paraphrase.
   Do not duplicate this formula in the frontend or in another
   package. UIs consume the exported `quoteShipment` function.
 
+## Scoped context precedence
+
+This file remains authoritative for shared TrackFlow vocabulary, shipment
+pricing, currencies, service tiers, and the public product. The inventory
+milestone has a narrower source of truth at
+[`docs/CONTEXT-inventory-trackflow.md`](./docs/CONTEXT-inventory-trackflow.md).
+For `/inventory` models, endpoints, seeded SKUs, and the warehouse agent, that
+scoped document overrides only the facility geography (`LA` / `ZGZ`) and its
+inventory-specific fields. It does not override the MX/ES freight-quote or
+tenant-pricing rules in this file.
+
 ## Product surfaces in this repo
 
 | Surface                                | Audience                       | Lives in            |
@@ -62,12 +75,13 @@ paraphrase.
 | Corporate website                      | Prospective customers, public  | `./uis/website`     |
 | Backoffice (internal admin app)        | TrackFlow account managers     | `./uis/backoffice`  |
 | Business-logic library (freight quote) | Consumed by backoffice + APIs  | `./packages/business-logic` |
-| Backend services (future milestones)   | Programmatic consumers         | `./services/`       |
-| AI agents (future milestones)          | Internal support & dispatchers | `./agents/`         |
+| Backend services                       | Programmatic consumers         | `./services/`       |
+| AI agents                              | Internal support & dispatchers | `./agents/`, `./.openclaw/` |
 
 ## Out of scope for this monorepo
 
 - Customer-facing consumer app (a shipper does not log into TrackFlow
   directly — they are notified by their retailer).
 - Driver mobile app (native, lives in a separate repo).
-- Anything that is not either MX or ES.
+- Shipment-pricing or tenant expansion beyond MX or ES. The explicitly scoped
+  LA/ZGZ inventory programme is the sole current exception.

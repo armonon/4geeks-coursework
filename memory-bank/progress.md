@@ -4,6 +4,42 @@ Rolling log of substantive changes. Newest first.
 
 ---
 
+## 2026-08-28 · Repository hardening and submission cleanup
+
+**Branch:** `codex/repository-hardening`
+
+- Reconciled the shared MX/ES TrackFlow context with the inventory-specific
+  LA/ZGZ assignment through an explicit, narrow precedence rule.
+- Replaced the blanket `.openclaw/` ignore with a public-deliverable
+  allowlist while keeping credentials, memory, and runtime state denied by
+  default. The warehouse agent remains separate from the coursework steward.
+- Explained the two historically valid Milestone 5 snapshots and kept the
+  warehouse-agent milestone unnumbered until 4Geeks supplies its official
+  project identifier.
+- Made `npm run test` genuinely repository-wide: every npm workspace now has
+  `typecheck`, `test`, and `build`; the root test also runs pytest through
+  `uv` or the existing API virtual environment. Added real website and talent
+  tracker unit tests and removed the nested workspace lockfile.
+- Upgraded all three UIs together to Next.js 16.3.3, resolved the remaining
+  `nanoid` advisory, and added `httpx2` so the FastAPI test client runs without
+  its former Starlette deprecation warning.
+- Added GitHub Actions verification for pull requests and `main`. Updated the
+  GitHub description/topics, disabled the stale template flag, enabled Issues,
+  and enabled secret scanning with push protection.
+- Updated English/Spanish orientation, testing instructions, current stack,
+  and historical audit notes that had become misleading.
+
+Verification on the hardening branch:
+
+- `npm run typecheck` passes for every workspace.
+- 69 JavaScript/TypeScript tests pass; the shared types package also compiles
+  under its own strict TypeScript configuration.
+- 318 FastAPI tests pass without warnings.
+- All packages and all three Next.js 16.3.3 production applications build.
+- `npm audit --omit=dev` reports zero vulnerabilities.
+
+---
+
 ## 2026-08-28 · Milestone branch recovery and OpenClaw coursework agent
 
 **Branch:** `codex/openclaw-coursework-agent`

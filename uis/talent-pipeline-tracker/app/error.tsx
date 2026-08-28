@@ -19,10 +19,8 @@ import Link from "next/link";
  * Nothing here is a substitute for handling errors where they happen —
  * this is the net under the trapeze, for the cases nobody predicted.
  *
- * The recovery callback is `reset`. Next 16 renames it to
- * `unstable_retry`; this app was moved back to Next 15 so the monorepo
- * runs one version of the framework — see the build fix in
- * memory-bank/progress.md.
+ * The recovery callback is `reset`, the App Router error-boundary contract
+ * used by the current shared Next.js version across all three UIs.
  */
 export default function Error({
   error,
