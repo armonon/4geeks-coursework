@@ -11,7 +11,7 @@
 | Node                     | **≥ 20**                              | Enforced via `engines` in root package.json.                 |
 | Backend services         | **FastAPI**                            | Central API under `services/api`, managed with `uv`.          |
 | Persistence              | **TinyDB + SQLModel/PostgreSQL**        | TinyDB covers existing local data; inventory uses PostgreSQL/Supabase. |
-| Coursework agent         | **OpenClaw 2026.6.1+**                 | Dedicated agent uses this repository as its workspace.       |
+| Coursework agent         | **OpenClaw 2026.7.1+**                 | Dedicated agent uses this repository as its workspace.       |
 | CI                       | Not yet configured                    | Rule `MONO-2` covers the plan.                               |
 
 ## Repository layout (what matters right now)

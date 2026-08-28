@@ -12,13 +12,18 @@ From this repository root:
 openclaw agents add 4geeks-coursework --workspace "$(pwd)" --non-interactive
 openclaw agents set-identity --agent 4geeks-coursework --from-identity
 openclaw config set gateway.mode local
+openclaw config set gateway.port 18790 --strict-json
 openclaw doctor --generate-gateway-token --non-interactive --yes
 openclaw gateway install
 openclaw gateway start
-openclaw models auth login --provider openai
+openclaw models --agent 4geeks-coursework auth login --provider openai
 openclaw agents list --bindings
 openclaw doctor --lint
 ```
+
+This Mac uses local port `18790` because `18789` is already assigned to a
+gateway owned by a different macOS account. The coursework gateway remains
+loopback-only and is not exposed to the network.
 
 Do not bind a public messaging channel until the agent has passed the
 repository audit and its GitHub write confirmation rule has been tested.
