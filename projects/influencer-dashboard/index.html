@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,14 +9,18 @@
     >
     <meta name="theme-color" content="#111827">
     <title>Influencer Ads Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 
-<body class="min-w-80 bg-slate-100 text-slate-950 antialiased">
-    <a class="skip-link" href="#main-content">Skip to dashboard</a>
+<body class="min-w-80 bg-slate-100 text-slate-950 antialiased print:bg-white">
+    <a
+        class="fixed left-3 top-3 z-50 -translate-y-[150%] rounded-lg bg-emerald-500 px-4 py-3 font-black text-white no-underline transition-transform duration-150 focus:translate-y-0 print:hidden"
+        href="#main-content"
+    >
+        Skip to dashboard
+    </a>
 
-    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
+    <header class="sticky top-0 z-40 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur print:hidden">
         <nav
             class="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-4 sm:px-6 md:flex-row md:items-center md:justify-between lg:px-8"
             aria-label="Dashboard navigation"
@@ -645,7 +649,7 @@
         </section>
     </main>
 
-    <footer class="border-t border-slate-200 bg-slate-950 px-4 py-6 text-sm text-slate-300 sm:px-6 lg:px-8">
+    <footer class="border-t border-slate-200 bg-slate-950 px-4 py-6 text-sm text-slate-300 sm:px-6 lg:px-8 print:hidden">
         <div class="mx-auto flex w-full max-w-7xl flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <p class="font-semibold">Influencer Ads Dashboard</p>
             <p>Static HTML + Tailwind CSS v4. Sample data for dashboard structure practice.</p>
