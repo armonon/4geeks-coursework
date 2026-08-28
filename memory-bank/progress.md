@@ -432,3 +432,10 @@ Three consequential edits came with it:
   up precisely as `Cannot read properties of null (reading 'useContext')`
   during prerender). The backoffice's 56 error-handling assertions and the
   supplier directory check were re-run against the shared hoisted React.
+
+## 2026-08-28 — Portable Linux native dependencies
+
+- GitHub Actions exposed npm's cross-platform optional-dependency lockfile
+  bug during clean Ubuntu installs. The root now declares the exact Linux
+  x64 native packages used by Lightning CSS and Tailwind CSS Oxide so
+  `npm ci` installs both bindings deterministically on the CI runner.
