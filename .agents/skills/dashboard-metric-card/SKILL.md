@@ -1,6 +1,6 @@
 ---
 name: dashboard-metric-card
-description: Add or modify a KPI card on the financial dashboard so it fits the project's conventions end-to-end — type, aggregation, formatting, colour badge, and accessibility wiring. Use when asked to "add a KPI", "show a new metric on the dashboard", or "change how X displays on the header cards".
+description: Add or modify a KPI card on this financial dashboard with the required type, aggregation, formatting, accessibility, and tests. Use for requests to add a KPI, show a new metric, or change a header card; do not use for unrelated charts or backend-only metrics.
 license: MIT
 metadata:
   author: armonon
@@ -116,9 +116,9 @@ npm test
 
 - A single PR / commit with edits to exactly four files:
   `financial-types.ts`, `financial-utils.ts`, `financial-utils.test.ts`,
-  `kpi-row.tsx`. If your diff touches `kpi-card.tsx` or the API
-  client, stop and re-read this skill — you're probably about to
-  duplicate logic that already exists.
+  `kpi-row.tsx`. A justified new visual variant may also require
+  `kpi-card.tsx` and `frontend/src/index.css`; document that exception
+  in the commit body. Changes to the API client are out of scope.
 - Commit message references this skill by name in the trailer:
   `Skill: dashboard-metric-card`.
 

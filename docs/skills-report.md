@@ -79,9 +79,11 @@ else.
 
 ## Custom skill authored
 
-`./.skills/dashboard-metric-card/SKILL.md` — end-to-end recipe for
+`.agents/skills/dashboard-metric-card/SKILL.md` — end-to-end recipe for
 adding a new KPI card. Covers types, derivation, formatting, a11y
-inheritance, and tests, with a checklist of anti-patterns to reject.
+inheritance, and tests, with explicit acceptance criteria and a checklist of
+anti-patterns to reject. It lives beside the installed skills so agents can
+discover it through the repository convention documented in `AGENTS.md`.
 
 ## Verification
 

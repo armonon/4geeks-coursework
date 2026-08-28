@@ -40,7 +40,7 @@ using externally-authored agent skills.
 
 ### Custom skill authored
 
-`./.skills/dashboard-metric-card/SKILL.md` — end-to-end procedure to
+`.agents/skills/dashboard-metric-card/SKILL.md` — end-to-end procedure to
 add or modify a KPI card. Codifies conventions we've had to explain
 verbally in past reviews (formatter usage, badge variants, aria
 inheritance, test coverage requirement). Short and specific by design.
