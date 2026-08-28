@@ -5,14 +5,14 @@
 | Layer                    | Choice                                | Notes                                                        |
 | ------------------------ | ------------------------------------- | ------------------------------------------------------------ |
 | Package manager          | **npm** (workspaces)                  | One root `package.json` declares workspaces under `packages/*`, `uis/*`. |
-| Frontend framework       | **Next.js 15** (App Router) + React 19 | Both `uis/website` and `uis/backoffice`. TypeScript strict, Tailwind v4. |
+| Frontend framework       | **Next.js 16.3.3** (App Router) + React 19 | Website, backoffice, and talent tracker share one patched major. |
 | Business-logic package   | **TypeScript** (`tsc` builds to `dist/`) | `packages/business-logic`, pure functions, unit-tested with `node --test`. |
 | Package linking          | Workspace protocol (`"@trackflow/business-logic": "*"`) | Backoffice imports the package by name; no relative `../` reach across `uis/`. |
-| Node                     | **≥ 20**                              | Enforced via `engines` in root package.json.                 |
+| Node                     | **≥ 20.9**                            | Next.js 16 minimum, enforced by the root `engines`.          |
 | Backend services         | **FastAPI**                            | Central API under `services/api`, managed with `uv`.          |
 | Persistence              | **TinyDB + SQLModel/PostgreSQL**        | TinyDB covers existing local data; inventory uses PostgreSQL/Supabase. |
 | Coursework agent         | **OpenClaw 2026.7.1+**                 | Dedicated agent uses this repository as its workspace.       |
-| CI                       | Not yet configured                    | Rule `MONO-2` covers the plan.                               |
+| CI                       | **GitHub Actions**                     | PRs and `main` run bootstrap, typecheck, JS/Python tests, builds, and production audit. |
 
 ## Repository layout (what matters right now)
 
@@ -24,9 +24,11 @@
 ./.agents/skills/                — one-objective, verifiable agent skills
 ./MILESTONES.md                  — stable coursework branch and submission map
 ./IDENTITY.md / SOUL.md          — OpenClaw coursework agent identity and limits
+./.openclaw/                     — allowlisted public warehouse-agent deliverables
 ./packages/business-logic/       — Milestone 2 TypeScript module (freight quote)
 ./uis/website/                   — public corporate Next.js site
 ./uis/backoffice/                — internal Next.js app, imports @trackflow/business-logic
+./uis/talent-pipeline-tracker/    — recruiting workflow UI
 ./services/api/                  — FastAPI auth, incidents, suppliers, and inventory
 ./skills/                        — OpenClaw-visible reusable coursework skills
 ```
@@ -37,9 +39,10 @@
    `packages/shared/package.json` shape and Node ≥20 ships npm out of
    the box in Codespaces. Reverse if a future workspace exceeds
    npm's install performance ceiling.
-2. **Next.js 15 App Router for both UIs**, not one Next.js + one Vite.
-   Rationale: consistency for account managers deploying the two
-   apps; shared knowledge of Next primitives (metadata API,
+2. **One patched Next.js major for all UIs**, not mixed framework majors.
+   The original Milestone 4 choice was Next.js 15; the repository-hardening
+   pass upgraded all three apps to 16.3.3 together. Rationale: consistency
+   for contributors and one supported dependency graph; shared knowledge of Next primitives (metadata API,
    `next/image`, `next/font`). Cost: bigger dev-time footprint than
    Vite.
 3. **Business logic as a workspace package**, not copied into
@@ -67,17 +70,14 @@
 
 ## Known technical debt
 
-- No CI workflow yet — captured under rule `MONO-2` as the next
-  infrastructure task.
-- `packages/shared/types` (`@repo/shared-types`) is untouched; the
-  new work goes under `@trackflow/business-logic`. A follow-up may
-  consolidate the two.
 - No shared UI kit; `uis/website` and `uis/backoffice` each duplicate
-  a `Button` component. Deferred until a third UI appears.
-- `npm audit --omit=dev` reports four high-severity advisories in the current
-  Next.js 15 dependency graph (`next`, `nanoid`, `postcss`, and `sharp`). The
-  suggested complete fix is a Next.js 16 major upgrade, so it was not folded
-  into the milestone-branch/OpenClaw organization change.
+  a `Button` component. The talent tracker is the third UI, but extraction is
+  deferred until the components share an actual API instead of only a name.
+- The warehouse-agent brief is versioned, but its authenticated transcript
+  remains intentionally absent until a real operative account and live
+  inventory API are available. It must never be fabricated.
+- Milestones 7 and 8 and the warehouse agent's official milestone number
+  remain unmapped until the 4Geeks project pages provide their identifiers.
 
 ## Runbook
 

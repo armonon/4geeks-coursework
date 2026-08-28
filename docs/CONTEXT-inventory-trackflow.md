@@ -8,7 +8,12 @@
 
 ## Your Company
 
-**TrackFlow** is a last-mile delivery and warehouse management company operating in Los Angeles (USA) and Zaragoza (Spain). Its core business is managing warehouse inventory on behalf of e-commerce brands — fashion, electronics, and cosmetics — that outsource their entire logistics operation.
+For this scoped inventory milestone, **TrackFlow** manages warehouse operations in Los Angeles (USA) and Zaragoza (Spain) on behalf of e-commerce brands — fashion, electronics, and cosmetics — that outsource their logistics operation.
+
+This document overrides the root `CONTEXT.md` only for `/inventory` fields,
+endpoints, seeded data, and the `LA` / `ZGZ` facility geography. The root
+context remains authoritative for TrackFlow's MX/ES shipment-pricing product,
+currencies, service tiers, and shared vocabulary.
 
 Every product unit that flows through TrackFlow's warehouses must be tracked precisely: when it arrives from the client brand, and when it leaves for a customer delivery. A discrepancy in stock is a contractual issue, not just an internal problem. Clients expect real-time accuracy.
 

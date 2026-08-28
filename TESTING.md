@@ -49,6 +49,10 @@ From the repo root:
 npm run test
 ```
 
+The root command runs every npm-workspace test and then the complete FastAPI
+pytest suite. It uses `uv` when available and falls back to
+`services/api/.venv` for an already-synchronised local environment.
+
 ---
 
 ## The test plan
@@ -170,7 +174,8 @@ Two non-authentication endpoint groups, same three tiers:
 
 ### Backend — pytest
 
-**286 tests pass** — 73 new for AUTH-088, 17 more for API-042.
+**318 backend tests pass** — including the inventory ORM coverage added after
+AUTH-088 and API-042.
 
 | Module | Tests | Endpoint |
 |---|---|---|
@@ -370,4 +375,3 @@ arrange/act/assert scaffolding were generated, then read line by line —
 which is how the five wrong assumptions above were caught: each was a
 generated assertion that looked plausible and turned out to encode a belief
 about the system that was not true.
-

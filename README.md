@@ -107,8 +107,8 @@ Read the linked `README.md` inside each folder before you start coding there.
 
 | Path                         | Purpose                                                                   | What you do here                                                                                              |
 | ---------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| [`CONTEXT.md`](./CONTEXT.md) | Single source of truth for your company (Brasaland, TrackFlow, or Nexova) | **First step:** copy your assigned company briefing here so every app, agent, and prompt uses the same domain |
-| `docker-compose.yml`         | Local dev orchestration for the whole stack                               | Keep at repo root — wires `services/`, databases, and other containers from one place                         |
+| [`CONTEXT.md`](./CONTEXT.md) | Shared TrackFlow context and scoped-precedence rules                     | Read it before changing domain models, product copy, or business rules                                         |
+| `.github/workflows/ci.yml`   | Required monorepo verification                                             | Runs Node and Python checks for pull requests and `main`                                                       |
 | `README.md` / `README.es.md` | This guide                                                                | Orientation — you are here                                                                                    |
 
 ### `uis/` — user interfaces
@@ -249,7 +249,9 @@ Read the linked `README.md` inside each folder before you start coding there.
 
 - Dockerfiles, Terraform, K8s manifests, Nginx configs, CI/CD pipelines
 
-**Keep at repo root:** `docker-compose.yml` — orchestrates local dev for `services/`, databases, and other containers from one place.
+If local container orchestration is introduced later, keep
+`docker-compose.yml` at the repository root so it can coordinate `services/`,
+databases, and UIs. There is no compose file today.
 
 → See [`infra/README.md`](./infra/README.md)
 
@@ -309,8 +311,8 @@ Is it a CLI tool with its own package?     → internal/
 ```text
 ai-engineering-company-project-monorepo/
 ├── README.md / README.es.md   # This guide
-├── CONTEXT.md                 # ← Replace with your company briefing
-├── docker-compose.yml         # ← Local dev orchestration (repo root)
+├── CONTEXT.md                 # Canonical TrackFlow context and scoped overrides
+├── .github/workflows/ci.yml   # Required Node + Python verification
 ├── uis/                       # Frontends (website, backoffice, dashboards)
 ├── services/                  # Centralized FastAPI company API
 ├── data/

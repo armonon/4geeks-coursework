@@ -7,4 +7,10 @@ Each subfolder under `packages/` should represent **one versionable package** (f
 - **Main purpose**: encourage reuse and consistency across all company deliverables.
 - **Recommendation**: document packages as you add them—their public API and how they are consumed from `apps/`, `agents/`, and `workflows/`.
 
+Current packages include the freight-quote business logic, programming
+fundamentals, incident analyser, and `shared`, which deliberately contains
+both the small TypeScript type surface and Python incident-domain package.
+The root npm commands verify every JavaScript/TypeScript workspace; the API
+environment installs the Python packages through `services/api/pyproject.toml`.
+
 > _Spanish version: [README.es.md](./README.es.md)._
