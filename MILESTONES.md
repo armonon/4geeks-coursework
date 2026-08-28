@@ -13,6 +13,7 @@ stable submission snapshot from the same repository.
 | 3 — Talent pipeline | `milestone-3-talent-pipeline` | Talent Pipeline Tracker under `uis/` | Original merged PR #4 head `f769ede` |
 | 4 — AI-assisted engineering | `milestone-4` | Context, memory bank, agent rules, skills, website and backoffice | Original merged PR #1 head `d4af128` |
 | 5 — Backend architecture | `milestone-5-strengthening` | Architecture proposal completed against the rubric | Original merged PR #6 head `d0d7a38`; initial draft remains on `milestone-5` |
+| 5 — Inventory ORM | `milestone-5-inventory-orm` | SQLModel inventory API with PostgreSQL/Supabase support | Original merged PR #17 head `28caa9d` |
 | 6 — Incident analyser | `milestone-6-incident-analyzer` | Shared analyser, CLI, API and backoffice integration | Original merged PR #7 head `a396534` |
 | 9 — Supplier directory | `milestone-9-supplier-directory` | FastAPI/TinyDB supplier directory and backoffice UI | Original merged PR #9 head `dcfb896` |
 

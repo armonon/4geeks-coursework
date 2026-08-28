@@ -10,7 +10,7 @@
 | Package linking          | Workspace protocol (`"@trackflow/business-logic": "*"`) | Backoffice imports the package by name; no relative `../` reach across `uis/`. |
 | Node                     | **≥ 20**                              | Enforced via `engines` in root package.json.                 |
 | Backend services         | **FastAPI**                            | Central API under `services/api`, managed with `uv`.          |
-| Persistence              | **TinyDB**                             | Local service data under ignored `services/api/data/`.       |
+| Persistence              | **TinyDB + SQLModel/PostgreSQL**        | TinyDB covers existing local data; inventory uses PostgreSQL/Supabase. |
 | Coursework agent         | **OpenClaw 2026.6.1+**                 | Dedicated agent uses this repository as its workspace.       |
 | CI                       | Not yet configured                    | Rule `MONO-2` covers the plan.                               |
 
@@ -27,7 +27,7 @@
 ./packages/business-logic/       — Milestone 2 TypeScript module (freight quote)
 ./uis/website/                   — public corporate Next.js site
 ./uis/backoffice/                — internal Next.js app, imports @trackflow/business-logic
-./services/api/                  — FastAPI authentication, incidents, and suppliers
+./services/api/                  — FastAPI auth, incidents, suppliers, and inventory
 ./skills/                        — OpenClaw-visible reusable coursework skills
 ```
 

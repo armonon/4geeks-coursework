@@ -37,6 +37,16 @@ const snapshots = [
     paths: ["docs/ARCHITECTURE_PROPOSAL.md"],
   },
   {
+    milestone: 5,
+    branch: "milestone-5-inventory-orm",
+    sha: "28caa9dcebc0cdaad442c1635e527374973520a5",
+    paths: [
+      "docs/CONTEXT-inventory-trackflow.md",
+      "services/api/routers/inventory.py",
+      "services/api/tests/test_inventory.py",
+    ],
+  },
+  {
     milestone: 6,
     branch: "milestone-6-incident-analyzer",
     sha: "a3965340cb1344f44eeffffa7a39fef17f2c70cd",
