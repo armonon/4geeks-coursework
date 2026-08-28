@@ -101,12 +101,6 @@ export default function Home() {
     const content = text.trim();
     if (!content || loading) return;
 
-    const apiKey = process.env.NEXT_PUBLIC_GROQ_API_KEY;
-    if (!apiKey || apiKey.includes("your_groq")) {
-      setError("Add your Groq API key to .env.local, then restart the development server.");
-      return;
-    }
-
     const userMessage: Message = {
       id: crypto.randomUUID(),
       role: "user",
@@ -122,27 +116,20 @@ export default function Home() {
     const requestStarted = performance.now();
 
     try {
-      const response = await fetch(
-        "https://api.groq.com/openai/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: MODEL,
-            messages: conversation.map(({ role, content: messageContent }) => ({
-              role,
-              content: messageContent,
-            })),
-          }),
-        },
-      );
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: conversation.map(({ role, content: messageContent }) => ({
+            role,
+            content: messageContent,
+          })),
+        }),
+      });
 
       const data = (await response.json()) as GroqResponse;
       if (!response.ok) {
-        throw new Error(data.error?.message || `Groq request failed (${response.status}).`);
+        throw new Error(data.error?.message || `Chat request failed (${response.status}).`);
       }
 
       const assistantContent = data.choices?.[0]?.message?.content;
