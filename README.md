@@ -16,6 +16,8 @@ This monorepo collects coursework completed for 4Geeks Academy. Each project rem
 | `influencer-dashboard` | HTML and Tailwind CSS | `main` | [armonon/influencer-dashboard](https://github.com/armonon/influencer-dashboard) |
 | `agenthub-admin-panel` | HTML and Tailwind CSS | `main` | [armonon/agenthub-admin-panel](https://github.com/armonon/agenthub-admin-panel) |
 | `cinema-seat-manager` | TypeScript fundamentals | `main` | [armonon/cinema-seat-manager](https://github.com/armonon/cinema-seat-manager) |
+| `edutrack-data-audit` | SQL data auditing | `main` | [armonon/edutrack-data-audit](https://github.com/armonon/edutrack-data-audit) |
+| `edutrack-related-tables` | Relational SQL and JOINs | `main` | [armonon/edutrack-related-tables](https://github.com/armonon/edutrack-related-tables) |
 | `maison-lumiere-ecommerce` | Milestone 1 | `main` | [armonon/maison-lumiere-ecommerce](https://github.com/armonon/maison-lumiere-ecommerce) |
 | `maison-lumiere-data-utilities` | Milestone 2 | `main` | [armonon/maison-lumiere-data-utilities](https://github.com/armonon/maison-lumiere-data-utilities) |
 | `airbnb-ui-clone` | Next.js and Tailwind CSS | `main` | [armonon/airbnb-ui-clone](https://github.com/armonon/airbnb-ui-clone) |
@@ -36,6 +38,17 @@ Open the project directory and follow its own README. Projects keep their origin
 cd projects/influencer-dashboard
 python3 server.py
 ```
+
+## Canonical development workflow
+
+Use this monorepo as the working home for future 4Geeks coursework. Start each change from `main`, use a focused branch such as `codex/<project>-<change>`, and keep changes inside that project's directory under `projects/`.
+
+The standalone repositories remain available as submission snapshots and history sources. Do not delete them while a project is awaiting grading or resubmission.
+
+The two EduTrack imports also have source-specific monorepo branches:
+
+- `codex/import-edutrack-data-audit`
+- `codex/import-edutrack-related-tables`
 
 ## History and source repositories
 

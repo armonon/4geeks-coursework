@@ -13,6 +13,8 @@ healthcore-public-website                   main
 influencer-dashboard                        main
 agenthub-admin-panel                        main
 cinema-seat-manager                         main
+edutrack-data-audit                         main
+edutrack-related-tables                     main
 maison-lumiere-ecommerce                    main
 maison-lumiere-data-utilities               main
 airbnb-ui-clone                             main
