@@ -21,8 +21,9 @@ Rolling log of substantive changes. Newest first.
   `uv` or the existing API virtual environment. Added real website and talent
   tracker unit tests and removed the nested workspace lockfile.
 - Upgraded all three UIs together to Next.js 16.3.3, resolved the remaining
-  `nanoid` advisory, and added `httpx2` so the FastAPI test client runs without
-  its former Starlette deprecation warning.
+  `nanoid` advisory, made the root lockfile carry Lightning CSS's Linux native
+  binary for portable `npm ci`, and added `httpx2` so the FastAPI test client
+  runs without its former Starlette deprecation warning.
 - Added GitHub Actions verification for pull requests and `main`. Updated the
   GitHub description/topics, disabled the stale template flag, enabled Issues,
   and enabled secret scanning with push protection.

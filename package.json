@@ -10,6 +10,9 @@
     "packages/*",
     "uis/*"
   ],
+  "optionalDependencies": {
+    "lightningcss-linux-x64-gnu": "1.32.0"
+  },
   "scripts": {
     "bootstrap": "npm run build --workspace @trackflow/business-logic && npm run build --workspace @trackflow/programming-fundamentals",
     "typecheck": "npm run typecheck --workspaces --if-present",
