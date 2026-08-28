@@ -9,8 +9,9 @@
 | Business-logic package   | **TypeScript** (`tsc` builds to `dist/`) | `packages/business-logic`, pure functions, unit-tested with `node --test`. |
 | Package linking          | Workspace protocol (`"@trackflow/business-logic": "*"`) | Backoffice imports the package by name; no relative `../` reach across `uis/`. |
 | Node                     | **≥ 20**                              | Enforced via `engines` in root package.json.                 |
-| Backend services         | Not yet implemented                   | Landing in later milestones under `services/`.               |
-| Persistence              | None yet                              | Business logic is pure; no database chosen.                  |
+| Backend services         | **FastAPI**                            | Central API under `services/api`, managed with `uv`.          |
+| Persistence              | **TinyDB**                             | Local service data under ignored `services/api/data/`.       |
+| Coursework agent         | **OpenClaw 2026.6.1+**                 | Dedicated agent uses this repository as its workspace.       |
 | CI                       | Not yet configured                    | Rule `MONO-2` covers the plan.                               |
 
 ## Repository layout (what matters right now)
@@ -21,10 +22,13 @@
 ./memory-bank/                   — projectbrief, techContext, progress (this file)
 ./.agents/rules/                 — dev rules with explicit scopes
 ./.agents/skills/                — one-objective, verifiable agent skills
+./MILESTONES.md                  — stable coursework branch and submission map
+./IDENTITY.md / SOUL.md          — OpenClaw coursework agent identity and limits
 ./packages/business-logic/       — Milestone 2 TypeScript module (freight quote)
 ./uis/website/                   — public corporate Next.js site
 ./uis/backoffice/                — internal Next.js app, imports @trackflow/business-logic
-./services/, ./agents/, ...      — reserved for later milestones (READMEs describe intent)
+./services/api/                  — FastAPI authentication, incidents, and suppliers
+./skills/                        — OpenClaw-visible reusable coursework skills
 ```
 
 ## Architectural decisions taken in Milestone 4
@@ -70,6 +74,10 @@
   consolidate the two.
 - No shared UI kit; `uis/website` and `uis/backoffice` each duplicate
   a `Button` component. Deferred until a third UI appears.
+- `npm audit --omit=dev` reports four high-severity advisories in the current
+  Next.js 15 dependency graph (`next`, `nanoid`, `postcss`, and `sharp`). The
+  suggested complete fix is a Next.js 16 major upgrade, so it was not folded
+  into the milestone-branch/OpenClaw organization change.
 
 ## Runbook
 

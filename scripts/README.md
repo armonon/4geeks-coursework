@@ -1,6 +1,6 @@
 # `scripts/`
 
-Standalone scripts. Currently one:
+Standalone scripts for TrackFlow runtime work and read-only coursework checks.
 
 ## `analyze.py` — Incident Report Analyser (Phase 1)
 
@@ -25,3 +25,18 @@ Flags:
 The bundled `incidents-trackflow.csv` is the 100-row sample from the
 syllabus. Expected values are documented in `CONTEXT.md`
 (§ Data Distribution).
+
+## Read-only 4Geeks status scripts
+
+Copy `.env.example` to the ignored `.env` file and add the student token,
+then run any of these from the repository root:
+
+```bash
+node scripts/verify-4geeks-session.mjs
+node scripts/query-4geeks-projects.mjs
+node scripts/query-4geeks-pending.mjs
+node scripts/query-4geeks-progress.mjs
+```
+
+The shared `4geeks-client.mjs` performs authenticated GET requests only and
+does not print the token or personal profile fields.

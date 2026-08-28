@@ -4,6 +4,41 @@ Rolling log of substantive changes. Newest first.
 
 ---
 
+## 2026-08-28 · Milestone branch recovery and OpenClaw coursework agent
+
+**Branch:** `codex/openclaw-coursework-agent`
+
+- Restored the milestone branches that could be proven from original commit
+  and pull-request history: Milestones 1, 2, 3, 4, 5, 6, and 9.
+- Added `MILESTONES.md` as the canonical submission branch map. Milestones 7
+  and 8 remain explicitly unmapped instead of being inferred from feature
+  branch names.
+- Added current OpenClaw workspace files (`IDENTITY.md`, `SOUL.md`,
+  `TOOLS.md`) and a setup runbook in `OPENCLAW.md`.
+- Added a read-only milestone snapshot audit skill and read-only 4Geeks API
+  status skills. Secrets stay in the ignored root `.env` file.
+- Corrected the root README and tech context, which still described the
+  populated repository as an unused starter template.
+
+Verification completed on the organization branch:
+
+- OpenClaw sees all five coursework skills; gateway configuration and local
+  gateway authentication pass their health checks.
+- `npm run typecheck`, `npm run test`, and `npm run build` pass after the
+  documented `npm run bootstrap` fresh-clone step.
+- The FastAPI pytest suite passes in an ignored local virtual environment.
+- The read-only milestone audit verifies every published snapshot against its
+  exact historical commit and required deliverable paths.
+
+Local OpenClaw model authentication and the private `TOKEN_4GEEKS` value are
+still user-supplied credentials; neither is stored in Git.
+
+The active development repository is
+`armonon/ai-engineering-company-project-monorepo`; the separate
+`4geeks-coursework` repository remains a historical archive.
+
+---
+
 ## 2026-08-14 · Fold Milestone 2 into `packages/programming-fundamentals`
 
 **Branch:** `milestone-2-fold-in`

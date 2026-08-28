@@ -1,9 +1,9 @@
-# AI Engineering Company Project — Student Template
+# TrackFlow AI Engineering Coursework Monorepo
 
 [![4Geeks Academy](https://img.shields.io/badge/4Geeks-Academy-blue)](https://4geeksacademy.com)
 [![AI Engineering](https://img.shields.io/badge/track-AI%20Engineering-green)](https://4geeksacademy.com/es/programas-de-carrera/ingenieria-ia)
 
-_Base template for transversal projects in the AI Engineering Career Program — 4Geeks Academy._
+_One cumulative TrackFlow repository for the AI Engineering Career Program — 4Geeks Academy._
 
 _Estas instrucciones tambien estan disponibles en [espanol](./README.es.md)._
 
@@ -11,22 +11,23 @@ _Estas instrucciones tambien estan disponibles en [espanol](./README.es.md)._
 
 ## Purpose
 
-This repository is the **starter template** for transversal projects. You will work on real company scenarios (Brasaland, TrackFlow, Nexova), building deliverables that map to course milestones (Web, Programming, Backend, Telemetry, RAG, Agents, Workflows, Real-time).
+This repository is the canonical home for the **TrackFlow transversal project**. Every accepted milestone is integrated into `main`, while its submission snapshot remains available on a milestone branch.
 
-- Create a template from this repository.
-- Replace the placeholder `CONTEXT.md` with your assigned company context.
-- Use `skills/` and the directory-level `README.md` files as working guidance.
+- Read [`MILESTONES.md`](./MILESTONES.md) before choosing a branch.
+- Treat [`CONTEXT.md`](./CONTEXT.md) as the canonical TrackFlow company context.
+- Use [`AGENTS.md`](./AGENTS.md), `skills/`, and directory-level README files as working guidance.
+- Use [`OPENCLAW.md`](./OPENCLAW.md) to register the dedicated coursework agent.
 
 ---
 
 ## How to start
 
-1. **Use this repository as a template** and create your own project repo.
-2. **Clone** your repository (or open it in Codespaces).
-3. **Replace** `CONTEXT.md` with the full context for your assigned company.
-4. **Read this folder guide** and open the `README.md` of the folder you are working in.
-5. **Start implementing** in the right folder — do not dump everything in the root.
-6. **Document** what you add: each new app, service, agent, or pipeline gets a subfolder + README.
+1. **Clone this repository** or open it in Codespaces.
+2. **Read** `AGENTS.md`, `CONTEXT.md`, `MILESTONES.md`, and the memory bank.
+3. **Fetch branches** and select the milestone named by the current assignment.
+4. **Start from the latest accepted `main`** when creating a new milestone branch.
+5. **Implement in the correct folder** — do not dump work in the root or create another TrackFlow repository.
+6. **Run the complete verification workflow** before committing or submitting.
 
 ---
 
@@ -85,13 +86,16 @@ You are building **one company** across many milestones and projects. Each top-l
 
 ---
 
-## Current status of the template
+## Current status
 
-> 💡 This repository currently provides a **base folder structure and documentation skeleton** only. It does not include runnable apps or global scripts yet.
->
-> - `CONTEXT.md` is a placeholder and must be replaced with your assigned company context.
-> - There is no root `AGENTS.md` yet.
-> - Shared package metadata exists in `packages/shared/package.json` (`@repo/shared-types`), but no workspace runner is configured at root.
+This is an active monorepo, not an unused template. It contains the TrackFlow
+public website, backoffice, talent tracker, shared TypeScript packages,
+FastAPI services, incident analysis, authentication, and supplier management.
+The root npm workspace provides aggregate typecheck, test, and build commands.
+
+Milestone submission branches are catalogued in `MILESTONES.md`. Milestones 7
+and 8 are intentionally marked unmapped until their 4Geeks requirements are
+confirmed.
 
 ---
 

@@ -24,3 +24,10 @@ services/api/data/
 .coverage
 .coverage.*
 htmlcov/
+
+# OpenClaw local memory and private workspace context
+/USER.md
+/MEMORY.md
+/BOOTSTRAP.md
+/memory/
+/.openclaw/
