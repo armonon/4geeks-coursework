@@ -27,7 +27,7 @@ This monorepo collects coursework completed for 4Geeks Academy. Each project rem
 | `ai-engineering-company-project-monorepo` | Milestone 4 | `milestone-4` | [armonon/ai-engineering-company-project-monorepo](https://github.com/armonon/ai-engineering-company-project-monorepo) |
 | `ai-eng-financial-dashboard-context-project` | Context engineering | `main` | [armonon/ai-eng-financial-dashboard-context-project](https://github.com/armonon/ai-eng-financial-dashboard-context-project) |
 | `frontend-specs-financial-dashboard` | Spec-driven development | `feature/frontend-specs` | [armonon/frontend-specs-financial-dashboard](https://github.com/armonon/frontend-specs-financial-dashboard) |
-| `financial-dashboard-agent-skills` | Agent skills | `feature/agent-skills` | [armonon/financial-dashboard-agent-skills](https://github.com/armonon/financial-dashboard-agent-skills) |
+| `financial-dashboard-agent-skills` | Agent skills | `main` | [armonon/financial-dashboard-agent-skills](https://github.com/armonon/financial-dashboard-agent-skills) |
 | `exercise-terminal-challenge-slides` | Course reference | `master` | [armonon/exercise-terminal-challenge-slides](https://github.com/armonon/exercise-terminal-challenge-slides) |
 
 ## Working with a project
