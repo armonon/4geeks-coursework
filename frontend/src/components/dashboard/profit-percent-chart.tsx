@@ -37,6 +37,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
       <p className="font-semibold text-foreground mb-1">{label}</p>
       <div className="flex items-center gap-2">
         <span
+          aria-hidden="true"
           className="inline-block h-2 w-2 rounded-full"
           style={{ backgroundColor: 'var(--chart-profit)' }}
         />
@@ -63,20 +64,34 @@ export function ProfitPercentChart({ data, loading }: ProfitPercentChartProps) {
   }
 
   const hasData = data.some((d) => d.profitPercent !== 0)
+  const firstMonth = data[0]?.month
+  const lastMonth = data[data.length - 1]?.month
+  const rangeLabel = firstMonth && lastMonth ? ` from ${firstMonth} to ${lastMonth}` : ''
 
   return (
     <Card className="border-border/60">
       <CardHeader className="pb-4">
-        <CardTitle className="text-base font-semibold">Profit Margin %</CardTitle>
+        <CardTitle>
+          <h3 className="text-base font-semibold m-0">Profit Margin %</h3>
+        </CardTitle>
         <CardDescription>Monthly profit as a percentage of total income</CardDescription>
       </CardHeader>
       <CardContent>
         {!hasData ? (
-          <div className="flex h-[280px] items-center justify-center text-muted-foreground text-sm">
+          <div
+            role="status"
+            className="flex h-[280px] items-center justify-center text-muted-foreground text-sm"
+          >
             No data available to display
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={280}>
+          <figure
+            role="group"
+            aria-label={`Line chart of monthly profit margin percentage${rangeLabel}`}
+            className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring"
+            tabIndex={0}
+          >
+            <ResponsiveContainer width="100%" height={280}>
             <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" strokeOpacity={0.6} />
               <XAxis
@@ -106,6 +121,12 @@ export function ProfitPercentChart({ data, loading }: ProfitPercentChartProps) {
               />
             </LineChart>
           </ResponsiveContainer>
+          <figcaption className="sr-only">
+            Profit margin per month{rangeLabel}: {data
+              .map((d) => `${d.month}, ${d.profitPercent.toFixed(1)} percent`)
+              .join('; ')}.
+          </figcaption>
+          </figure>
         )}
       </CardContent>
     </Card>
