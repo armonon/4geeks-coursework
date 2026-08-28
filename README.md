@@ -13,7 +13,7 @@ This repository uses the official 4Geeks Academy `html-hello` template environme
 ## Project structure
 
 - `index.html`: semantic dashboard structure with top KPIs, middle drivers, and bottom operational details.
-- `styles.css`: small support stylesheet for accessibility and print behavior. Responsive layout is handled with Tailwind CSS v4 utility classes.
+- All visual, responsive, accessibility-focus, and print behavior is expressed with Tailwind CSS v4 utility classes in `index.html`; there is no custom stylesheet or second CSS framework.
 - `server.py`: 4Geeks Flask preview server.
 - `learn.json`: 4Geeks project metadata.
 
