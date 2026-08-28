@@ -133,6 +133,37 @@ def _to_sku_read(sku: SKU, totals: dict[tuple[int, str], int]) -> SKURead:
     )
 
 
+def _lock_sku_or_404(session: Session, sku_id: int) -> SKU:
+    """Fetch a SKU and hold a row lock on it for the rest of the transaction.
+
+    This is what makes the stock check trustworthy. Without it the check
+    and the insert are separable: two dispatches for the same SKU both
+    read 20 units available, both pass, and both commit — shipping 30
+    units that do not exist. Measured before this lock: 7 of 8 concurrent
+    pairs oversold, leaving stock at -10.
+
+    `SELECT ... FOR UPDATE` makes the second request wait until the first
+    commits, so it re-reads the reduced figure and is correctly rejected.
+    A row lock rather than an application lock because the API may run as
+    more than one process, and a lock inside one of them would not be
+    seen by the others.
+
+    SQLite has no FOR UPDATE and serialises writers itself, so the clause
+    is only emitted on backends that support it.
+    """
+    query = select(SKU).where(SKU.id == sku_id)
+    if session.get_bind().dialect.name != "sqlite":
+        query = query.with_for_update()
+
+    sku = session.exec(query).first()
+    if sku is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No SKU with id {sku_id}.",
+        )
+    return sku
+
+
 def _get_sku_or_404(session: Session, sku_id: int) -> SKU:
     sku = session.get(SKU, sku_id)
     if sku is None:
@@ -232,8 +263,15 @@ def create_inbound(
     caller: UserInDB = Depends(get_current_user),
 ) -> StockEntryRead:
     """A receipt from a client brand. Adds stock; never rejected on stock
-    grounds, since it can only increase the figure."""
-    _get_sku_or_404(session, payload.sku_id)
+    grounds, since it can only increase the figure.
+
+    Still takes the same row lock as an exit. A receipt landing between
+    another request's stock check and its insert would not cause an
+    oversell — it can only add units — but taking the lock keeps every
+    write to one SKU serialised, so the movement history cannot
+    interleave in ways that are hard to reason about later.
+    """
+    _lock_sku_or_404(session, payload.sku_id)
 
     entry = StockEntry(
         sku_id=payload.sku_id,
@@ -273,7 +311,10 @@ def create_outbound(
     The check is scoped to the warehouse on the exit. Units in Zaragoza
     cannot satisfy a dispatch from Los Angeles (CONTEXT rule 6).
     """
-    sku = _get_sku_or_404(session, payload.sku_id)
+    # Locks the SKU row for the duration of this transaction, so the
+    # check below and the insert that follows cannot be interleaved by a
+    # second dispatch. See _lock_sku_or_404.
+    sku = _lock_sku_or_404(session, payload.sku_id)
 
     available = _available_stock(session, payload.sku_id, payload.warehouse)
     if payload.quantity > available:

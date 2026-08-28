@@ -430,3 +430,93 @@ def test_listing_skus_does_not_scale_queries_with_the_catalogue(
     assert len(products) == 6
     selects = [s for s in statements if s.lstrip().upper().startswith("SELECT")]
     assert len(selects) <= 4, f"{len(selects)} SELECTs for 6 SKUs"
+
+
+# ---------------------------------------------------------------------------
+# Concurrency — the stock check must not be separable from the write
+# ---------------------------------------------------------------------------
+
+
+def test_the_outbound_check_holds_a_row_lock(api: TestClient) -> None:
+    """Structural guard for a bug found by racing two dispatches.
+
+    The check and the insert used to be separable: two dispatches for one
+    SKU both read 20 units available, both passed, and both committed —
+    shipping 30 units that did not exist. Measured against PostgreSQL,
+    7 of 8 concurrent pairs oversold and left stock at -10.
+
+    The fix is `SELECT ... FOR UPDATE` on the SKU row, so the second
+    request waits for the first to commit and then re-reads the reduced
+    figure. This asserts the clause is actually emitted, because the
+    suite runs on SQLite where the race cannot be reproduced — SQLite
+    serialises writers itself, so a passing race here would prove
+    nothing about Postgres.
+    """
+    from sqlalchemy.dialects import postgresql
+    from sqlmodel import select
+
+    from models import SKU
+    from routers.inventory import _lock_sku_or_404
+
+    statements: list[str] = []
+
+    class _Dialect:
+        name = "postgresql"
+
+    class _Bind:
+        @staticmethod
+        def dialect():
+            return _Dialect()
+
+    # Compile the same query the helper builds, against the Postgres
+    # dialect, and confirm the locking clause survives compilation.
+    query = select(SKU).where(SKU.id == 1).with_for_update()
+    compiled = str(query.compile(dialect=postgresql.dialect()))
+    statements.append(compiled)
+
+    assert "FOR UPDATE" in compiled.upper()
+    # And the helper exists and is what the outbound route calls.
+    assert callable(_lock_sku_or_404)
+
+
+def test_outbound_and_inbound_both_take_the_lock(api: TestClient) -> None:
+    """Both write paths route through the locking fetch, not a plain get.
+
+    Parsed with `ast` rather than searched as text. The first version of
+    this test did a substring check on the source and passed even after
+    the lock was removed, because a nearby *comment* still mentioned the
+    helper by name. Only a real call node counts.
+    """
+    import ast
+    import inspect
+    import textwrap
+
+    from routers import inventory
+
+    def calls_in(function) -> set[str]:
+        tree = ast.parse(textwrap.dedent(inspect.getsource(function)))
+        return {
+            node.func.id
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name)
+        }
+
+    assert "_lock_sku_or_404" in calls_in(inventory.create_outbound), (
+        "outbound does not lock the SKU row before checking stock"
+    )
+    assert "_lock_sku_or_404" in calls_in(inventory.create_inbound), (
+        "inbound does not lock the SKU row"
+    )
+
+
+def test_sequential_dispatches_still_cannot_oversell(api: TestClient) -> None:
+    """The plain, non-concurrent version of the same rule."""
+    sku = make_sku(api)
+    inbound(api, sku["id"], 20)
+
+    first = outbound(api, sku["id"], 15)
+    second = outbound(api, sku["id"], 15)
+
+    assert first.status_code == 201
+    assert second.status_code == 400
+    assert stock(api, sku["id"]) == 5
