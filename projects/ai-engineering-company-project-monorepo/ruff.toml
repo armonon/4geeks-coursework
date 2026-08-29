@@ -1,0 +1,23 @@
+# Repo-wide Python lint config.
+#
+# services/api/pyproject.toml carries its own [tool.ruff] for the API
+# package; this covers everything else (scripts/, packages/) so the
+# whole monorepo is held to the same rules and `# noqa` directives mean
+# the same thing everywhere.
+
+line-length = 100
+extend-exclude = [".venv", "**/.venv", "node_modules"]
+
+[lint]
+select = ["E", "F", "I", "B", "UP", "RUF"]
+ignore = [
+    # `class X(str, Enum)` is the idiom FastAPI's docs use for path and
+    # query enums, and the shared package mirrors it.
+    "UP042",
+]
+
+[lint.flake8-bugbear]
+extend-immutable-calls = [
+    "fastapi.Query", "fastapi.File", "fastapi.Depends",
+    "fastapi.Body", "fastapi.Path", "fastapi.Header", "fastapi.Form",
+]

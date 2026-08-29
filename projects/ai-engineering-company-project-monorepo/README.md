@@ -1,9 +1,9 @@
-# AI Engineering Company Project — Student Template
+# TrackFlow AI Engineering Coursework Monorepo
 
 [![4Geeks Academy](https://img.shields.io/badge/4Geeks-Academy-blue)](https://4geeksacademy.com)
 [![AI Engineering](https://img.shields.io/badge/track-AI%20Engineering-green)](https://4geeksacademy.com/es/programas-de-carrera/ingenieria-ia)
 
-_Base template for transversal projects in the AI Engineering Career Program — 4Geeks Academy._
+_One cumulative TrackFlow repository for the AI Engineering Career Program — 4Geeks Academy._
 
 _Estas instrucciones tambien estan disponibles en [espanol](./README.es.md)._
 
@@ -11,22 +11,78 @@ _Estas instrucciones tambien estan disponibles en [espanol](./README.es.md)._
 
 ## Purpose
 
-This repository is the **starter template** for transversal projects. You will work on real company scenarios (Brasaland, TrackFlow, Nexova), building deliverables that map to course milestones (Web, Programming, Backend, Telemetry, RAG, Agents, Workflows, Real-time).
+This repository is the canonical home for the **TrackFlow transversal project**. Every accepted milestone is integrated into `main`, while its submission snapshot remains available on a milestone branch.
 
-- Create a template from this repository.
-- Replace the placeholder `CONTEXT.md` with your assigned company context.
-- Use `skills/` and the directory-level `README.md` files as working guidance.
+- Read [`MILESTONES.md`](./MILESTONES.md) before choosing a branch.
+- Treat [`CONTEXT.md`](./CONTEXT.md) as the canonical TrackFlow company context.
+- Use [`AGENTS.md`](./AGENTS.md), `skills/`, and directory-level README files as working guidance.
+- Use [`OPENCLAW.md`](./OPENCLAW.md) to register the dedicated coursework agent.
 
 ---
 
 ## How to start
 
-1. **Use this repository as a template** and create your own project repo.
-2. **Clone** your repository (or open it in Codespaces).
-3. **Replace** `CONTEXT.md` with the full context for your assigned company.
-4. **Read this folder guide** and open the `README.md` of the folder you are working in.
-5. **Start implementing** in the right folder — do not dump everything in the root.
-6. **Document** what you add: each new app, service, agent, or pipeline gets a subfolder + README.
+1. **Clone this repository** or open it in Codespaces.
+2. **Read** `AGENTS.md`, `CONTEXT.md`, `MILESTONES.md`, and the memory bank.
+3. **Fetch branches** and select the milestone named by the current assignment.
+4. **Start from the latest accepted `main`** when creating a new milestone branch.
+5. **Implement in the correct folder** — do not dump work in the root or create another TrackFlow repository.
+6. **Run the complete verification workflow** before committing or submitting.
+
+---
+
+## Running it after a fresh clone
+
+**Order matters.** The frontends import `@trackflow/business-logic`, a
+workspace package whose compiled `dist/` is git-ignored. Building a UI
+before that package is linked and compiled fails with
+`Module not found: Can't resolve '@trackflow/business-logic'`.
+
+```bash
+# 1. From the REPO ROOT — links the npm workspaces
+npm install
+
+# 2. From the REPO ROOT — compiles packages/*/dist
+npm run bootstrap
+```
+
+Only then are the UIs buildable/runnable:
+
+```bash
+npm run dev:website       # http://localhost:3000
+npm run dev:backoffice    # http://localhost:3100
+```
+
+The backend is a separate, `uv`-managed project:
+
+```bash
+cd services/api
+uv sync            # installs deps + the local incident-analyzer package
+uv run seed        # loads the CONTEXT suppliers into TinyDB
+uv run uvicorn main:app --reload    # http://127.0.0.1:8000/docs
+```
+
+> Running `npm install` *inside* `uis/backoffice` alone is not enough —
+> npm workspaces are linked from the root.
+
+### Docker development environment
+
+Run the public website, backoffice, and FastAPI service together:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+- Website: <http://localhost:3000>
+- Backoffice: <http://localhost:3001>
+- API docs: <http://localhost:8000/docs>
+
+The UI container runs the two Next.js workspaces through `uis/start.sh`.
+The backend container runs Uvicorn with reload enabled. Source folders are
+bind-mounted for hot reload, while dependencies and local development data
+stay in named volumes. The committed `.env.example` contains only safe local
+defaults; `.env` remains ignored and must never contain committed secrets.
 
 ---
 
@@ -49,13 +105,16 @@ You are building **one company** across many milestones and projects. Each top-l
 
 ---
 
-## Current status of the template
+## Current status
 
-> 💡 This repository currently provides a **base folder structure and documentation skeleton** only. It does not include runnable apps or global scripts yet.
->
-> - `CONTEXT.md` is a placeholder and must be replaced with your assigned company context.
-> - There is no root `AGENTS.md` yet.
-> - Shared package metadata exists in `packages/shared/package.json` (`@repo/shared-types`), but no workspace runner is configured at root.
+This is an active monorepo, not an unused template. It contains the TrackFlow
+public website, backoffice, talent tracker, shared TypeScript packages,
+FastAPI services, incident analysis, authentication, and supplier management.
+The root npm workspace provides aggregate typecheck, test, and build commands.
+
+Milestone submission branches are catalogued in `MILESTONES.md`. Milestones 7
+and 8 are intentionally marked unmapped until their 4Geeks requirements are
+confirmed.
 
 ---
 
@@ -67,8 +126,8 @@ Read the linked `README.md` inside each folder before you start coding there.
 
 | Path                         | Purpose                                                                   | What you do here                                                                                              |
 | ---------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| [`CONTEXT.md`](./CONTEXT.md) | Single source of truth for your company (Brasaland, TrackFlow, or Nexova) | **First step:** copy your assigned company briefing here so every app, agent, and prompt uses the same domain |
-| `docker-compose.yml`         | Local dev orchestration for the whole stack                               | Keep at repo root — wires `services/`, databases, and other containers from one place                         |
+| [`CONTEXT.md`](./CONTEXT.md) | Shared TrackFlow context and scoped-precedence rules                     | Read it before changing domain models, product copy, or business rules                                         |
+| `.github/workflows/ci.yml`   | Required monorepo verification                                             | Runs Node and Python checks for pull requests and `main`                                                       |
 | `README.md` / `README.es.md` | This guide                                                                | Orientation — you are here                                                                                    |
 
 ### `uis/` — user interfaces
@@ -209,7 +268,9 @@ Read the linked `README.md` inside each folder before you start coding there.
 
 - Dockerfiles, Terraform, K8s manifests, Nginx configs, CI/CD pipelines
 
-**Keep at repo root:** `docker-compose.yml` — orchestrates local dev for `services/`, databases, and other containers from one place.
+Local container orchestration lives in the root `docker-compose.yml`, where it
+coordinates `services/` and `uis/` over the named TrackFlow development
+network.
 
 → See [`infra/README.md`](./infra/README.md)
 
@@ -269,8 +330,8 @@ Is it a CLI tool with its own package?     → internal/
 ```text
 ai-engineering-company-project-monorepo/
 ├── README.md / README.es.md   # This guide
-├── CONTEXT.md                 # ← Replace with your company briefing
-├── docker-compose.yml         # ← Local dev orchestration (repo root)
+├── CONTEXT.md                 # Canonical TrackFlow context and scoped overrides
+├── .github/workflows/ci.yml   # Required Node + Python verification
 ├── uis/                       # Frontends (website, backoffice, dashboards)
 ├── services/                  # Centralized FastAPI company API
 ├── data/

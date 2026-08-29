@@ -1,0 +1,54 @@
+name: trackflow
+
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: uis/Dockerfile
+    env_file: .env
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8000}
+      TRACKFLOW_API_INTERNAL_URL: http://backend:8000
+    ports:
+      - "3000:3000"
+      - "3001:3001"
+    volumes:
+      - ./uis:/workspace/uis
+      - ./packages/business-logic:/workspace/packages/business-logic
+      - ui_node_modules:/workspace/node_modules
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - trackflow
+
+  backend:
+    build:
+      context: .
+      dockerfile: services/Dockerfile
+    env_file: .env
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-sqlite:////workspace/services/api/data/inventory.db}
+      FRONTEND_BASE_URL: ${FRONTEND_BASE_URL:-http://localhost:3001}
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./services/api:/workspace/services/api
+      - ./packages/incident_analyzer:/workspace/packages/incident_analyzer
+      - ./packages/shared:/workspace/packages/shared
+      - api_data:/workspace/services/api/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/', timeout=2)"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks:
+      - trackflow
+
+networks:
+  trackflow:
+    name: trackflow-development
+
+volumes:
+  ui_node_modules:
+  api_data:

@@ -2,21 +2,29 @@
   "name": "@trackflow/monorepo",
   "version": "0.1.0",
   "private": true,
-  "description": "TrackFlow monorepo — website, backoffice, business logic, and future AI agents.",
+  "description": "TrackFlow coursework monorepo — UIs, shared packages, FastAPI services, milestone snapshots, and OpenClaw agents.",
   "engines": {
-    "node": ">=20"
+    "node": ">=20.9.0"
   },
   "workspaces": [
     "packages/*",
     "uis/*"
   ],
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu": "4.3.3",
+    "lightningcss-linux-x64-gnu": "1.32.0"
+  },
   "scripts": {
-    "bootstrap": "npm run build --workspace @trackflow/business-logic",
+    "bootstrap": "npm run build --workspace @trackflow/business-logic && npm run build --workspace @trackflow/programming-fundamentals",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test --workspace @trackflow/business-logic",
+    "test": "npm run test:workspaces && npm run test:api",
+    "test:workspaces": "npm run test --workspaces --if-present",
+    "demo:programming-fundamentals": "npm run demo --workspace @trackflow/programming-fundamentals",
     "build": "npm run build --workspaces --if-present",
     "dev:website": "npm run dev --workspace @trackflow/website",
     "dev:backoffice": "npm run dev --workspace @trackflow/backoffice",
-    "verify:freight-quote": "node .agents/skills/freight-quote-invariants/scripts/verify.mjs"
+    "verify:freight-quote": "node .agents/skills/freight-quote-invariants/scripts/verify.mjs",
+    "test:api": "node scripts/run-api-tests.mjs",
+    "test:coverage": "npm run test:workspaces -- --coverage"
   }
 }

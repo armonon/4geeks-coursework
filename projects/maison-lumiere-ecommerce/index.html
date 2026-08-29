@@ -29,9 +29,9 @@
                 Maison Lumiere
             </a>
             <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
-                <form role="search" class="flex min-w-0 rounded-md border border-gray-300 bg-white">
+                <form role="search" action="catalog.html" method="get" class="flex min-w-0 rounded-md border border-gray-300 bg-white">
                     <label for="site-search" class="sr-only">Search products</label>
-                    <input id="site-search" name="search" type="search" placeholder="Search coats, shirts, denim" class="min-h-11 w-full min-w-0 rounded-l-md px-4 text-sm outline-none focus:ring-2 focus:ring-gray-950 sm:w-72">
+                    <input id="site-search" name="q" type="search" placeholder="Search coats, shirts, denim" class="min-h-11 w-full min-w-0 rounded-l-md px-4 text-sm outline-none focus:ring-2 focus:ring-gray-950 sm:w-72">
                     <button class="min-h-11 rounded-r-md bg-gray-950 px-4 text-sm font-bold text-white" type="submit">Search</button>
                 </form>
                 <ul class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-bold text-gray-700">
@@ -75,22 +75,23 @@
                 </div>
                 <div class="mt-8 flex gap-5 overflow-x-auto pb-4" aria-label="New arrivals product list">
                     <article class="min-w-64 rounded-md border border-gray-200 bg-white">
-                        <a href="product.html"><img src="https://images.unsplash.com/photo-1539533018447-63fcce2678e3?auto=format&fit=crop&w=600&q=80" alt="Camel trench coat" class="h-72 w-full rounded-t-md object-cover"></a>
+                        <a href="product.html"><img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1539533018447-63fcce2678e3?auto=format&fit=crop&w=600&q=80" alt="Camel trench coat" class="h-72 w-full rounded-t-md object-cover"></a>
                         <div class="p-4"><h3 class="font-bold">Rivoli Trench Coat</h3><p class="mt-1 text-sm text-gray-600">Outerwear</p><p class="mt-3 font-black">$189.00</p></div>
                     </article>
                     <article class="min-w-64 rounded-md border border-gray-200 bg-white">
-                        <img src="https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=600&q=80" alt="White cotton shirt" class="h-72 w-full rounded-t-md object-cover">
+                        <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1520975954732-35dd22299614?auto=format&fit=crop&w=600&q=80" alt="White cotton shirt" class="h-72 w-full rounded-t-md object-cover">
                         <div class="p-4"><h3 class="font-bold">Marais Poplin Shirt</h3><p class="mt-1 text-sm text-gray-600">Shirts</p><p class="mt-3 font-black">$76.00</p></div>
                     </article>
                     <article class="min-w-64 rounded-md border border-gray-200 bg-white">
-                        <img src="https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=600&q=80" alt="Dark straight-leg jeans" class="h-72 w-full rounded-t-md object-cover">
+                        <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=600&q=80" alt="Dark straight-leg jeans" class="h-72 w-full rounded-t-md object-cover">
                         <div class="p-4"><h3 class="font-bold">Seine Straight Denim</h3><p class="mt-1 text-sm text-gray-600">Pants</p><p class="mt-3 font-black">$98.00</p></div>
                     </article>
                     <article class="min-w-64 rounded-md border border-gray-200 bg-white">
-                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80" alt="Minimal leather sneakers" class="h-72 w-full rounded-t-md object-cover">
+                        <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80" alt="Minimal leather sneakers" class="h-72 w-full rounded-t-md object-cover">
                         <div class="p-4"><h3 class="font-bold">Canal Leather Sneaker</h3><p class="mt-1 text-sm text-gray-600">Footwear</p><p class="mt-3 font-black">$124.00</p></div>
                     </article>
                 </div>
+                <a href="catalog.html" class="mt-4 inline-flex font-bold text-gray-700 underline decoration-gray-300 underline-offset-4 sm:hidden">View all new arrivals</a>
             </div>
         </section>
 
@@ -105,22 +106,23 @@
                 </div>
                 <div class="mt-8 flex gap-5 overflow-x-auto pb-4" aria-label="Best sellers product list">
                     <article class="min-w-64 rounded-md border border-gray-200 bg-stone-50">
-                        <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80" alt="Black tailored jacket" class="h-72 w-full rounded-t-md object-cover">
+                        <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=600&q=80" alt="Black tailored jacket" class="h-72 w-full rounded-t-md object-cover">
                         <div class="p-4"><h3 class="font-bold">Opera Tailored Jacket</h3><p class="mt-1 text-sm text-gray-600">Outerwear</p><p class="mt-3 font-black">$168.00</p></div>
                     </article>
                     <article class="min-w-64 rounded-md border border-gray-200 bg-stone-50">
-                        <img src="https://images.unsplash.com/photo-1506629905607-d405d7d3b0d2?auto=format&fit=crop&w=600&q=80" alt="Silk scarf accessory" class="h-72 w-full rounded-t-md object-cover">
+                        <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1506629905607-d405d7d3b0d2?auto=format&fit=crop&w=600&q=80" alt="Silk scarf accessory" class="h-72 w-full rounded-t-md object-cover">
                         <div class="p-4"><h3 class="font-bold">Louvre Silk Scarf</h3><p class="mt-1 text-sm text-gray-600">Accessories</p><p class="mt-3 font-black">$54.00</p></div>
                     </article>
                     <article class="min-w-64 rounded-md border border-gray-200 bg-stone-50">
-                        <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&q=80" alt="Brown leather jacket" class="h-72 w-full rounded-t-md object-cover">
+                        <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=600&q=80" alt="Brown leather jacket" class="h-72 w-full rounded-t-md object-cover">
                         <div class="p-4"><h3 class="font-bold">Bastille Leather Jacket</h3><p class="mt-1 text-sm text-gray-600">Outerwear</p><p class="mt-3 font-black">$248.00</p></div>
                     </article>
                     <article class="min-w-64 rounded-md border border-gray-200 bg-stone-50">
-                        <img src="https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=600&q=80" alt="Striped cotton shirt" class="h-72 w-full rounded-t-md object-cover">
+                        <img loading="lazy" decoding="async" src="https://images.unsplash.com/photo-1523398002811-999ca8dec234?auto=format&fit=crop&w=600&q=80" alt="Striped cotton shirt" class="h-72 w-full rounded-t-md object-cover">
                         <div class="p-4"><h3 class="font-bold">Montmartre Stripe Tee</h3><p class="mt-1 text-sm text-gray-600">Shirts</p><p class="mt-3 font-black">$42.00</p></div>
                     </article>
                 </div>
+                <a href="catalog.html" class="mt-4 inline-flex font-bold text-gray-700 underline decoration-gray-300 underline-offset-4 sm:hidden">Shop all best sellers</a>
             </div>
         </section>
     </main>

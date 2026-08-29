@@ -5,13 +5,15 @@
 | Layer                    | Choice                                | Notes                                                        |
 | ------------------------ | ------------------------------------- | ------------------------------------------------------------ |
 | Package manager          | **npm** (workspaces)                  | One root `package.json` declares workspaces under `packages/*`, `uis/*`. |
-| Frontend framework       | **Next.js 15** (App Router) + React 19 | Both `uis/website` and `uis/backoffice`. TypeScript strict, Tailwind v4. |
+| Frontend framework       | **Next.js 16.3.3** (App Router) + React 19 | Website, backoffice, and talent tracker share one patched major. |
 | Business-logic package   | **TypeScript** (`tsc` builds to `dist/`) | `packages/business-logic`, pure functions, unit-tested with `node --test`. |
 | Package linking          | Workspace protocol (`"@trackflow/business-logic": "*"`) | Backoffice imports the package by name; no relative `../` reach across `uis/`. |
-| Node                     | **≥ 20**                              | Enforced via `engines` in root package.json.                 |
-| Backend services         | Not yet implemented                   | Landing in later milestones under `services/`.               |
-| Persistence              | None yet                              | Business logic is pure; no database chosen.                  |
-| CI                       | Not yet configured                    | Rule `MONO-2` covers the plan.                               |
+| Node                     | **≥ 20.9**                            | Next.js 16 minimum, enforced by the root `engines`.          |
+| Backend services         | **FastAPI**                            | Central API under `services/api`, managed with `uv`.          |
+| Persistence              | **TinyDB + SQLModel/PostgreSQL**        | TinyDB covers existing local data; inventory uses PostgreSQL/Supabase. |
+| Coursework agent         | **OpenClaw 2026.7.1+**                 | Dedicated agent uses this repository as its workspace.       |
+| CI                       | **GitHub Actions**                     | PRs and `main` run bootstrap, typecheck, JS/Python tests, builds, and production audit. |
+| Local containers         | **Docker Compose**                     | One UI container (website + backoffice) and one reloadable FastAPI container. |
 
 ## Repository layout (what matters right now)
 
@@ -21,10 +23,16 @@
 ./memory-bank/                   — projectbrief, techContext, progress (this file)
 ./.agents/rules/                 — dev rules with explicit scopes
 ./.agents/skills/                — one-objective, verifiable agent skills
+./MILESTONES.md                  — stable coursework branch and submission map
+./IDENTITY.md / SOUL.md          — OpenClaw coursework agent identity and limits
+./.openclaw/                     — allowlisted public warehouse-agent deliverables
 ./packages/business-logic/       — Milestone 2 TypeScript module (freight quote)
 ./uis/website/                   — public corporate Next.js site
 ./uis/backoffice/                — internal Next.js app, imports @trackflow/business-logic
-./services/, ./agents/, ...      — reserved for later milestones (READMEs describe intent)
+./uis/talent-pipeline-tracker/    — recruiting workflow UI
+./services/api/                  — FastAPI auth, incidents, suppliers, and inventory
+./docker-compose.yml             — two-service local development environment
+./skills/                        — OpenClaw-visible reusable coursework skills
 ```
 
 ## Architectural decisions taken in Milestone 4
@@ -33,9 +41,10 @@
    `packages/shared/package.json` shape and Node ≥20 ships npm out of
    the box in Codespaces. Reverse if a future workspace exceeds
    npm's install performance ceiling.
-2. **Next.js 15 App Router for both UIs**, not one Next.js + one Vite.
-   Rationale: consistency for account managers deploying the two
-   apps; shared knowledge of Next primitives (metadata API,
+2. **One patched Next.js major for all UIs**, not mixed framework majors.
+   The original Milestone 4 choice was Next.js 15; the repository-hardening
+   pass upgraded all three apps to 16.3.3 together. Rationale: consistency
+   for contributors and one supported dependency graph; shared knowledge of Next primitives (metadata API,
    `next/image`, `next/font`). Cost: bigger dev-time footprint than
    Vite.
 3. **Business logic as a workspace package**, not copied into
@@ -48,6 +57,12 @@
    backend service can consume them.
 5. **All secrets remain out of the repo.** No `.env` committed; each
    app has an `.env.example`.
+6. **Two development containers, one company repository.** The UI image runs
+   the website and backoffice on ports 3000 and 3001 through `uis/start.sh`;
+   the backend image runs the centralized FastAPI app on port 8000. Compose
+   bind mounts source for hot reload and keeps dependencies/data in named
+   volumes. Browser-facing API requests use the published host port, while
+   container-to-container configuration uses the `backend` service name.
 
 ## Active technical constraints
 
@@ -63,13 +78,14 @@
 
 ## Known technical debt
 
-- No CI workflow yet — captured under rule `MONO-2` as the next
-  infrastructure task.
-- `packages/shared/types` (`@repo/shared-types`) is untouched; the
-  new work goes under `@trackflow/business-logic`. A follow-up may
-  consolidate the two.
 - No shared UI kit; `uis/website` and `uis/backoffice` each duplicate
-  a `Button` component. Deferred until a third UI appears.
+  a `Button` component. The talent tracker is the third UI, but extraction is
+  deferred until the components share an actual API instead of only a name.
+- The warehouse-agent brief is versioned, but its authenticated transcript
+  remains intentionally absent until a real operative account and live
+  inventory API are available. It must never be fabricated.
+- Milestones 7 and 8 and the warehouse agent's official milestone number
+  remain unmapped until the 4Geeks project pages provide their identifiers.
 
 ## Runbook
 
@@ -81,6 +97,10 @@ npm run bootstrap        # builds packages/*
 # during dev
 npm run dev --workspace @trackflow/website
 npm run dev --workspace @trackflow/backoffice
+
+# alternative: all applications with hot reload
+cp .env.example .env
+docker compose up --build
 
 # before every commit (see AGENTS.md, Delivery Workflow)
 npm run typecheck

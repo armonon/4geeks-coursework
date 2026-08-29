@@ -20,11 +20,12 @@ This monorepo collects coursework completed for 4Geeks Academy. Each project rem
 | `edutrack-related-tables` | Relational SQL and JOINs | `main` | [armonon/edutrack-related-tables](https://github.com/armonon/edutrack-related-tables) |
 | `maison-lumiere-ecommerce` | Milestone 1 | `main` | [armonon/maison-lumiere-ecommerce](https://github.com/armonon/maison-lumiere-ecommerce) |
 | `maison-lumiere-data-utilities` | Milestone 2 | `main` | [armonon/maison-lumiere-data-utilities](https://github.com/armonon/maison-lumiere-data-utilities) |
+| `todo-list-cli-python` | Python foundations | `main` | [armonon/todo-list-cli-python](https://github.com/armonon/todo-list-cli-python) |
 | `airbnb-ui-clone` | Next.js and Tailwind CSS | `main` | [armonon/airbnb-ui-clone](https://github.com/armonon/airbnb-ui-clone) |
 | `nextjs-wanderlust-explorer` | Next.js and TypeScript | `main` | [armonon/nextjs-wanderlust-explorer](https://github.com/armonon/nextjs-wanderlust-explorer) |
 | `talk-to-the-machine` | AI chat application | `main` | [armonon/talk-to-the-machine](https://github.com/armonon/talk-to-the-machine) |
 | `talent-pipeline-tracker` | Milestone 3 | `main` | [armonon/talent-pipeline-tracker](https://github.com/armonon/talent-pipeline-tracker) |
-| `ai-engineering-company-project-monorepo` | Milestone 4 | `milestone-4` | [armonon/ai-engineering-company-project-monorepo](https://github.com/armonon/ai-engineering-company-project-monorepo) |
+| `ai-engineering-company-project-monorepo` | Cumulative TrackFlow milestones | `main` | [armonon/ai-engineering-company-project-monorepo](https://github.com/armonon/ai-engineering-company-project-monorepo) |
 | `ai-eng-financial-dashboard-context-project` | Context engineering | `main` | [armonon/ai-eng-financial-dashboard-context-project](https://github.com/armonon/ai-eng-financial-dashboard-context-project) |
 | `frontend-specs-financial-dashboard` | Spec-driven development | `feature/frontend-specs` | [armonon/frontend-specs-financial-dashboard](https://github.com/armonon/frontend-specs-financial-dashboard) |
 | `financial-dashboard-agent-skills` | Agent skills | `main` | [armonon/financial-dashboard-agent-skills](https://github.com/armonon/financial-dashboard-agent-skills) |

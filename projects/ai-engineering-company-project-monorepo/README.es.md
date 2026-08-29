@@ -1,9 +1,9 @@
-# Proyecto de Compañía - Ingeniería de IA — Plantilla para estudiantes
+# Monorepo de TrackFlow — Ingeniería de IA
 
 [![4Geeks Academy](https://img.shields.io/badge/4Geeks-Academy-blue)](https://4geeksacademy.com)
 [![AI Engineering](https://img.shields.io/badge/track-AI%20Engineering-green)](https://4geeksacademy.com/es/programas-de-carrera/ingenieria-ia)
 
-_Plantilla base para proyectos transversales del Programa de Carrera en Ingeniería de IA — 4Geeks Academy._
+_Un único repositorio acumulativo para el proyecto transversal de TrackFlow en 4Geeks Academy._
 
 _These instructions are also available in [English](./README.md)._
 
@@ -11,22 +11,23 @@ _These instructions are also available in [English](./README.md)._
 
 ## Propósito
 
-Este repositorio es la **plantilla de inicio** para los proyectos transversales. Trabajarás con escenarios de empresas reales (Brasaland, TrackFlow, Nexova) construyendo entregables que se corresponden con los hitos del curso (Web, Programación, Backend, Telemetría, RAG, Agentes, Workflows, Tiempo real).
+Este repositorio es la fuente canónica del proyecto transversal de **TrackFlow**. Cada hito aceptado se integra en `main`, mientras que su versión exacta de entrega permanece disponible en una rama de hito.
 
-- Crea una plantilla a partir de este repositorio.
-- Reemplaza el `CONTEXT.md` placeholder por el contexto de tu empresa asignada.
-- Usa `skills/` y los `README.md` por carpeta como guía de trabajo.
+- Lee [`MILESTONES.md`](./MILESTONES.md) antes de elegir una rama.
+- Trata [`CONTEXT.md`](./CONTEXT.md) como contexto compartido y respeta los contextos específicos documentados para cada proyecto.
+- Usa [`AGENTS.md`](./AGENTS.md), `skills/` y los `README.md` por carpeta como guía de trabajo.
+- Usa [`OPENCLAW.md`](./OPENCLAW.md) para el agente dedicado al curso.
 
 ---
 
 ## Cómo empezar
 
-1. **Usa este repositorio como plantilla** y crea tu propio repo de proyecto.
-2. **Clona** tu repositorio (o ábrelo en Codespaces).
-3. **Reemplaza** `CONTEXT.md` con el contexto completo de tu empresa asignada.
-4. **Lee esta guía de carpetas** y abre el `README.md` de la carpeta en la que estés trabajando.
-5. **Empieza a implementar** en la carpeta correcta — no tires todo en la raíz.
-6. **Documenta** lo que añadas: cada app, servicio, agente o pipeline nuevo lleva subcarpeta + README.
+1. **Clona** este repositorio o ábrelo en Codespaces.
+2. Lee `AGENTS.md`, `CONTEXT.md`, `MILESTONES.md` y `memory-bank/`.
+3. Parte del último `main` aceptado y crea la rama indicada por el proyecto actual.
+4. Implementa en la carpeta correcta; no crees otro repositorio de TrackFlow.
+5. Ejecuta typecheck, todas las pruebas y el build completo antes de entregar.
+6. Conserva la rama del hito como snapshot y fusiona el trabajo aceptado en `main`.
 
 ---
 
@@ -49,13 +50,11 @@ Estás construyendo **una sola empresa** a lo largo de muchos hitos y proyectos.
 
 ---
 
-## Estado actual de la plantilla
+## Estado actual
 
-> 💡 Actualmente el repositorio ofrece solo una **estructura base de carpetas y documentación**. Todavía no incluye aplicaciones ejecutables ni scripts globales en la raíz.
->
-> - `CONTEXT.md` es un placeholder y debe sustituirse por el contexto de la empresa asignada.
-> - No existe todavía un `AGENTS.md` en la raíz.
-> - Existe metadata del paquete compartido en `packages/shared/package.json` (`@repo/shared-types`), pero aún no hay runner de workspace en raíz.
+Este es un monorepo activo. Contiene el sitio público, el backoffice, el tracker de talento, paquetes TypeScript compartidos, una API FastAPI, autenticación, proveedores, incidentes e inventario. Los comandos de la raíz ejecutan verificación, pruebas y builds de todo el repositorio, incluida la suite Python.
+
+Las ramas de entrega están catalogadas en `MILESTONES.md`. Los hitos 7 y 8 permanecen sin asignar hasta que la página de 4Geeks confirme su número y entregable.
 
 ---
 
@@ -67,8 +66,8 @@ Lee el `README.md` enlazado dentro de cada carpeta antes de empezar a programar 
 
 | Ruta                         | Propósito                                                            | Qué haces aquí                                                                                               |
 | ---------------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [`CONTEXT.md`](./CONTEXT.md) | Fuente única de verdad de tu empresa (Brasaland, TrackFlow o Nexova) | **Primer paso:** copia aquí el briefing de tu empresa para que apps, agentes y prompts usen el mismo dominio |
-| `docker-compose.yml`         | Orquestación local de todo el stack                                  | Mantener en la raíz del repo — conecta `services/`, bases de datos y otros contenedores desde un solo lugar  |
+| [`CONTEXT.md`](./CONTEXT.md) | Contexto compartido de TrackFlow y reglas de precedencia             | Léelo antes de modificar modelos, copy o reglas de negocio                                                  |
+| `.github/workflows/ci.yml`   | Verificación obligatoria del monorepo                                | Ejecuta checks de Node y Python para pull requests y `main`                                                   |
 | `README.md` / `README.es.md` | Esta guía                                                            | Orientación — estás aquí                                                                                     |
 
 ### `uis/` — interfaces de usuario
@@ -209,7 +208,9 @@ Lee el `README.md` enlazado dentro de cada carpeta antes de empezar a programar 
 
 - Dockerfiles, Terraform, manifiestos K8s, configs Nginx, pipelines CI/CD
 
-**Mantener en la raíz del repo:** `docker-compose.yml` — orquesta el entorno local de `services/`, bases de datos y otros contenedores desde un solo lugar.
+Si más adelante se añade orquestación local con contenedores,
+`docker-compose.yml` debe vivir en la raíz para coordinar `services/`, bases de
+datos y UIs. Actualmente no existe un archivo Compose.
 
 → Ver [`infra/README.md`](./infra/README.md)
 
@@ -269,8 +270,8 @@ Guía rápida de decisión:
 ```text
 ai-engineering-company-project-monorepo/
 ├── README.md / README.es.md   # Esta guía
-├── CONTEXT.md                 # ← Reemplazar con el briefing de tu empresa
-├── docker-compose.yml         # ← Orquestación local (raíz del repo)
+├── CONTEXT.md                 # Contexto canónico de TrackFlow y overrides acotados
+├── .github/workflows/ci.yml   # Verificación obligatoria de Node + Python
 ├── uis/                       # Frontends (website, backoffice, dashboards)
 ├── services/                  # API FastAPI centralizada de la empresa
 ├── data/
