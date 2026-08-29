@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     template: "%s · TrackFlow Backoffice",
   },
   description:
-    "Internal admin app for TrackFlow — freight quoting, incident analysis, and the supplier directory.",
+    "Internal TrackFlow app for freight quoting, incidents, inventory, and suppliers.",
   robots: { index: false, follow: false },
 };
 

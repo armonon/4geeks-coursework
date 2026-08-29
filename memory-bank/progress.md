@@ -439,3 +439,19 @@ Three consequential edits came with it:
   bug during clean Ubuntu installs. The root now declares the exact Linux
   x64 native packages used by Lightning CSS and Tailwind CSS Oxide so
   `npm ci` installs both bindings deterministically on the CI runner.
+
+## 2026-08-28 — Inventory backoffice
+
+- Added protected inventory routes to the existing backoffice for the SKU
+  list, goods receipts, dispatches/losses, and the unified movement audit.
+- All inventory HTTP calls live in `uis/backoffice/lib/inventory.ts` and use
+  the shared bearer-token client. Components never call `fetch` directly.
+- Product stock is visibly warehouse-scoped and computed by the API. The UI
+  flags out-of-stock and low-stock SKUs, previews available stock before an
+  exit, and blocks obvious oversells while preserving the API as the final
+  concurrency-safe authority.
+- Dispatches require a tracking number; warehouse losses omit one, matching
+  the TrackFlow inventory rules. Movement rows show product, warehouse,
+  reference/tracking data, and the authenticated user identifier.
+- Added the stable `milestone-5-inventory-backoffice` submission snapshot to
+  `MILESTONES.md`; the existing Inventory ORM milestone remains separate.
