@@ -52,7 +52,7 @@ assignment was submitted or resubmitted.
 | --- | --- |
 | Todo List CLI with Python | [`projects/todo-list-cli-python`](./projects/todo-list-cli-python), mirrored at [`armonon/todo-list-cli-python`](https://github.com/armonon/todo-list-cli-python); official-compatible root functions, headerless CSV persistence, six-action menu, 5 official-style tests, and 9 additional edge-case tests |
 | Milestone 5 — Backoffice: Inventory Management Interface | [`milestone-5-inventory-backoffice`](https://github.com/armonon/ai-engineering-company-project-monorepo/tree/milestone-5-inventory-backoffice), merged by [PR #19](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/19) |
-| Company Monorepo Containerization | TrackFlow `main`, merged by [PR #20](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/20), runtime-corrected by [PR #21](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/21), and live-Docker-verified by [PR #22](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/22) |
+| Company Monorepo Containerization | TrackFlow `main`, merged by [PR #20](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/20), runtime-corrected by [PR #21](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/21), live-Docker-verified by [PR #22](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/22), and available as a [public website demonstration](https://trackflow-coursework-demo.armonon.chatgpt.site) |
 
 ## Built but waiting for cohort timing
 
@@ -104,3 +104,6 @@ reaches the assignment.
   API, website, backoffice, and same-origin API proxy all returned HTTP 200,
   while browser verification rendered the public site and redirected the
   protected backoffice to `/login`.
+- TrackFlow public demonstration: the hosted landing page returns HTTP 200,
+  and its canonical source, production URL, and sharing preview are linked from
+  the company monorepo README through merged [PR #23](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/23).

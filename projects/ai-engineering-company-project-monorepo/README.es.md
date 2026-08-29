@@ -7,6 +7,12 @@ _Un único repositorio acumulativo para el proyecto transversal de TrackFlow en 
 
 _These instructions are also available in [English](./README.md)._
 
+**Demostración pública:**
+[trackflow-coursework-demo.armonon.chatgpt.site](https://trackflow-coursework-demo.armonon.chatgpt.site)
+
+La demostración alojada publica la página canónica `uis/website`. Ejecuta
+Docker Compose para demostrar el backoffice autenticado y la API de FastAPI.
+
 ---
 
 ## Propósito
