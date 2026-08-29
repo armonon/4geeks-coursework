@@ -12,12 +12,13 @@ from __future__ import annotations
 
 import os
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
+import jwt
 
 # libpass is a maintained drop-in fork of passlib; the import path is
 # unchanged, which is why this reads as `passlib`.
@@ -26,7 +27,11 @@ from passlib.hash import bcrypt
 from database import users_table
 from models import Role, UserInDB
 
-load_dotenv()
+# The repository-root `.env` belongs to Docker Compose and may contain
+# container-only paths such as `/workspace/...`. Native API development has a
+# separate, documented environment file beside this module; never let dotenv
+# walk upward and accidentally import Compose settings.
+load_dotenv(Path(__file__).resolve().with_name(".env"))
 
 ALGORITHM = "HS256"
 
@@ -52,6 +57,11 @@ def secret_key() -> str:
             "SECRET_KEY is not set. Copy services/api/.env.example to "
             "services/api/.env and set a value "
             "(e.g. `python -c \"import secrets; print(secrets.token_hex(32))\"`)."
+        )
+    if len(key.encode()) < 32:
+        raise RuntimeError(
+            "SECRET_KEY must contain at least 32 bytes for HS256. Generate one "
+            "with `python -c \"import secrets; print(secrets.token_hex(32))\"`."
         )
     return key
 
@@ -146,7 +156,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> UserInDB:
     """
     try:
         payload = decode_token(token)
-    except JWTError:
+    except jwt.PyJWTError:
         # Covers bad signature, expired `exp`, and structurally invalid tokens.
         raise _CREDENTIALS_EXC from None
 

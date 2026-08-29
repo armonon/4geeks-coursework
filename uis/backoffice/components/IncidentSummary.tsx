@@ -35,7 +35,7 @@ export function IncidentSummaryPanel({ reloadKey = 0 }: { reloadKey?: number }) 
   }, []);
 
   useEffect(() => {
-    void load();
+    queueMicrotask(() => void load());
   }, [load, reloadKey]);
 
   if (state.kind === "loading") {

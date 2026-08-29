@@ -384,8 +384,9 @@ runtimes.
 
 ### 6.2 CORS
 
-- **Dev:** allow `http://localhost:3000` (`uis/website`) and
-  `http://localhost:3100` (`uis/backoffice`) explicitly. Not
+- **Dev:** allow `http://localhost:3000` (`uis/website`) and both
+  `http://localhost:3001` (Compose backoffice) and
+  `http://localhost:3100` (standalone backoffice) explicitly. Not
   `"*"` (learned that lesson on the reference dashboard —
   wildcard origin + `allow_credentials=True` is rejected by
   browsers and misrepresents the policy anyway).
@@ -400,10 +401,12 @@ runtimes.
   directly.
 - `services/api/.env.example` mirrors that class one-to-one; CI
   fails if the two drift.
-- Frontends use `NEXT_PUBLIC_API_BASE_URL` pointing at
-  `http://localhost:8000/api/v1` in dev and the deployed origin
-  in prod. Set per app via each app's `.env.local` (never
-  committed).
+- The backoffice uses the same-origin `NEXT_PUBLIC_API_BASE_URL`
+  path `/trackflow-api`. Next.js rewrites that path to
+  `TRACKFLOW_API_INTERNAL_URL`, which is `http://backend:8000`
+  inside Compose and defaults to `http://127.0.0.1:8000` during
+  standalone development. This keeps browser requests independent
+  of Docker's private DNS names.
 
 ### 6.4 Deploy shape
 

@@ -4,6 +4,40 @@ Rolling log of substantive changes. Newest first.
 
 ---
 
+## 2026-08-28 · Runtime readiness corrections
+
+**Branch:** `codex/runtime-readiness-corrections`
+
+- Routed browser API calls through a same-origin Next.js rewrite that reaches
+  the FastAPI container as `backend`, satisfying the Compose service-name
+  contract without exposing Docker DNS names to the host browser.
+- Added the published backoffice port to explicit CORS defaults and made the
+  production origin list configurable without permitting wildcards.
+- Replaced the unused vulnerable `python-ecdsa` dependency chain with PyJWT;
+  TrackFlow signs and verifies only HS256 tokens and rejects signing keys
+  shorter than 32 bytes.
+- Added mobile backoffice navigation, longest-route active matching, truthful
+  inventory POST response types, and request/navigation regression tests.
+- Scoped dotenv loading to `services/api/.env`, preventing native API sessions
+  from inheriting Docker-only paths from the Compose root `.env`.
+- Migrated all three UI linters from the removed compatibility-adapter pattern
+  to Next.js 16's native flat ESLint config and resolved the stricter effect
+  scheduling findings.
+
+Verification on this branch:
+
+- Root typecheck and production builds pass for every workspace.
+- 79 JavaScript/TypeScript tests and 322 FastAPI tests pass.
+- All three UI linters pass and `npm audit` reports zero vulnerabilities.
+- A native runtime smoke test returned the FastAPI health response through the
+  backoffice `/trackflow-api` rewrite and rendered the guarded inventory route
+  without browser console warnings.
+- Docker Compose could not be executed on this Mac because no Docker runtime is
+  installed; the Compose service-name contract is covered by the rewrite,
+  environment, CORS, and runtime proxy checks above.
+
+---
+
 ## 2026-08-28 · Repository hardening and submission cleanup
 
 **Branch:** `codex/repository-hardening`

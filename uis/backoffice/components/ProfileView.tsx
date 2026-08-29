@@ -26,9 +26,11 @@ export function ProfileView() {
   // Seed the form once the session is known.
   useEffect(() => {
     if (!user?.profile) return;
-    setName(user.profile.name ?? "");
-    setPhone(user.profile.phone ?? "");
-    setAddress(user.profile.address ?? "");
+    queueMicrotask(() => {
+      setName(user.profile?.name ?? "");
+      setPhone(user.profile?.phone ?? "");
+      setAddress(user.profile?.address ?? "");
+    });
   }, [user]);
 
   async function onSubmit(e: React.FormEvent) {
