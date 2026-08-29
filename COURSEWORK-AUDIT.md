@@ -1,6 +1,6 @@
 # 4Geeks coursework audit
 
-Snapshot taken on 2026-08-28 from the signed-in
+Snapshot taken on 2026-08-29 from the signed-in
 `miami-ft-ai-engineering-3` program. This file maps portal assignments to the
 canonical local project and GitHub submission target. Portal status can change
 after instructor review, so re-check the assignment page immediately before
@@ -52,7 +52,7 @@ assignment was submitted or resubmitted.
 | --- | --- |
 | Todo List CLI with Python | [`projects/todo-list-cli-python`](./projects/todo-list-cli-python), mirrored at [`armonon/todo-list-cli-python`](https://github.com/armonon/todo-list-cli-python); official-compatible root functions, headerless CSV persistence, six-action menu, 5 official-style tests, and 9 additional edge-case tests |
 | Milestone 5 — Backoffice: Inventory Management Interface | [`milestone-5-inventory-backoffice`](https://github.com/armonon/ai-engineering-company-project-monorepo/tree/milestone-5-inventory-backoffice), merged by [PR #19](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/19) |
-| Company Monorepo Containerization | TrackFlow `main`, merged by [PR #20](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/20) and runtime-corrected by [PR #21](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/21); Docker execution still requires a machine with Docker installed |
+| Company Monorepo Containerization | TrackFlow `main`, merged by [PR #20](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/20), runtime-corrected by [PR #21](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/21), and live-Docker-verified by [PR #22](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/22) |
 
 ## Built but waiting for cohort timing
 
@@ -99,6 +99,8 @@ reaches the assignment.
   page-level horizontal overflow at 375, 768, and 1440 pixels.
 - Every changed npm project reports zero known vulnerabilities after its
   production build and lint/test checks.
-- TrackFlow containerization: Compose YAML, shell syntax, required files, and
-  Python dependency resolution passed static checks. Docker was unavailable
-  locally, so no live container run is claimed.
+- TrackFlow containerization: Docker Desktop built both images on Apple Silicon;
+  a fresh Compose recreation kept the backend healthy and the UI running. The
+  API, website, backoffice, and same-origin API proxy all returned HTTP 200,
+  while browser verification rendered the public site and redirected the
+  protected backoffice to `/login`.
