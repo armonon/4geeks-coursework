@@ -15,7 +15,11 @@ services:
     volumes:
       - ./uis:/workspace/uis
       - ./packages/business-logic:/workspace/packages/business-logic
-      - ui_node_modules:/workspace/node_modules
+    # Next.js caches include platform-native module paths. Keep container caches
+    # ephemeral so a macOS `.next` directory cannot poison the Alpine runtime.
+    tmpfs:
+      - /workspace/uis/website/.next
+      - /workspace/uis/backoffice/.next
     depends_on:
       backend:
         condition: service_healthy
@@ -50,5 +54,4 @@ networks:
     name: trackflow-development
 
 volumes:
-  ui_node_modules:
   api_data:
