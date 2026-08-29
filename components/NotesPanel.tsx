@@ -20,8 +20,11 @@ export function NotesPanel({ candidateId, onError, onSuccess }: Props) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setLoadError(null);
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setLoading(true);
+      setLoadError(null);
+    });
     candidatesService
       .listNotes(candidateId)
       .then((res) => {
