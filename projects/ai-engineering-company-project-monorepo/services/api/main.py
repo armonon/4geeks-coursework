@@ -13,6 +13,7 @@ Run it:
 from __future__ import annotations
 
 import logging
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -74,16 +75,28 @@ app = FastAPI(
 
 # Explicit origins for the two uis/* dev servers — never "*".
 # See docs/ARCHITECTURE_PROPOSAL.md § 6.2.
-ALLOWED_ORIGINS = [
+DEFAULT_ALLOWED_ORIGINS = (
     "http://localhost:3000",
+    "http://localhost:3001",
     "http://localhost:3100",
     "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
     "http://127.0.0.1:3100",
-]
+)
+
+
+def allowed_origins() -> list[str]:
+    configured = os.environ.get("ALLOWED_ORIGINS", "")
+    origins = [origin.strip().rstrip("/") for origin in configured.split(",") if origin.strip()]
+    if not origins:
+        return list(DEFAULT_ALLOWED_ORIGINS)
+    if "*" in origins:
+        raise RuntimeError("ALLOWED_ORIGINS must list explicit browser origins, never '*'.")
+    return origins
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=allowed_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

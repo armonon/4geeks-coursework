@@ -40,7 +40,7 @@ export function InventoryProductList() {
   }, []);
 
   useEffect(() => {
-    void load();
+    queueMicrotask(() => void load());
   }, [load]);
 
   if (loading) {

@@ -20,7 +20,7 @@ REGISTER = {
 @pytest.fixture
 def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("TINYDB_PATH", str(tmp_path / "auth.json"))
-    monkeypatch.setenv("SECRET_KEY", "test-secret-not-a-real-one")
+    monkeypatch.setenv("SECRET_KEY", "test-secret-not-a-real-one-32-bytes-minimum")
     monkeypatch.setenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
 
     import database
@@ -406,9 +406,13 @@ def test_malformed_token_is_401(client: TestClient) -> None:
 
 
 def test_token_signed_with_the_wrong_secret_is_401(client: TestClient) -> None:
-    from jose import jwt
+    import jwt
 
-    forged = jwt.encode({"sub": "1", "role": "admin"}, "attacker-key", algorithm="HS256")
+    forged = jwt.encode(
+        {"sub": "1", "role": "admin"},
+        "attacker-key-that-is-long-enough-for-hs256",
+        algorithm="HS256",
+    )
     r = client.get("/auth/me", headers=auth(forged))
     assert r.status_code == 401
 
@@ -533,11 +537,16 @@ def test_secret_key_is_read_from_the_environment(
     """Never hardcoded: an unset SECRET_KEY must fail loudly."""
     import security
 
-    monkeypatch.setenv("SECRET_KEY", "from-the-environment")
-    assert security.secret_key() == "from-the-environment"
+    configured_secret = "from-the-environment-with-at-least-32-bytes"
+    monkeypatch.setenv("SECRET_KEY", configured_secret)
+    assert security.secret_key() == configured_secret
 
     monkeypatch.setenv("SECRET_KEY", "")
     with pytest.raises(RuntimeError, match="SECRET_KEY is not set"):
+        security.secret_key()
+
+    monkeypatch.setenv("SECRET_KEY", "too-short")
+    with pytest.raises(RuntimeError, match="at least 32 bytes"):
         security.secret_key()
 
 
@@ -554,7 +563,7 @@ def test_token_expiry_is_read_from_the_environment(
 # JWT attack surface
 #
 # These exist because an earlier manual probe of these cases silently
-# generated EMPTY tokens (the shell used a python without python-jose),
+# generated EMPTY tokens (the shell used a Python environment without PyJWT),
 # so every attack "passed" for the wrong reason. Encoded as real tests
 # so that can never happen again.
 # ---------------------------------------------------------------------------
@@ -588,7 +597,7 @@ def test_hs256_header_with_empty_signature_is_rejected(client: TestClient) -> No
 def test_token_without_a_sub_claim_is_401(client: TestClient) -> None:
     import os
 
-    from jose import jwt
+    import jwt
 
     register(client)
     forged = jwt.encode({"role": "admin"}, os.environ["SECRET_KEY"], algorithm="HS256")
@@ -598,7 +607,7 @@ def test_token_without_a_sub_claim_is_401(client: TestClient) -> None:
 def test_token_for_a_nonexistent_user_id_is_401(client: TestClient) -> None:
     import os
 
-    from jose import jwt
+    import jwt
 
     register(client)
     forged = jwt.encode(
@@ -615,7 +624,7 @@ def test_role_comes_from_the_database_not_the_token_claim(client: TestClient) ->
     """
     import os
 
-    from jose import jwt
+    import jwt
 
     user = register(client)
     claims_admin = jwt.encode(

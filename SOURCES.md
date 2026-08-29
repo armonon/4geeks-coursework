@@ -25,7 +25,7 @@ talent-pipeline-tracker                     main
 ai-engineering-company-project-monorepo     main
 ai-eng-financial-dashboard-context-project  main
 frontend-specs-financial-dashboard           feature/frontend-specs
-financial-dashboard-agent-skills             feature/agent-skills
+financial-dashboard-agent-skills             main
 exercise-terminal-challenge-slides           master
 ```
 

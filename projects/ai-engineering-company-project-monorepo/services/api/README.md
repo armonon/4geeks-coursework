@@ -132,6 +132,10 @@ Set the key in `services/api/.env`:
 RESEND_API_KEY=your_key_here
 ```
 
+The API intentionally loads only `services/api/.env`. The root `.env` is for
+Docker Compose and can contain container-only paths that are invalid during a
+native `uv run uvicorn ...` session.
+
 **Without the key the flow still works**: the reset link is printed to
 the server log instead of being emailed, clearly labelled so it cannot
 be mistaken for real delivery. That keeps the whole journey testable
@@ -143,6 +147,7 @@ locally with no credentials.
 | `EMAIL_FROM` | Sender. Defaults to Resend's onboarding sender. |
 | `FRONTEND_BASE_URL` | Where the reset link points. Defaults to `http://localhost:3100`. |
 | `RESET_TOKEN_EXPIRE_MINUTES` | Link lifetime. Defaults to 30, clamped to 5–120. |
+| `ALLOWED_ORIGINS` | Optional comma-separated browser origins. Explicit origins only; `*` is rejected. |
 
 ### Why tokens are stored server-side
 
@@ -308,5 +313,7 @@ analysis.
 
 ## CORS
 
-Explicit origins for the two `uis/*` dev servers, never `"*"`. See
-`main.py`.
+Explicit origins for the `uis/*` dev servers, including the containerized
+backoffice on port 3001, never `"*"`. Override the defaults with a
+comma-separated `ALLOWED_ORIGINS` value. The Compose backoffice normally uses
+the same-origin `/trackflow-api` proxy, so its requests do not require CORS.

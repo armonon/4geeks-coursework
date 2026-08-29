@@ -1,5 +1,5 @@
 image: gitpod/workspace-python-3.12
 
 tasks:
-  - init: python -m unittest discover -v
+  - init: python test.py && python -m unittest discover -v
     command: python app.py

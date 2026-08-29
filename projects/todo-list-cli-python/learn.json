@@ -1,0 +1,15 @@
+{
+  "slug": "todo-list-cli-python",
+  "title": {"us": "Todo List CLI with Python", "es": "Todo List CLI con Python"},
+  "description": {
+    "us": "Create a command-line todo list app with CSV persistence.",
+    "es": "Crea una lista de tareas por terminal con persistencia CSV."
+  },
+  "preview": "https://github.com/breatheco-de/exercise-todo-list-cli-python/blob/master/preview.gif?raw=true",
+  "difficulty": "BEGINNER",
+  "duration": 8,
+  "template_url": "https://github.com/4GeeksAcademy/python-hello",
+  "gitpod": true,
+  "technologies": ["python", "command-line", "csv", "static-file-storage"],
+  "projectType": "project"
+}

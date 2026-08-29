@@ -32,7 +32,7 @@ SKU_ZGZ = {**SKU_LA, "sku": "CLT-SNK-W-42-Z", "warehouse": "ZGZ"}
 def api(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
     """Authenticated client with both databases pointed at temp files."""
     monkeypatch.setenv("TINYDB_PATH", str(tmp_path / "auth.json"))
-    monkeypatch.setenv("SECRET_KEY", "test-secret-not-a-real-one")
+    monkeypatch.setenv("SECRET_KEY", "test-secret-not-a-real-one-32-bytes-minimum")
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{tmp_path / 'inventory.db'}")
 
     import database
