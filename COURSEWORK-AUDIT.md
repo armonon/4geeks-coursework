@@ -24,7 +24,7 @@ resubmitting.
 
 | Assignment | Teacher issue | Corrected target |
 | --- | --- | --- |
-| A simple Dashboard with Tailwind CSS | Missing 4Geeks template environment | [`projects/influencer-dashboard`](./projects/influencer-dashboard), mirrored at [`armonon/influencer-dashboard`](https://github.com/armonon/influencer-dashboard) |
+| A simple Dashboard with Tailwind CSS | Missing 4Geeks template environment | [`projects/influencer-dashboard`](./projects/influencer-dashboard), mirrored at [`armonon/influencer-dashboard`](https://github.com/armonon/influencer-dashboard); template restored and styling is now strictly Tailwind-only |
 | Milestone 2 — Building Scripts to Automate Tasks | Submitted outside the required monorepo/company context | [`milestone-2-fold-in`](https://github.com/armonon/ai-engineering-company-project-monorepo/tree/milestone-2-fold-in) |
 | Talk to the Machine | Groq key exposed through `NEXT_PUBLIC_GROQ_API_KEY` | [`projects/talk-to-the-machine`](./projects/talk-to-the-machine), mirrored at [`armonon/talk-to-the-machine`](https://github.com/armonon/talk-to-the-machine); requests now use a server-only API route |
 | Milestone 3 — Talent Pipeline Tracker | Company differed from earlier milestones | [`milestone-3-talent-pipeline`](https://github.com/armonon/ai-engineering-company-project-monorepo/tree/milestone-3-talent-pipeline) |
@@ -43,6 +43,17 @@ These cannot be truthfully completed by editing repository files alone.
 | Setting Up Your Personal AI Agent with OpenClaw | Perform the VPS, SSH, LiteLLM, local-chat, personalization, and push-from-VPS steps. The submitted repository URL was rejected. A public repository alone does not prove these actions. |
 | Connect Your Agent: Telegram, Google Drive & Calendar | Configure the test accounts and integrations, run the real workflow, and capture evidence without exposing credentials. The portal currently shows 0/25 tasks. |
 
+## Completed in code; portal records unchanged
+
+These deliverables were completed during the repository remediation. No portal
+assignment was submitted or resubmitted.
+
+| Assignment | Completed target |
+| --- | --- |
+| Todo List CLI with Python | [`projects/todo-list-cli-python`](./projects/todo-list-cli-python), mirrored at [`armonon/todo-list-cli-python`](https://github.com/armonon/todo-list-cli-python); required functions, CSV persistence, menu, and seven tests |
+| Milestone 5 — Backoffice: Inventory Management Interface | [`milestone-5-inventory-backoffice`](https://github.com/armonon/ai-engineering-company-project-monorepo/tree/milestone-5-inventory-backoffice), merged by [PR #19](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/19) |
+| Company Monorepo Containerization | TrackFlow `main`, merged by [PR #20](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/20); Docker execution still requires a machine with Docker installed |
+
 ## Built but waiting for cohort timing
 
 The instructor feedback on these submissions says they were delivered ahead of
@@ -51,7 +62,7 @@ reaches the assignment.
 
 | Assignment | Existing target |
 | --- | --- |
-| My first collaborative professional project | [`projects/maison-lumiere-ecommerce`](./projects/maison-lumiere-ecommerce) |
+| My first collaborative professional project | [`projects/maison-lumiere-ecommerce`](./projects/maison-lumiere-ecommerce); each required view now has a preserved feature branch and merged PR, documented in the project README |
 | My 4Geeks Assistant — Teaching OpenClaw to Track Your Progress | [`armonon/openclaw-setup-armonon`](https://github.com/armonon/openclaw-setup-armonon) |
 | Backend Architecture Proposal | [`milestone-5-strengthening`](https://github.com/armonon/ai-engineering-company-project-monorepo/tree/milestone-5-strengthening) |
 | Voice Command API | [`armonon/voice-command-api`](https://github.com/armonon/voice-command-api) |
@@ -76,3 +87,9 @@ reaches the assignment.
   response without exposing a client key.
 - Financial dashboard: production build and all five current tests passed;
   `dashboard-metric-card` passed the skill validator.
+- Todo List CLI: all seven standard-library unit tests passed.
+- Maison Lumiere storefront: all five page-specific PRs passed the production
+  Tailwind build; the work remains honestly identified as single-contributor.
+- TrackFlow containerization: Compose YAML, shell syntax, required files, and
+  Python dependency resolution passed static checks. Docker was unavailable
+  locally, so no live container run is claimed.

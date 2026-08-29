@@ -17,11 +17,12 @@ edutrack-data-audit                         main
 edutrack-related-tables                     main
 maison-lumiere-ecommerce                    main
 maison-lumiere-data-utilities               main
+todo-list-cli-python                        main
 airbnb-ui-clone                             main
 nextjs-wanderlust-explorer                  main
 talk-to-the-machine                         main
 talent-pipeline-tracker                     main
-ai-engineering-company-project-monorepo     milestone-4
+ai-engineering-company-project-monorepo     main
 ai-eng-financial-dashboard-context-project  main
 frontend-specs-financial-dashboard           feature/frontend-specs
 financial-dashboard-agent-skills             feature/agent-skills
