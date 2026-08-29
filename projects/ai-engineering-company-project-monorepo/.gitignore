@@ -9,3 +9,35 @@ coverage/
 *.log
 .turbo/
 next-env.d.ts
+
+# Python build/test artefacts
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.venv/
+
+# TinyDB runtime data (regenerate with: cd services/api && uv run seed)
+services/api/data/
+
+# Coverage artefacts
+.coverage
+.coverage.*
+htmlcov/
+
+# OpenClaw local memory and private workspace context
+/USER.md
+/MEMORY.md
+/BOOTSTRAP.md
+/memory/
+
+# The warehouse-agent brief requires public deliverables under .openclaw/.
+# Ignore everything there by default, then allow only the reviewable contract.
+/.openclaw/*
+!/.openclaw/README.md
+!/.openclaw/IDENTITY.md
+!/.openclaw/AGENTS.md
+!/.openclaw/TOOLS.md
+!/.openclaw/TRANSCRIPT.md
+!/.openclaw/skills/
+!/.openclaw/skills/**

@@ -1,0 +1,17 @@
+[project]
+name = "trackflow-shared"
+version = "0.1.0"
+description = "Validation and domain rules shared between scripts/ and services/api — the single definition of the incident model, its lifecycle, and the analyzer-CSV transformations."
+requires-python = ">=3.11"
+dependencies = [
+    # The CSV row-validity rules from the analyzer milestone are reused
+    # rather than re-implemented, so there is exactly one definition.
+    "incident-analyzer",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["trackflow_shared*"]

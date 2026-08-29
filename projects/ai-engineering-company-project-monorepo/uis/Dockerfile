@@ -1,0 +1,25 @@
+FROM node:22-alpine
+
+WORKDIR /workspace
+
+# Preserve the npm workspace graph so the backoffice resolves the local
+# business-logic package while each UI remains independently runnable.
+COPY package.json package-lock.json ./
+COPY packages/business-logic/package.json packages/business-logic/package.json
+COPY packages/programming-fundamentals/package.json packages/programming-fundamentals/package.json
+COPY packages/shared/package.json packages/shared/package.json
+COPY uis/website/package.json uis/website/package.json
+COPY uis/backoffice/package.json uis/backoffice/package.json
+COPY uis/talent-pipeline-tracker/package.json uis/talent-pipeline-tracker/package.json
+RUN npm ci --workspace=@trackflow/website --workspace=@trackflow/backoffice --workspace=@trackflow/business-logic --include-workspace-root=false
+
+COPY packages/business-logic packages/business-logic
+COPY uis/website uis/website
+COPY uis/backoffice uis/backoffice
+COPY uis/start.sh uis/start.sh
+
+RUN chmod +x /workspace/uis/start.sh
+
+EXPOSE 3000 3001
+
+CMD ["/workspace/uis/start.sh"]

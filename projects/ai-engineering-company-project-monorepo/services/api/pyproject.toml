@@ -1,0 +1,94 @@
+[project]
+name = "trackflow-api"
+version = "1.0.0"
+description = "TrackFlow backend API — supplier directory (TinyDB) + incident analysis."
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "python-multipart>=0.0.20",
+    "tinydb>=4.8",
+    # incident-analyzer is installed from the local monorepo:
+    #   pip install -e packages/incident_analyzer
+    # See README.md for the bootstrap.
+    "incident-analyzer",
+    "python-jose[cryptography]>=3.5.0",
+    "libpass[bcrypt]>=1.9.3",
+    "python-dotenv>=1.2.2",
+    "pydantic[email]>=2.13.4",
+    "trackflow-shared>=0.1.0",
+    "sqlmodel>=0.0.39",
+    "psycopg2-binary>=2.9.12",
+]
+
+[project.scripts]
+seed-inventory = "seed_inventory:main"
+# Enables `uv run seed`.
+seed = "seed:main"
+# Enables `uv run seed-incidents` (historical CSV -> incident manager).
+seed-incidents = "seed_incidents_entry:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "httpx>=0.27",
+    "httpx2>=2.12",
+    "pytest-cov>=7.1.0",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# Flat layout: the milestone specifies main.py / models.py / database.py /
+# seed.py at services/api/ with routes/ beside them.
+py-modules = ["main", "models", "database", "seed", "security", "services_users", "email_service", "password_reset", "seed_incidents_entry"]
+
+[tool.setuptools.packages.find]
+include = ["routes*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+pythonpath = ["."]
+
+[tool.uv.sources]
+incident-analyzer = { path = "../../packages/incident_analyzer", editable = true }
+trackflow-shared = { path = "../../packages/shared", editable = true }
+
+[tool.ruff]
+extend-exclude = [".venv"]
+# The seed data is transcribed verbatim from CONTEXT.md; a few of those
+# note strings run past 88 columns and reflowing them would obscure that
+# they are copied exactly.
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "RUF"]
+ignore = [
+    # `class Status(str, Enum)` is the idiom FastAPI's own docs use for
+    # path/query enums. StrEnum would work on 3.11+ but this is the
+    # shape every FastAPI reader expects.
+    "UP042",
+]
+
+[tool.ruff.lint.per-file-ignores]
+# The reset email is inline-styled HTML: email clients strip <style>
+# blocks, so the styles must live in long style="" attributes. Wrapping
+# them would either break the attribute or hurt readability.
+"email_service.py" = ["E501"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's dependency-injection idiom puts Query()/File()/Depends()
+# in argument defaults on purpose. B008 exists for mutable defaults;
+# these are not that.
+extend-immutable-calls = [
+    "fastapi.Query",
+    "fastapi.File",
+    "fastapi.Depends",
+    "fastapi.Body",
+    "fastapi.Path",
+    "fastapi.Header",
+    "fastapi.Form",
+]
