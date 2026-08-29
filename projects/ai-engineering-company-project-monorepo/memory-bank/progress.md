@@ -4,6 +4,26 @@ Rolling log of substantive changes. Newest first.
 
 ---
 
+## 2026-08-29 · Public TrackFlow demonstration
+
+**Branch:** `codex/sync-live-trackflow-site`
+
+- Published the TrackFlow public landing page at
+  `https://trackflow-coursework-demo.armonon.chatgpt.site` while keeping the
+  authenticated backoffice and FastAPI service in the Docker demonstration.
+- Updated the canonical website metadata, mobile navigation, public copy, and
+  branded Open Graph/X preview asset to match the hosted version.
+- Added the live URL to the repository README so the deployment is directly
+  traceable from GitHub.
+
+Verification on this branch:
+
+- Root typecheck, all production builds, and the website lint pass.
+- 79 JavaScript/TypeScript tests and 322 FastAPI tests pass.
+- `npm audit` reports zero known vulnerabilities.
+- The public deployment returns HTTP 200, and the production website build
+  emits the canonical Open Graph and X image URLs.
+
 ## 2026-08-29 · Docker runtime dependency correction
 
 **Branch:** `codex/docker-runtime-dependency`

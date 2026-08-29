@@ -7,6 +7,12 @@ _One cumulative TrackFlow repository for the AI Engineering Career Program — 4
 
 _Estas instrucciones tambien estan disponibles en [espanol](./README.es.md)._
 
+**Live public demonstration:**
+[trackflow-coursework-demo.armonon.chatgpt.site](https://trackflow-coursework-demo.armonon.chatgpt.site)
+
+The hosted demonstration publishes the canonical `uis/website` landing page.
+Run Docker Compose for the authenticated backoffice and FastAPI demonstration.
+
 ---
 
 ## Purpose
