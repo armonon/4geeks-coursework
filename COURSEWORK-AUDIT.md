@@ -50,9 +50,9 @@ assignment was submitted or resubmitted.
 
 | Assignment | Completed target |
 | --- | --- |
-| Todo List CLI with Python | [`projects/todo-list-cli-python`](./projects/todo-list-cli-python), mirrored at [`armonon/todo-list-cli-python`](https://github.com/armonon/todo-list-cli-python); required functions, CSV persistence, menu, and seven tests |
+| Todo List CLI with Python | [`projects/todo-list-cli-python`](./projects/todo-list-cli-python), mirrored at [`armonon/todo-list-cli-python`](https://github.com/armonon/todo-list-cli-python); official-compatible root functions, headerless CSV persistence, six-action menu, 5 official-style tests, and 9 additional edge-case tests |
 | Milestone 5 — Backoffice: Inventory Management Interface | [`milestone-5-inventory-backoffice`](https://github.com/armonon/ai-engineering-company-project-monorepo/tree/milestone-5-inventory-backoffice), merged by [PR #19](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/19) |
-| Company Monorepo Containerization | TrackFlow `main`, merged by [PR #20](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/20); Docker execution still requires a machine with Docker installed |
+| Company Monorepo Containerization | TrackFlow `main`, merged by [PR #20](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/20) and runtime-corrected by [PR #21](https://github.com/armonon/ai-engineering-company-project-monorepo/pull/21); Docker execution still requires a machine with Docker installed |
 
 ## Built but waiting for cohort timing
 
@@ -79,17 +79,26 @@ reaches the assignment.
 
 - TrackFlow milestone branch audit: no errors.
 - TrackFlow workspace typecheck: passed for all six npm workspaces.
-- TrackFlow JavaScript/TypeScript tests: 69 passed.
-- TrackFlow FastAPI tests: 318 passed.
+- TrackFlow JavaScript/TypeScript tests: 79 passed; all three UI linters passed.
+- TrackFlow FastAPI tests: 322 passed.
 - TrackFlow production builds: website, backoffice, and talent tracker passed.
+- TrackFlow runtime proxy: the backoffice `/trackflow-api` path returned the
+  FastAPI health response during a native two-service smoke test.
 - Talk to the Machine: lint and production build passed; local page returned
   HTTP 200 and the server-only API route returned a controlled missing-key
   response without exposing a client key.
 - Financial dashboard: production build and all five current tests passed;
   `dashboard-metric-card` passed the skill validator.
-- Todo List CLI: all seven standard-library unit tests passed.
+- Todo List CLI: all 14 standard-library unit tests passed, including the five
+  official-style cases.
 - Maison Lumiere storefront: all five page-specific PRs passed the production
-  Tailwind build; the work remains honestly identified as single-contributor.
+  Tailwind build; all views avoided horizontal overflow at 375, 768, and 1440
+  pixels, and the disabled checkout cannot collect or submit payment data. The
+  work remains honestly identified as single-contributor.
+- Influencer dashboard: all three rubric sections remained visible without
+  page-level horizontal overflow at 375, 768, and 1440 pixels.
+- Every changed npm project reports zero known vulnerabilities after its
+  production build and lint/test checks.
 - TrackFlow containerization: Compose YAML, shell syntax, required files, and
   Python dependency resolution passed static checks. Docker was unavailable
   locally, so no live container run is claimed.
