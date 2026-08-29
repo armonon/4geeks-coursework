@@ -72,15 +72,15 @@ export default function HomePage() {
           <div className="rounded-lg border border-slate-200 bg-white p-5">
             <h3 className="text-lg font-semibold">Mexico</h3>
             <p className="mt-2 text-sm text-slate-600">
-              Metropolitan same-day delivery available on the priority
-              tier. Prices in MXN.
+              Metropolitan same-day delivery is available on the priority
+              tier. Prices are in MXN.
             </p>
           </div>
           <div className="rounded-lg border border-slate-200 bg-white p-5">
             <h3 className="text-lg font-semibold">Spain</h3>
             <p className="mt-2 text-sm text-slate-600">
-              24h express and 48h standard tiers across mainland Spain.
-              Prices in EUR.
+              24h express and 48h standard tiers are available across mainland
+              Spain. Prices are in EUR.
             </p>
           </div>
         </div>
@@ -136,7 +136,7 @@ export default function HomePage() {
             <p className="text-slate-600">
               We&apos;ll walk through your current shipment volume, the
               warehouses you run today, and where TrackFlow would fit.
-              No procurement paperwork required for the first call.
+              No procurement paperwork is required for the first call.
             </p>
             <p className="mt-4 text-sm text-slate-500">
               Prefer email?{" "}

@@ -14,7 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://trackflow.example.com"),
+  metadataBase: new URL(
+    "https://trackflow-coursework-demo.armonon.chatgpt.site",
+  ),
   title: {
     default: "TrackFlow · Last-mile delivery and warehousing SaaS",
     template: "%s · TrackFlow",
@@ -27,6 +29,21 @@ export const metadata: Metadata = {
       "Warehouse, dispatch, and shipment tracking for mid-market retailers in Mexico and Spain.",
     type: "website",
     locale: "en_US",
+    images: [
+      {
+        url: "/og.png",
+        width: 1730,
+        height: 909,
+        alt: "TrackFlow — One workspace for every shipment.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "TrackFlow · Last-mile delivery and warehousing SaaS",
+    description:
+      "Warehouse, dispatch, and shipment tracking for retailers in Mexico and Spain.",
+    images: ["/og.png"],
   },
   robots: { index: true, follow: true },
 };
@@ -47,14 +64,20 @@ export default function RootLayout({
               </span>
               <span className="text-sm font-semibold">TrackFlow</span>
             </Link>
-            <nav className="flex items-center gap-5 text-sm text-slate-700">
+            <nav
+              aria-label="Primary"
+              className="flex items-center gap-3 text-xs text-slate-700 sm:gap-5 sm:text-sm"
+            >
               <a href="#offering" className="hover:text-slate-900">
                 Product
               </a>
               <a href="#countries" className="hover:text-slate-900">
                 Countries
               </a>
-              <a href="#pricing" className="hover:text-slate-900">
+              <a
+                href="#pricing"
+                className="hidden hover:text-slate-900 sm:inline"
+              >
                 Pricing
               </a>
               <a
