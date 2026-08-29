@@ -50,7 +50,7 @@ export function IncidentList({ reloadKey = 0 }: { reloadKey?: number }) {
   }, [filters]);
 
   useEffect(() => {
-    void load();
+    queueMicrotask(() => void load());
   }, [load, reloadKey]);
 
   /**

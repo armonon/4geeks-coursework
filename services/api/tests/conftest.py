@@ -27,7 +27,7 @@ EMAIL = "ana@trackflow.com"
 def api(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
     """An unauthenticated client on a throwaway database."""
     monkeypatch.setenv("TINYDB_PATH", str(tmp_path / "auth-088.json"))
-    monkeypatch.setenv("SECRET_KEY", "test-secret-not-a-real-one")
+    monkeypatch.setenv("SECRET_KEY", "test-secret-not-a-real-one-32-bytes-minimum")
     monkeypatch.setenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
 
     import database

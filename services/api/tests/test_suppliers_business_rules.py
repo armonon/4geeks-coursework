@@ -32,7 +32,7 @@ VALID_SUPPLIER = {
 @pytest.fixture
 def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("TINYDB_PATH", str(tmp_path / "suppliers.json"))
-    monkeypatch.setenv("SECRET_KEY", "test-secret-not-a-real-one")
+    monkeypatch.setenv("SECRET_KEY", "test-secret-not-a-real-one-32-bytes-minimum")
 
     import database
 
