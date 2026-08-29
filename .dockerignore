@@ -1,0 +1,15 @@
+.git/
+.github/
+.devcontainer/
+node_modules/
+**/node_modules/
+.next/
+**/.next/
+.env*
+!.env.example
+*.log
+coverage/
+**/__pycache__/
+*.pyc
+**/tests/
+.venv/

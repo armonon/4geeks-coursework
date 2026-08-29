@@ -455,3 +455,20 @@ Three consequential edits came with it:
   reference/tracking data, and the authenticated user identifier.
 - Added the stable `milestone-5-inventory-backoffice` submission snapshot to
   `MILESTONES.md`; the existing Inventory ORM milestone remains separate.
+
+## 2026-08-28 — Company monorepo containerization
+
+- Added a Node Alpine UI image and `uis/start.sh` to run the website on 3000
+  and backoffice on 3001 from the shared npm workspace installation.
+- Added a Python 3.12 service image that installs `uv`, consumes
+  `services/requirements.txt`, and runs the centralized FastAPI app through
+  Uvicorn with reload enabled.
+- Root Compose now starts both services on a named network, waits for the API
+  health check, bind-mounts source for hot reload, and retains dependencies
+  and development data in named volumes.
+- Added scoped Docker ignore files and a safe `.env.example`; the real root
+  `.env` remains gitignored. SQLite is the credential-free local inventory
+  default, while Supabase can be selected through an uncommitted value.
+- Docker was not installed on the authoring machine, so image execution was
+  not claimed. Static Dockerfile/Compose validation and the full repository
+  typecheck, test, and build workflow are the available verification gates.
