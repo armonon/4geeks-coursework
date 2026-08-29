@@ -65,6 +65,25 @@ uv run uvicorn main:app --reload    # http://127.0.0.1:8000/docs
 > Running `npm install` *inside* `uis/backoffice` alone is not enough —
 > npm workspaces are linked from the root.
 
+### Docker development environment
+
+Run the public website, backoffice, and FastAPI service together:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+- Website: <http://localhost:3000>
+- Backoffice: <http://localhost:3001>
+- API docs: <http://localhost:8000/docs>
+
+The UI container runs the two Next.js workspaces through `uis/start.sh`.
+The backend container runs Uvicorn with reload enabled. Source folders are
+bind-mounted for hot reload, while dependencies and local development data
+stay in named volumes. The committed `.env.example` contains only safe local
+defaults; `.env` remains ignored and must never contain committed secrets.
+
 ---
 
 ## How to think about this monorepo
@@ -249,9 +268,9 @@ Read the linked `README.md` inside each folder before you start coding there.
 
 - Dockerfiles, Terraform, K8s manifests, Nginx configs, CI/CD pipelines
 
-If local container orchestration is introduced later, keep
-`docker-compose.yml` at the repository root so it can coordinate `services/`,
-databases, and UIs. There is no compose file today.
+Local container orchestration lives in the root `docker-compose.yml`, where it
+coordinates `services/` and `uis/` over the named TrackFlow development
+network.
 
 → See [`infra/README.md`](./infra/README.md)
 

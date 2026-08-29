@@ -13,6 +13,7 @@
 | Persistence              | **TinyDB + SQLModel/PostgreSQL**        | TinyDB covers existing local data; inventory uses PostgreSQL/Supabase. |
 | Coursework agent         | **OpenClaw 2026.7.1+**                 | Dedicated agent uses this repository as its workspace.       |
 | CI                       | **GitHub Actions**                     | PRs and `main` run bootstrap, typecheck, JS/Python tests, builds, and production audit. |
+| Local containers         | **Docker Compose**                     | One UI container (website + backoffice) and one reloadable FastAPI container. |
 
 ## Repository layout (what matters right now)
 
@@ -30,6 +31,7 @@
 ./uis/backoffice/                — internal Next.js app, imports @trackflow/business-logic
 ./uis/talent-pipeline-tracker/    — recruiting workflow UI
 ./services/api/                  — FastAPI auth, incidents, suppliers, and inventory
+./docker-compose.yml             — two-service local development environment
 ./skills/                        — OpenClaw-visible reusable coursework skills
 ```
 
@@ -55,6 +57,12 @@
    backend service can consume them.
 5. **All secrets remain out of the repo.** No `.env` committed; each
    app has an `.env.example`.
+6. **Two development containers, one company repository.** The UI image runs
+   the website and backoffice on ports 3000 and 3001 through `uis/start.sh`;
+   the backend image runs the centralized FastAPI app on port 8000. Compose
+   bind mounts source for hot reload and keeps dependencies/data in named
+   volumes. Browser-facing API requests use the published host port, while
+   container-to-container configuration uses the `backend` service name.
 
 ## Active technical constraints
 
@@ -89,6 +97,10 @@ npm run bootstrap        # builds packages/*
 # during dev
 npm run dev --workspace @trackflow/website
 npm run dev --workspace @trackflow/backoffice
+
+# alternative: all applications with hot reload
+cp .env.example .env
+docker compose up --build
 
 # before every commit (see AGENTS.md, Delivery Workflow)
 npm run typecheck
