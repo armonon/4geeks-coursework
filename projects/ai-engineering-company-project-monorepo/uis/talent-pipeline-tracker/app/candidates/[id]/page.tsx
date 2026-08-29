@@ -24,8 +24,11 @@ export default function CandidateDetailPage({ params }: PageProps) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setLoading(true);
+      setError(null);
+    });
     candidatesService
       .get(id)
       .then((c) => {

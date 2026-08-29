@@ -44,7 +44,7 @@ export function SupplierDirectory() {
 
   // Re-runs whenever a filter changes — no page reload.
   useEffect(() => {
-    void load();
+    queueMicrotask(() => void load());
   }, [load]);
 
   /** Swap one row in place so a rate/status change shows immediately. */

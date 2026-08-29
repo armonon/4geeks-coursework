@@ -18,7 +18,7 @@ PASSWORD = "original-password-1"
 @pytest.fixture
 def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     monkeypatch.setenv("TINYDB_PATH", str(tmp_path / "reset.json"))
-    monkeypatch.setenv("SECRET_KEY", "test-secret-not-a-real-one")
+    monkeypatch.setenv("SECRET_KEY", "test-secret-not-a-real-one-32-bytes-minimum")
     monkeypatch.setenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
     monkeypatch.setenv("RESET_TOKEN_EXPIRE_MINUTES", "30")
     # No RESEND_API_KEY: the sender must never hit the network in tests.

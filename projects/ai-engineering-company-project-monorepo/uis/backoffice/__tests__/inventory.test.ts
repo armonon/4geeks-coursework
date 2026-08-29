@@ -1,4 +1,17 @@
-import { stockStatus } from "@/lib/inventory";
+import { authJson } from "@/lib/auth";
+import {
+  createInboundMovement,
+  createOutboundMovement,
+  stockStatus,
+} from "@/lib/inventory";
+
+jest.mock("@/lib/auth", () => ({ authJson: jest.fn() }));
+
+const mockedAuthJson = jest.mocked(authJson);
+
+beforeEach(() => {
+  mockedAuthJson.mockReset();
+});
 
 describe("stockStatus", () => {
   it("marks empty and negative computed stock as out", () => {
@@ -13,5 +26,45 @@ describe("stockStatus", () => {
 
   it("marks stock over ten as available", () => {
     expect(stockStatus(11)).toBe("available");
+  });
+});
+
+describe("inventory movement requests", () => {
+  it("sends the inbound payload to the protected receipt endpoint", async () => {
+    mockedAuthJson.mockResolvedValue({ id: 1 });
+    const input = {
+      sku_id: 7,
+      quantity: 12,
+      reference: "PO-2042",
+      warehouse: "LA" as const,
+    };
+
+    await createInboundMovement(input);
+
+    expect(mockedAuthJson).toHaveBeenCalledWith(
+      "/inventory/orders/inbound",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
+    );
+  });
+
+  it("preserves the nullable tracking contract for a warehouse loss", async () => {
+    mockedAuthJson.mockResolvedValue({ id: 2 });
+    const input = {
+      sku_id: 9,
+      quantity: 1,
+      exit_type: "loss" as const,
+      tracking_number: null,
+      warehouse: "ZGZ" as const,
+    };
+
+    await createOutboundMovement(input);
+
+    expect(mockedAuthJson).toHaveBeenCalledWith(
+      "/inventory/orders/outbound",
+      expect.objectContaining({ body: JSON.stringify(input) }),
+    );
   });
 });

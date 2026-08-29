@@ -61,8 +61,8 @@
    the website and backoffice on ports 3000 and 3001 through `uis/start.sh`;
    the backend image runs the centralized FastAPI app on port 8000. Compose
    bind mounts source for hot reload and keeps dependencies/data in named
-   volumes. Browser-facing API requests use the published host port, while
-   container-to-container configuration uses the `backend` service name.
+   volumes. Browser requests use the same-origin `/trackflow-api` path; the
+   backoffice Next.js server proxies it to the `backend` service name.
 
 ## Active technical constraints
 
@@ -75,6 +75,12 @@
   the backoffice quote form.
 - **Package builds must not depend on Next.js runtime.** Packages are
   plain Node / TypeScript.
+- **Environment files have separate scopes.** The root `.env` is consumed by
+  Docker Compose; native FastAPI development loads only `services/api/.env` so
+  container-only paths never leak into a host process.
+- **UI linting uses native flat configs.** Next.js 16's exported configs are
+  spread directly into each `eslint.config.mjs`; `FlatCompat` must not wrap
+  them.
 
 ## Known technical debt
 

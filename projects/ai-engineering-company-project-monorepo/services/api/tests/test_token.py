@@ -20,11 +20,11 @@ from datetime import UTC, datetime, timedelta
 
 import pytest
 from fastapi.testclient import TestClient
-from jose import jwt
+import jwt
 
 from models import Role
 
-SECRET = "test-secret-not-a-real-one"
+SECRET = "test-secret-not-a-real-one-32-bytes-minimum"
 ALGORITHM = "HS256"
 
 
@@ -145,8 +145,7 @@ def test_an_unsigned_alg_none_token_is_rejected(
     api: TestClient, registered: dict
 ) -> None:
     """The classic JWT forgery: strip the signature and claim `alg: none`."""
-    # python-jose refuses to *encode* alg:none, so the token is assembled
-    # by hand — which is how an attacker would produce it in any case.
+    # The token is assembled by hand, which is how an attacker would produce it.
     header = _b64({"alg": "none", "typ": "JWT"})
     payload = _b64(
         {
@@ -167,7 +166,7 @@ def test_a_token_signed_with_another_secret_is_rejected(
             "sub": str(registered["user"]["id"]),
             "exp": datetime.now(UTC) + timedelta(hours=1),
         },
-        key="a-different-secret-entirely",
+        key="a-different-secret-entirely-but-long-enough-for-hs256",
         algorithm=ALGORITHM,
     )
 

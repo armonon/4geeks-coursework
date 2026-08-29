@@ -118,8 +118,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Verify the session on mount and whenever the route changes.
   useEffect(() => {
-    setLoading(true);
-    void refresh();
+    queueMicrotask(() => {
+      setLoading(true);
+      void refresh();
+    });
   }, [refresh, pathname]);
 
   // Redirect unauthenticated users away from guarded routes.

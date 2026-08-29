@@ -30,7 +30,7 @@ export function Filters() {
   }, [debouncedSearch]);
 
   useEffect(() => {
-    setSearchInput(currentSearch);
+    queueMicrotask(() => setSearchInput(currentSearch));
   }, [currentSearch]);
 
   function updateParam(key: string, value: string) {

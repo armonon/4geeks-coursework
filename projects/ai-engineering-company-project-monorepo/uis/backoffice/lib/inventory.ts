@@ -27,6 +27,27 @@ export interface InventoryMovement {
   tracking_number: string | null;
 }
 
+export interface StockEntry {
+  id: number;
+  sku_id: number;
+  quantity: number;
+  reference: string;
+  warehouse: Warehouse;
+  created_at: string;
+  user_uuid: string;
+}
+
+export interface StockExit {
+  id: number;
+  sku_id: number;
+  quantity: number;
+  exit_type: ExitType;
+  tracking_number: string | null;
+  warehouse: Warehouse;
+  created_at: string;
+  user_uuid: string;
+}
+
 export interface InboundInput {
   sku_id: number;
   quantity: number;
@@ -56,8 +77,8 @@ export function fetchInventoryProducts(): Promise<InventoryProduct[]> {
 
 export function createInboundMovement(
   input: InboundInput,
-): Promise<InventoryMovement> {
-  return authJson<InventoryMovement>("/inventory/orders/inbound", {
+): Promise<StockEntry> {
+  return authJson<StockEntry>("/inventory/orders/inbound", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
@@ -66,8 +87,8 @@ export function createInboundMovement(
 
 export function createOutboundMovement(
   input: OutboundInput,
-): Promise<InventoryMovement> {
-  return authJson<InventoryMovement>("/inventory/orders/outbound", {
+): Promise<StockExit> {
+  return authJson<StockExit>("/inventory/orders/outbound", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(input),
