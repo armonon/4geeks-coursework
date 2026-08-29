@@ -1,23 +1,23 @@
 # Todo List CLI with Python
 
-A standard-library command-line todo list for the 4Geeks Python exercise. Tasks
-can be added, listed, and deleted by their displayed number. The list is saved
-to `todos.csv`, so it is restored the next time the program starts.
+A standard-library command-line todo list for the 4Geeks Python exercise. It
+implements the exact root-module function contract and headerless CSV format
+used by the course test suite.
 
 ## Run it
 
 ```bash
-python app.py
+python3 app.py
 ```
 
-The interactive menu offers exactly four actions: add, view, delete, and exit.
-There is intentionally no edit flow because the assignment only requests those
-operations.
+The interactive menu provides the six starter actions: add, delete, print,
+save, load, and exit. Task editing is intentionally out of scope.
 
 ## Required functions
 
-The implementation in `src/app.py` exposes:
+The root `app.py` exposes:
 
+- `get_todos()`
 - `add_one_task(title)`
 - `print_list()`
 - `delete_task(number_to_delete)`
@@ -27,7 +27,8 @@ The implementation in `src/app.py` exposes:
 ## Tests
 
 ```bash
-python -m unittest discover -v
+python3 test.py
+python3 -m unittest discover -v
 ```
 
-No third-party packages are required.
+No third-party packages are required by the CLI.

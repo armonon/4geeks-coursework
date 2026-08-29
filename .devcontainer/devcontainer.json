@@ -1,5 +1,5 @@
 {
   "name": "4Geeks Python Todo CLI",
   "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
-  "postCreateCommand": "python -m unittest discover -v"
+  "postCreateCommand": "python test.py && python -m unittest discover -v"
 }
