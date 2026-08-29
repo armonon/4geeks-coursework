@@ -1,11 +1,12 @@
 import contextlib
+import csv
 import io
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from src import app
+import app
 
 
 class TodoListTests(unittest.TestCase):
@@ -19,23 +20,24 @@ class TodoListTests(unittest.TestCase):
         self.addCleanup(self.file_patch.stop)
         app.todos.clear()
 
-    def test_add_one_task_persists_trimmed_title(self) -> None:
-        position = app.add_one_task("  Prepare assessment  ")
+    def test_get_todos_returns_active_list(self) -> None:
+        app.add_one_task("Prepare assessment")
+        self.assertIs(app.get_todos(), app.todos)
+        self.assertEqual(app.get_todos(), ["Prepare assessment"])
 
+    def test_add_one_task_trims_title_without_implicitly_saving(self) -> None:
+        position = app.add_one_task("  Prepare assessment  ")
         self.assertEqual(position, 1)
         self.assertEqual(app.todos, ["Prepare assessment"])
-        app.todos.clear()
-        self.assertEqual(app.load_todos(), ["Prepare assessment"])
+        self.assertFalse(app.TODOS_FILE.exists())
 
     def test_add_rejects_empty_title(self) -> None:
         with self.assertRaisesRegex(ValueError, "cannot be empty"):
             app.add_one_task("   ")
 
-    def test_delete_task_uses_displayed_one_based_number(self) -> None:
+    def test_delete_task_accepts_displayed_number(self) -> None:
         app.todos.extend(["First", "Second", "Third"])
-
-        removed = app.delete_task(2)
-
+        removed = app.delete_task("2")
         self.assertEqual(removed, "Second")
         self.assertEqual(app.todos, ["First", "Third"])
 
@@ -49,21 +51,25 @@ class TodoListTests(unittest.TestCase):
     def test_print_list_shows_clear_numeric_positions(self) -> None:
         app.todos.extend(["Alpha", "Beta"])
         output = io.StringIO()
-
         with contextlib.redirect_stdout(output):
             app.print_list()
-
         self.assertIn("1. Alpha", output.getvalue())
         self.assertIn("2. Beta", output.getvalue())
+
+    def test_save_uses_headerless_single_column_csv(self) -> None:
+        app.todos.extend(["jump", "run", "roll"])
+        app.save_todos()
+        with app.TODOS_FILE.open(newline="", encoding="utf-8") as csv_file:
+            self.assertEqual(list(csv.reader(csv_file)), [["jump"], ["run"], ["roll"]])
+
+    def test_load_replaces_memory_from_headerless_csv(self) -> None:
+        app.todos.append("Old in-memory task")
+        app.TODOS_FILE.write_text("jump\nrun\nroll\n", encoding="utf-8")
+        self.assertEqual(app.load_todos(), ["jump", "run", "roll"])
 
     def test_load_missing_file_starts_with_empty_list(self) -> None:
         app.todos.append("Old in-memory task")
         self.assertEqual(app.load_todos(), [])
-
-    def test_load_rejects_malformed_csv(self) -> None:
-        app.TODOS_FILE.write_text("wrong\nvalue\n", encoding="utf-8")
-        with self.assertRaisesRegex(ValueError, "title"):
-            app.load_todos()
 
 
 if __name__ == "__main__":
