@@ -11,7 +11,9 @@ COPY packages/shared/package.json packages/shared/package.json
 COPY uis/website/package.json uis/website/package.json
 COPY uis/backoffice/package.json uis/backoffice/package.json
 COPY uis/talent-pipeline-tracker/package.json uis/talent-pipeline-tracker/package.json
-RUN npm ci --workspace=@trackflow/website --workspace=@trackflow/backoffice --workspace=@trackflow/business-logic --include-workspace-root=false
+# Include the root's explicit optional native packages. npm lockfiles generated
+# on macOS can otherwise omit the Linux musl binaries required by Alpine.
+RUN npm ci --workspace=@trackflow/website --workspace=@trackflow/backoffice --workspace=@trackflow/business-logic --include-workspace-root=true
 
 COPY packages/business-logic packages/business-logic
 COPY uis/website uis/website

@@ -4,6 +4,39 @@ Rolling log of substantive changes. Newest first.
 
 ---
 
+## 2026-08-29 · Docker runtime dependency correction
+
+**Branch:** `codex/docker-runtime-dependency`
+
+- Promoted `httpx` from the API's development dependency group to its runtime
+  dependencies. `email_service.py` imports it during application startup, so
+  the backend container could not boot when production dependencies were
+  installed without the development group.
+- Discovered through the first live Docker Desktop Compose run on Apple
+  Silicon: both images built, but the backend health check failed with
+  `ModuleNotFoundError: No module named 'httpx'` and correctly prevented the UI
+  from starting.
+- Rebuilt the backend image from the corrected lockfile and re-ran the complete
+  Compose stack before marking the containerization deliverable verified.
+- Live browser requests then exposed missing Alpine-native Tailwind/Lightning
+  CSS binaries in the UI image. Declared the Linux GNU and musl packages for
+  both `amd64` and `arm64`, included root optional dependencies during the
+  workspace install, stopped shadowing image dependencies with a stale named
+  volume, and isolated container-side Next.js caches from host-native caches.
+- Allowed the two loopback development hosts in every Next.js application so
+  browser verification can load development chunks and hydrate normally when
+  Compose is opened through either `localhost` or `127.0.0.1`.
+
+Verification on this branch:
+
+- Root typecheck and production builds pass for every workspace.
+- 79 JavaScript/TypeScript tests and 322 FastAPI tests pass.
+- Fresh Compose recreation returns HTTP 200 from the API (`:8000`), website
+  (`:3000`), backoffice (`:3001`), and same-origin API proxy
+  (`:3001/trackflow-api`).
+- Browser verification renders the public TrackFlow site and confirms the
+  protected backoffice redirects an unauthenticated visitor to `/login`.
+
 ## 2026-08-28 · Runtime readiness corrections
 
 **Branch:** `codex/runtime-readiness-corrections`
