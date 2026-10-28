@@ -11,8 +11,8 @@ the engineering trade-off, and connect it to evidence in the repository.
 | WeLoveReviews sentiment analysis | Integrate and validate a pretrained model | Standalone ML template | Complete |
 | Image classifier | Supervised image classification | Standalone course template | Complete |
 | K-means project | Unsupervised clustering | Standalone course template | Complete |
-| Sales forecasting | Regression and time-aware data | Standalone course template | Next |
-| Regression evaluation | Cross-validation and learning curves | Company coursework | Queued |
+| Sales forecasting | Regression and time-aware data | Company monorepo | Complete |
+| Regression evaluation | Cross-validation and learning curves | Company monorepo | Next |
 | StreamLoop churn tuning | Search spaces and stable hyperparameter tuning | Standalone Python template | Queued |
 | Milestone 7 — RAG knowledge base | Retrieval, Qdrant, generation, API, UI | Company monorepo | Queued |
 
@@ -149,6 +149,39 @@ enter training for a past prediction. Use chronological splits or expanding-wind
 cross-validation. Inspect trend, seasonality, outliers, variance changes, and
 autocorrelation. A naïve baseline such as “tomorrow equals today” is essential;
 a complex model that cannot beat it is not useful.
+
+### TrackFlow sales-forecasting evidence
+
+The TrackFlow model uses the official 120 consolidated monthly revenue records
+from 2016–2025. The first eight source years belong to training and 2024–2025
+remain held out. A lag-12 feature consumes the first year, leaving 84 usable
+training rows and all 24 test rows. Lag and rolling features are shifted so a
+row never uses its own target or any later revenue value. Calendar sine/cosine,
+quarter, a briefing-defined alternating growth cycle, and a time index express
+known seasonal and growth structure without leaking the test target.
+
+The estimator is a Random Forest seasonal-residual model: it predicts the
+correction to the same month one year earlier and then adds that correction to
+lag-12 revenue. This design retains an explainable tree model while avoiding a
+plain Random Forest's inability to extrapolate beyond historical target values.
+The saved pipeline fits its scaler and forest on training rows only.
+
+On the untouched 2024–2025 period, the model achieved **€56,047 RMSE**, or
+**4.31% of average test revenue**, compared with **€93,184** for the seasonal
+naïve baseline. MAE was **€44,677**, R² was **0.8927**, and normalized Gini was
+**0.9227**. Residual normality was not rejected (K² = **0.2660**, p = **0.8754**).
+PSI was **9.2454**, correctly warning that persistent company growth shifted the
+test revenue distribution far beyond ordinary stability thresholds. That drift
+warning must not be hidden merely because predictive error is good.
+
+The ±1 tree-standard-deviation band covered 50% of test observations. It is a
+model-variability visualization—not a calibrated 95% prediction interval. This
+distinction matters whenever uncertainty is communicated to decision-makers.
+
+Assessment-ready lesson: preserve chronology, compute features causally, fit
+preprocessing on training data only, compare against a meaningful baseline, and
+interpret multiple metrics in business terms. A good error score does not erase
+distribution shift or make an uncalibrated uncertainty band probabilistic.
 
 ## 5. Evaluating a trained model
 
