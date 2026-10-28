@@ -1,0 +1,16 @@
+{
+  "accuracy": [
+    0.9793142676353455
+  ],
+  "loss": [
+    0.05815809592604637
+  ],
+  "val_accuracy": [
+    0.990933358669281
+  ],
+  "val_loss": [
+    0.027193328365683556
+  ],
+  "epochs_completed": 1,
+  "note": "Full-dataset training; best validation checkpoint retained."
+}

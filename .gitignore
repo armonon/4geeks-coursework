@@ -1,3 +1,10 @@
 __pycache__
+.venv/
+.ipynb_checkpoints/
+.DS_Store
+data/raw/dogs-vs-cats.zip
+data/raw/dogs-vs-cats/
+data/raw/__MACOSX/
+data/interim/cats-vs-dogs/
 .env
 .learn
