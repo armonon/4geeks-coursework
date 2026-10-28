@@ -27,6 +27,23 @@ uv run uvicorn main:app --reload
 
 Swagger UI: <http://127.0.0.1:8000/docs>
 
+## Business reporting pipeline
+
+The Prefect 3 implementation lives under `data/pipelines/`, with reusable pure
+transformation code under `data/process/`. Its HTTP boundary is the independent
+`services/reporting/` package mounted by this API:
+
+| Method | Endpoint | Access |
+| --- | --- | --- |
+| `GET` | `/reporting/pipeline-runs/latest` | authenticated |
+| `POST` | `/reporting/pipeline-runs` | manager or admin |
+| `GET` | `/reporting/weekly-warehouse-client-performance` | authenticated |
+
+The pipeline uses the existing `DATABASE_URL`, reads `telemetry_events`
+read-only, and writes only to the dedicated `reporting` schema. Run it directly
+from the repository root with
+`services/api/.venv/bin/python data/pipelines/pipeline.py`.
+
 
 ## Authentication
 
@@ -307,9 +324,27 @@ Carried over from the previous milestone, now mounted as a router:
 uv run pytest
 ```
 
-169 tests — 52 for the incident manager, 51 for auth, 20 for password
-reset/change, 39 for the supplier directory, and 7 for incident
-analysis.
+389 tests cover authentication, inventory, suppliers, incidents, telemetry
+capture/storage/reporting, and the business-performance pipeline contracts.
+
+## Telemetry storage
+
+`POST /telemetry/events` is the persistent Phase 3 receiver. It accepts the
+same `{"events": [...]}` browser envelope, parses every item separately with
+the unchanged `TelemetryEvent` model, enforces the event-specific catalogue,
+and writes all valid siblings to Supabase/PostgreSQL with one bulk insert. It
+returns `{"received": N, "stored": M, "rejected": R}`; one invalid item does
+not cancel the batch. Event properties and rejected payloads are never logged.
+
+The `telemetry_events` table is append-only, has timestamp and event-type
+indexes plus a JSONB GIN index, and is created from SQLModel metadata on
+startup. The matching idempotent SQL migration lives at
+`migrations/20260923_create_telemetry_events.sql`. The public target remains
+declared with `TELEMETRY_ENDPOINT`, so no frontend configuration changed.
+
+Authentication responses also include an HMAC-pseudonymised
+`telemetry_user_id`. Set a dedicated `TELEMETRY_HMAC_KEY` in `.env`; raw TinyDB
+user ids, email addresses, and credentials are never used as telemetry ids.
 
 ## CORS
 

@@ -2,6 +2,26 @@
 
 Standalone scripts for TrackFlow runtime work and read-only coursework checks.
 
+## `nightly_export.py` — independent nightly telemetry job
+
+```bash
+services/api/.venv/bin/python scripts/nightly_export.py
+TARGET_DATE=2026-07-15 services/api/.venv/bin/python scripts/nightly_export.py
+```
+
+The script exports the selected UTC day from `telemetry_events` to the ignored
+`data/raw/telemetry_YYYY-MM-DD.csv` audit file, then launches the existing
+Milestone 6 pipeline as a subprocess. It records the full lifecycle in
+`job_runs`, uses `processing` as its only cross-process lock, and skips a date
+that is already `completed`.
+
+Production uses the checked-in system crontab at
+`infra/cron/trackflow-nightly-export.cron`: `0 2 * * *` in UTC. OS cron was
+chosen because the job must remain operationally independent from FastAPI; a
+framework scheduler in the API process would share its failure and restart
+boundary. Ensure `/var/log/trackflow` exists and install the crontab with the
+deployment configuration for the `trackflow` service account.
+
 ## `analyze.py` — Incident Report Analyser (Phase 1)
 
 ```bash
@@ -26,17 +46,8 @@ The bundled `incidents-trackflow.csv` is the 100-row sample from the
 syllabus. Expected values are documented in `CONTEXT.md`
 (§ Data Distribution).
 
-## Read-only 4Geeks status scripts
+## 4Geeks coursework scripts
 
-Copy `.env.example` to the ignored `.env` file and add the student token,
-then run any of these from the repository root:
-
-```bash
-node scripts/verify-4geeks-session.mjs
-node scripts/query-4geeks-projects.mjs
-node scripts/query-4geeks-pending.mjs
-node scripts/query-4geeks-progress.mjs
-```
-
-The shared `4geeks-client.mjs` performs authenticated GET requests only and
-does not print the token or personal profile fields.
+Moved to [4geeks-coursework-agent](https://github.com/armonon/4geeks-coursework-agent) — they query the
+4Geeks student API and belong with the agent that calls them, not with
+TrackFlow's build tooling.

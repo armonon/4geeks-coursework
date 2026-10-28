@@ -1,5 +1,23 @@
 # AGENTS.md
 
+> **Which AGENTS.md is this?** This one is the **repository contributor
+> protocol** — the rules any human or AI contributor follows when
+> changing code here. It is read by people and by coding agents working
+> *on* this repo.
+>
+> It is **not** an OpenClaw agent contract. OpenClaw also reads a file
+> called `AGENTS.md`, and expects an agent's hard limits in it. Those
+> live with the agent they belong to:
+>
+> | Agent | Where its config lives |
+> |---|---|
+> | Warehouse agent (planned) | `.openclaw/` here — see `docs/BRIEF-warehouse-agent.md` |
+> | Coursework Steward | a separate repository: [4geeks-coursework-agent](https://github.com/armonon/4geeks-coursework-agent) |
+>
+> The coursework agent used to live at this root, which is what created
+> the ambiguity. It manages bootcamp progress and has nothing to do with
+> TrackFlow, so it moved out.
+
 Working protocol for any AI or human contributor operating in this
 repository. This file is authoritative — if it conflicts with your
 default habits, follow this file.
