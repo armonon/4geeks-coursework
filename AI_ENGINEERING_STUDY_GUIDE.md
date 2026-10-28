@@ -10,8 +10,8 @@ the engineering trade-off, and connect it to evidence in the repository.
 | --- | --- | --- | --- |
 | WeLoveReviews sentiment analysis | Integrate and validate a pretrained model | Standalone ML template | Complete |
 | Image classifier | Supervised image classification | Standalone course template | Complete |
-| K-means project | Unsupervised clustering | Standalone course template | Next |
-| Sales forecasting | Regression and time-aware data | Standalone course template | Queued |
+| K-means project | Unsupervised clustering | Standalone course template | Complete |
+| Sales forecasting | Regression and time-aware data | Standalone course template | Next |
 | Regression evaluation | Cross-validation and learning curves | Company coursework | Queued |
 | StreamLoop churn tuning | Search spaces and stable hyperparameter tuning | Standalone Python template | Queued |
 | Milestone 7 — RAG knowledge base | Retrieval, Qdrant, generation, API, UI | Company monorepo | Queued |
@@ -110,6 +110,33 @@ Key assessment distinction: **data preprocessing** standardizes input shape;
 **augmentation** adds plausible training variation; **transfer learning** reuses
 learned visual features; and **fine-tuning** would later unfreeze selected
 pretrained layers at a small learning rate.
+
+### Unsupervised learning and K-means evidence
+
+Unsupervised learning discovers structure without human-provided target labels.
+K-means assigns each row to the nearest centroid, recalculates centroids, and
+repeats until assignments stabilize. Its objective (inertia) is the sum of
+squared distances to the assigned centroids. Lower inertia alone cannot choose
+the number of groups because it always decreases as more clusters are added.
+
+The California Housing project uses latitude, longitude, and median income.
+These features have different units, so a `StandardScaler` is fit on training
+data inside the clustering pipeline. The required six-cluster K-means is also
+fit only on training rows; test rows receive labels from `predict`, preventing
+the test set from influencing the centroids.
+
+The sampled silhouette score is **0.4012**. Silhouette compares within-cluster
+cohesion with separation from the nearest other cluster: values near 1 are well
+separated, near 0 overlap, and below 0 may be assigned poorly. Here, moderate
+overlap is plausible because geography and income form continuous populations,
+not perfect spherical blobs.
+
+K-means-generated labels then become pseudo-labels for supervised learning.
+Five-fold training-only validation selects a random forest over logistic
+regression. On 4,128 held-out rows it reproduces the clusters with **99.49%
+accuracy** and **0.9933 macro F1**. This high score measures agreement with the
+clustering rule—not objective correctness or social meaning. Cluster numbers are
+arbitrary category IDs, and responsible use requires stability and impact review.
 
 ## 4. Regression and time series
 
