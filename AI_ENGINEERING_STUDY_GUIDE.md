@@ -9,8 +9,8 @@ the engineering trade-off, and connect it to evidence in the repository.
 | Project | Main skill | Required home | Status |
 | --- | --- | --- | --- |
 | WeLoveReviews sentiment analysis | Integrate and validate a pretrained model | Standalone ML template | Complete |
-| Image classifier | Supervised image classification | Standalone course template | Next |
-| K-means project | Unsupervised clustering | Standalone course template | Queued |
+| Image classifier | Supervised image classification | Standalone course template | Complete |
+| K-means project | Unsupervised clustering | Standalone course template | Next |
 | Sales forecasting | Regression and time-aware data | Standalone course template | Queued |
 | Regression evaluation | Cross-validation and learning curves | Company coursework | Queued |
 | StreamLoop churn tuning | Search spaces and stable hyperparameter tuning | Standalone Python template | Queued |
@@ -86,6 +86,30 @@ the cost of mistakes:
 Logistic regression is a strong interpretable baseline. Decision trees capture
 nonlinear rules but overfit easily. Random forests reduce tree variance through
 bagging; gradient boosting builds trees sequentially to correct earlier errors.
+
+### Image-classification evidence
+
+The cats-vs-dogs project uses a deterministic, class-balanced 70/15/15 split of
+25,000 labeled images. Keras decodes the source photographs to 200×200 RGB, then
+an explicit resize layer supplies the rubric's required 224×224×3 input to an
+EfficientNet-B0 backbone. Training-only flips, rotations, and zooms improve
+robustness without altering validation or test data.
+
+The literal baseline starts EfficientNet from random weights. The final model
+uses transfer learning: ImageNet features are frozen and a new global-pooling,
+128-unit ReLU, and two-class softmax head is trained. This preserves the required
+architecture while making training practical and data-efficient. A checkpoint
+keeps the best validation model; early stopping prevents unproductive overfitting.
+
+On 3,750 untouched test images, the model reached **99.20% accuracy** with only
+30 errors. Cat F1 and dog F1 are both approximately **0.992**, demonstrating
+balanced performance rather than an accuracy result caused by class imbalance.
+The confusion matrix is `[[1866, 9], [21, 1854]]`.
+
+Key assessment distinction: **data preprocessing** standardizes input shape;
+**augmentation** adds plausible training variation; **transfer learning** reuses
+learned visual features; and **fine-tuning** would later unfreeze selected
+pretrained layers at a small learning rate.
 
 ## 4. Regression and time series
 
