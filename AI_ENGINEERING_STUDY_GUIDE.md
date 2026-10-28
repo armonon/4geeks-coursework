@@ -13,8 +13,8 @@ the engineering trade-off, and connect it to evidence in the repository.
 | K-means project | Unsupervised clustering | Standalone course template | Complete |
 | Sales forecasting | Regression and time-aware data | Company monorepo | Complete |
 | Regression evaluation | Cross-validation and learning curves | Company monorepo | Complete |
-| StreamLoop churn tuning | Search spaces and stable hyperparameter tuning | Standalone Python template | Next |
-| Milestone 7 — RAG knowledge base | Retrieval, Qdrant, generation, API, UI | Company monorepo | Queued |
+| StreamLoop churn tuning | Search spaces and stable hyperparameter tuning | Standalone Python template | Complete |
+| Milestone 7 — RAG knowledge base | Retrieval, Qdrant, generation, API, UI | Company monorepo | Next |
 
 The RAG milestone appears in two syllabus modules but is one unique assignment.
 
@@ -232,6 +232,40 @@ worse choice than a slightly lower but consistent model.
 
 Put preprocessing and the estimator in one scikit-learn `Pipeline` so every fold
 learns transformations only from its own training partition.
+
+### StreamLoop tuning evidence
+
+StreamLoop uses an 80/20 stratified split of 7,043 customers. The test set is
+evaluated exactly twice: once for the untouched default Logistic Regression
+baseline and once for the final `GridSearchCV` estimator. Median imputation,
+standardization, most-frequent imputation, and one-hot encoding all live inside
+the pipeline, so each cross-validation fold learns them from only its training
+rows.
+
+The broad `RandomizedSearchCV` explores 20 combinations of regularization
+strength, class weighting, intercept, and solver across five stratified folds.
+The best region then seeds a 14-candidate `GridSearchCV`; `refit=True` retrains
+the winner automatically. The top candidates are compared by fold mean and
+standard deviation, not mean alone.
+
+Pure recall initially appeared attractive because false negatives are more
+expensive, but optimizing it without a precision constraint rewarded movement
+toward an all-positive classifier. The corrected search uses **F2**: recall has
+four times precision's weight in the harmonic mean, so it reflects the business
+priority while still penalizing indiscriminate retention offers.
+
+On the held-out test set, recall increased from **0.5588 to 0.7834** and F2 from
+**0.5761 to 0.7060**. F1 rose from **0.6040 to 0.6149**; ROC AUC stayed nearly
+flat (**0.8419 to 0.8411**). Precision fell from **0.6572 to 0.5060** and
+accuracy from **0.8055 to 0.7395**. This is an intentional operating-point
+trade-off, not something to hide: more real churners are found at the cost of
+more unnecessary offers.
+
+The selected candidate's cross-validated F2 is **0.7228 ± 0.0299**. Its fold
+variation is comparable with nearby candidates, so the highest mean is a
+defensible choice. If a slightly lower-mean candidate had been substantially
+more stable, choosing it would also have been defensible—but that was not the
+evidence here.
 
 ## 7. Model integration and monitoring
 

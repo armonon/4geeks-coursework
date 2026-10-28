@@ -1,0 +1,111 @@
+{
+  "dataset_url": "https://raw.githubusercontent.com/IBM/telco-customer-churn-on-icp4d/master/data/Telco-Customer-Churn.csv",
+  "rows": 7043,
+  "train_rows": 5634,
+  "test_rows": 1409,
+  "target_churn_rate": 0.2653698707936959,
+  "split": {
+    "test_size": 0.2,
+    "stratified": true,
+    "random_state": 42
+  },
+  "scoring": "F2 (beta=2)",
+  "test_set_evaluations": 2,
+  "baseline_default_hyperparameters": true,
+  "baseline_test": {
+    "recall": 0.5588235294117647,
+    "precision": 0.6572327044025157,
+    "f1": 0.6040462427745664,
+    "f2": 0.5760749724366042,
+    "accuracy": 0.8055358410220014,
+    "roc_auc": 0.8418610659019866
+  },
+  "random_search": {
+    "iterations": 20,
+    "folds": 5,
+    "best_cv_f2": 0.721899353095443,
+    "best_params": {
+      "classifier__C": 4.689400963537685,
+      "classifier__class_weight": "balanced",
+      "classifier__fit_intercept": false,
+      "classifier__solver": "liblinear"
+    }
+  },
+  "grid_search": {
+    "candidates": 14,
+    "folds": 5,
+    "best_cv_f2": 0.7228458239840091,
+    "best_cv_f2_std": 0.029905018557166783,
+    "best_params": {
+      "classifier__C": 3.1262673090251236,
+      "classifier__class_weight": "balanced",
+      "classifier__fit_intercept": false,
+      "classifier__solver": "liblinear"
+    },
+    "top_candidates": [
+      {
+        "rank": 1,
+        "mean_cv_f2": 0.7228458239840091,
+        "std_cv_f2": 0.029905018557166783,
+        "params": {
+          "classifier__C": 3.1262673090251236,
+          "classifier__class_weight": "balanced",
+          "classifier__fit_intercept": false,
+          "classifier__solver": "liblinear"
+        }
+      },
+      {
+        "rank": 2,
+        "mean_cv_f2": 0.7220724328404471,
+        "std_cv_f2": 0.02897534738782024,
+        "params": {
+          "classifier__C": 1.5631336545125618,
+          "classifier__class_weight": "balanced",
+          "classifier__fit_intercept": false,
+          "classifier__solver": "liblinear"
+        }
+      },
+      {
+        "rank": 3,
+        "mean_cv_f2": 0.721899353095443,
+        "std_cv_f2": 0.03014141466905186,
+        "params": {
+          "classifier__C": 4.689400963537685,
+          "classifier__class_weight": "balanced",
+          "classifier__fit_intercept": false,
+          "classifier__solver": "liblinear"
+        }
+      },
+      {
+        "rank": 4,
+        "mean_cv_f2": 0.7216997881037972,
+        "std_cv_f2": 0.02870336295735739,
+        "params": {
+          "classifier__C": 0.5210445515041873,
+          "classifier__class_weight": "balanced",
+          "classifier__fit_intercept": false,
+          "classifier__solver": "liblinear"
+        }
+      },
+      {
+        "rank": 5,
+        "mean_cv_f2": 0.7213047028104177,
+        "std_cv_f2": 0.03042154972525229,
+        "params": {
+          "classifier__C": 7.034101445306527,
+          "classifier__class_weight": "balanced",
+          "classifier__fit_intercept": false,
+          "classifier__solver": "liblinear"
+        }
+      }
+    ]
+  },
+  "final_test": {
+    "recall": 0.7834224598930482,
+    "precision": 0.5060449050086355,
+    "f1": 0.614900314795383,
+    "f2": 0.7060240963855422,
+    "accuracy": 0.7395315826827538,
+    "roc_auc": 0.8410912190963342
+  }
+}
