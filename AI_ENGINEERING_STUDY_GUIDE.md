@@ -12,8 +12,8 @@ the engineering trade-off, and connect it to evidence in the repository.
 | Image classifier | Supervised image classification | Standalone course template | Complete |
 | K-means project | Unsupervised clustering | Standalone course template | Complete |
 | Sales forecasting | Regression and time-aware data | Company monorepo | Complete |
-| Regression evaluation | Cross-validation and learning curves | Company monorepo | Next |
-| StreamLoop churn tuning | Search spaces and stable hyperparameter tuning | Standalone Python template | Queued |
+| Regression evaluation | Cross-validation and learning curves | Company monorepo | Complete |
+| StreamLoop churn tuning | Search spaces and stable hyperparameter tuning | Standalone Python template | Next |
 | Milestone 7 — RAG knowledge base | Retrieval, Qdrant, generation, API, UI | Company monorepo | Queued |
 
 The RAG milestone appears in two syllabus modules but is one unique assignment.
@@ -194,6 +194,33 @@ distribution shift or make an uncalibrated uncertainty band probabilistic.
   curves suggest the model or features need more capacity; a persistent gap
   suggests regularization, simplification, or more data may help.
 - Evaluate slices that matter to the real system, not only the global average.
+
+### TrackFlow evaluation evidence
+
+The final 2024–2025 holdout is not reused for diagnosis or corrective-model
+selection. Instead, the 2017–2023 usable training matrix is evaluated with five
+expanding windows; every fold trains on earlier months and validates on the
+next 12. Each validation feature is recomputed from a raw prefix ending at its
+month, proving that lags and rolling statistics never read the current target
+or a future row. This is a rolling-origin one-month-ahead evaluation.
+
+Across the five folds, training RMSE was **€17,585 ± €3,145** and validation
+RMSE was **€54,296 ± €14,435**. Training MAE was **€13,678 ± €2,113** and
+validation MAE was **€44,701 ± €12,900**. The persistent learning-curve gap
+supports an explicit diagnosis of **moderate overfitting**, not underfitting or
+a well-fitted model.
+
+RMSE is primary because large misses during TrackFlow's November–December peaks
+can create disproportionately expensive warehouse and carrier shortages. MAE
+is still reported because it communicates a typical miss in EUR. Mean without
+standard deviation would hide how much performance changes with the training
+era; a single split is not enough evidence of stability.
+
+The corrective action follows the diagnosis: increase `min_samples_leaf` above
+2 and lower `max_depth` below 8, choosing the smallest variance-reducing change
+through those same temporal folds. Do not add model complexity—that would make
+the diagnosed variance problem worse—and do not choose settings on the final
+test period.
 
 ## 6. Hyperparameter tuning
 
