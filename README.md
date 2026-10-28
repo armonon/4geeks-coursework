@@ -30,6 +30,7 @@ This monorepo collects coursework completed for 4Geeks Academy. Each project rem
 | `frontend-specs-financial-dashboard` | Spec-driven development | `feature/frontend-specs` | [armonon/frontend-specs-financial-dashboard](https://github.com/armonon/frontend-specs-financial-dashboard) |
 | `financial-dashboard-agent-skills` | Agent skills | `main` | [armonon/financial-dashboard-agent-skills](https://github.com/armonon/financial-dashboard-agent-skills) |
 | `exercise-terminal-challenge-slides` | Course reference | `master` | [armonon/exercise-terminal-challenge-slides](https://github.com/armonon/exercise-terminal-challenge-slides) |
+| `welovereviews-sentiment-analysis` | Models Training & RAG — pretrained models | `main` | [armonon/welovereviews-sentiment-analysis](https://github.com/armonon/welovereviews-sentiment-analysis) |
 
 ## Working with a project
 
