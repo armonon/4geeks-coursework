@@ -1,0 +1,15 @@
+{
+  "title": {
+    "en": "StreamLoop — Tuning the Churn Model",
+    "es": "StreamLoop — Ajustando el Modelo de Abandono"
+  },
+  "description": {
+    "en": "Tune a leakage-safe churn pipeline with randomized and grid search, business-aligned F2 scoring, and fold-stability analysis.",
+    "es": "Optimiza un pipeline de abandono sin fuga de datos mediante búsqueda aleatoria y de cuadrícula, F2 y análisis de estabilidad."
+  },
+  "repository": "https://github.com/armonon/streamloop-churn-model-tuning",
+  "preview": "",
+  "projectType": "project",
+  "difficulty": "intermediate",
+  "technologies": ["Python", "scikit-learn", "hyperparameter-tuning"]
+}
