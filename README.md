@@ -1,112 +1,84 @@
-# Data Science Project Boilerplate
+# Cats vs. Dogs Image Classifier
 
-This boilerplate is designed to kickstart data science projects by providing a basic setup for database connections, data processing, and machine learning model development. It includes a structured folder organization for your datasets and a set of pre-defined Python packages necessary for most data science tasks.
+An end-to-end binary image-classification project built from the official
+25,000-image cats-vs-dogs dataset. It follows the required 4Geeks
+EfficientNet-B0 architecture, documents the literal from-scratch baseline, and
+uses transfer learning for the final resource-efficient checkpoint.
 
-## Structure
+## Verified result
 
-The project is organized as follows:
+| Evidence | Result |
+|---|---:|
+| Training images | 17,500 |
+| Validation images | 3,750 |
+| Untouched test images | 3,750 |
+| Test accuracy | **99.20%** |
+| Test loss | 0.0291 |
+| Test mistakes | 30 |
+| Cat F1 | 0.9920 |
+| Dog F1 | 0.9920 |
 
-- **`src/app.py`** → Main Python script where your project will run.
-- **`src/explore.ipynb`** → Notebook for exploration and testing. Once exploration is complete, migrate the clean code to `app.py`.
-- **`src/utils.py`** → Auxiliary functions, such as database connection.
-- **`requirements.txt`** → List of required Python packages.
-- **`models/`** → Will contain your SQLAlchemy model classes.
-- **`data/`** → Stores datasets at different stages:
-  - **`data/raw/`** → Raw data.
-  - **`data/interim/`** → Temporarily transformed data.
-  - **`data/processed/`** → Data ready for analysis.
+The confusion matrix is `[[1866, 9], [21, 1854]]`. Detailed metrics live in
+[`data/processed/test_metrics.json`](data/processed/test_metrics.json), and the
+complete executed analysis is in [`src/explore.ipynb`](src/explore.ipynb).
 
+## Assignment coverage
 
-## ⚡ Initial Setup in Codespaces (Recommended)
+- Official 25,000-image dataset with visible nine-cat and nine-dog samples
+- Deterministic, stratified 70/15/15 train/validation/test split
+- RGB decoding and 200×200 resizing
+- Required `EfficientNetB0(include_top=False, weights=None, input_shape=(224, 224, 3))` baseline
+- Explicit 200×200-to-224×224 resize bridge between preprocessing and backbone
+- Global average pooling, 128-unit ReLU layer, and two-class softmax output
+- Explicit transfer-learning optimization using the same architecture
+- Training-only augmentation
+- `ModelCheckpoint` and `EarlyStopping`
+- Final best model saved to `models/best_model.keras`
+- Full held-out evaluation, confusion matrix, class metrics, and predictions
 
-No manual setup is required, as **Codespaces is automatically configured** with the predefined files created by the academy for you. Just follow these steps:
+## Reproduce
 
-1. **Wait for the environment to configure automatically**.
-   - All necessary packages and the database will install themselves.
-   - The automatically created `username` and `db_name` are in the **`.env`** file at the root of the project.
-2. **Once Codespaces is ready, you can start working immediately**.
-
-
-## 💻 Local Setup (Only if you can't use Codespaces)
-
-**Prerequisites**
-
-Make sure you have Python 3.11+ installed on your machine. You will also need pip to install the Python packages.
-
-**Installation**
-
-Clone the project repository to your local machine.
-
-Navigate to the project directory and install the required Python packages:
+Use Python 3.11 on macOS (Apple Silicon supports `tensorflow-metal`):
 
 ```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-**Create a database (if necessary)**
-
-Create a new database within the Postgres engine by customizing and executing the following command:
-
-```bash
-$ psql -U postgres -c "DO \$\$ BEGIN 
-    CREATE USER my_user WITH PASSWORD 'my_password'; 
-    CREATE DATABASE my_database OWNER my_user; 
-END \$\$;"
-```
-Connect to the Postgres engine to use your database, manipulate tables, and data:
+Place the official archive at `data/raw/dogs-vs-cats.zip`, then run the final
+transfer-learning workflow:
 
 ```bash
-$ psql -U my_user -d my_database
+python src/app.py --epochs 8 --batch-size 64
 ```
 
-Once inside PSQL, you can create tables, run queries, insert, update, or delete data, and much more!
-
-**Environment Variables**
-
-Create a .env file in the root directory of the project to store your environment variables, such as your database connection string:
-
-```makefile
-DATABASE_URL="postgresql://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>"
-
-#example
-DATABASE_URL="postgresql://my_user:my_password@localhost:5432/my_database"
-```
-
-## Running the Application
-
-To run the application, execute the app.py script from the root directory of the project:
+To run the literal assignment baseline from random weights:
 
 ```bash
-python src/app.py
+python src/app.py --baseline --epochs 8 --batch-size 32
 ```
 
-## Adding Models
+To re-evaluate the committed best checkpoint without retraining:
 
-To add SQLAlchemy model classes, create new Python script files within the models/ directory. These classes should be defined according to your database schema.
-
-Example model definition (`models/example_model.py`):
-
-```py
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
-
-Base = declarative_base()
-
-class ExampleModel(Base):
-    __tablename__ = 'example_table'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(unique=True)
+```bash
+python src/app.py --evaluate-only --batch-size 64
 ```
 
-## Working with Data
+Regenerate and execute the notebook:
 
-You can place your raw datasets in the data/raw directory, intermediate datasets in data/interim, and processed datasets ready for analysis in data/processed.
+```bash
+python scripts/build_notebook.py
+jupyter nbconvert --to notebook --execute src/explore.ipynb \
+  --output explore.ipynb --output-dir src --ExecutePreprocessor.timeout=900
+```
 
-To process data, you can modify the app.py script to include your data processing steps, using pandas for data manipulation and analysis.
+Run the lightweight data-split checks:
 
-## Contributors
+```bash
+pytest
+```
 
-This template was built as part of the [Data Science and Machine Learning Bootcamp](https://4geeksacademy.com/us/coding-bootcamps/datascience-machine-learning) by 4Geeks Academy by [Alejandro Sanchez](https://twitter.com/alesanchezr) and many other contributors. Learn more about [4Geeks Academy BootCamp programs](https://4geeksacademy.com/us/programs) here.
-
-Other templates and resources like this can be found on the school's GitHub page.
+Raw and prepared image directories are intentionally ignored because the
+official dataset is large and reproducible. The model, executed notebook,
+training history, and test evidence are versioned for review.
