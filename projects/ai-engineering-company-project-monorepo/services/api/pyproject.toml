@@ -4,7 +4,10 @@ version = "1.0.0"
 description = "TrackFlow backend API — supplier directory (TinyDB) + incident analysis."
 requires-python = ">=3.11"
 dependencies = [
-    "fastapi>=0.115",
+    # Prefect 3.9's embedded orchestration API still uses FastAPI's
+    # pre-0.142 Body constraint names. Keep the compatible range explicit
+    # so the API and Celery worker resolve the same known-good stack.
+    "fastapi>=0.115,<0.142",
     "uvicorn[standard]>=0.30",
     "python-multipart>=0.0.20",
     "tinydb>=4.8",
@@ -20,6 +23,21 @@ dependencies = [
     "trackflow-shared>=0.1.0",
     "sqlmodel>=0.0.39",
     "psycopg2-binary>=2.9.12",
+    "psycopg[binary]>=3.2,<4",
+    "trackflow-telemetry",
+    "trackflow-pipeline",
+    "trackflow-process",
+    "trackflow-reporting",
+    "trackflow-job-runner",
+    "celery>=5.5,<6",
+    "redis>=5,<9",
+    "flower>=2,<3",
+    "scikit-learn>=1.9.1",
+    "matplotlib>=3.11.2",
+    "statsmodels>=0.15.0",
+    "joblib>=1.6.0",
+    "qdrant-client>=1.20.0",
+    "openai>=3.40.0",
 ]
 
 [project.scripts]
@@ -43,10 +61,10 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 # Flat layout: the milestone specifies main.py / models.py / database.py /
 # seed.py at services/api/ with routes/ beside them.
-py-modules = ["main", "models", "database", "seed", "security", "services_users", "email_service", "password_reset", "seed_incidents_entry"]
+py-modules = ["main", "models", "schemas", "database", "seed", "seed_inventory", "security", "services_users", "email_service", "password_reset", "seed_incidents_entry", "inventory_telemetry_config", "celery_app", "task_queue_storage"]
 
 [tool.setuptools.packages.find]
-include = ["routes*"]
+include = ["routes*", "routers*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -56,6 +74,11 @@ pythonpath = ["."]
 [tool.uv.sources]
 incident-analyzer = { path = "../../packages/incident_analyzer", editable = true }
 trackflow-shared = { path = "../../packages/shared", editable = true }
+trackflow-telemetry = { path = "../telemetry", editable = true }
+trackflow-pipeline = { path = "../../data/pipelines", editable = true }
+trackflow-process = { path = "../../data/process", editable = true }
+trackflow-reporting = { path = "../reporting", editable = true }
+trackflow-job-runner = { path = "../job_runner", editable = true }
 
 [tool.ruff]
 extend-exclude = [".venv"]

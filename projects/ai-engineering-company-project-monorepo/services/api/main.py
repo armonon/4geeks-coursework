@@ -20,21 +20,26 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from reporting import router as reporting_router
 
+from routers.auth import router as auth_router
+from routers.incidents import router as incidents_router
+from routers.incidents_manager import router as incidents_manager_router
 from routers.inventory import router as inventory_router
-from routes.auth import router as auth_router
-from routes.incidents import router as incidents_router
-from routes.incidents_manager import router as incidents_manager_router
-from routes.profiles import router as profiles_router
-from routes.suppliers import router as suppliers_router
-from routes.users import router as users_router
+from routers.knowledge import router as knowledge_router
+from routers.profiles import router as profiles_router
+from routers.suppliers import router as suppliers_router
+from routers.tasks import router as tasks_router
+from routers.telemetry import router as telemetry_router
+from routers.telemetry_report import router as telemetry_report_router
+from routers.users import router as users_router
 
 logger = logging.getLogger("trackflow.api")
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    """Startup: make sure the inventory tables exist in Supabase.
+    """Startup: make sure the inventory and telemetry tables exist in Supabase.
 
     Deliberately non-fatal when DATABASE_URL is absent. The inventory
     routes will fail loudly on use, but auth, suppliers and incidents —
@@ -46,13 +51,15 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     FastAPI has deprecated.
     """
     from database import create_inventory_schema
+    from task_queue_storage import ensure_dead_letter_schema
 
     try:
         if create_inventory_schema():
-            logger.info("Inventory schema ready in Supabase")
+            ensure_dead_letter_schema()
+            logger.info("Inventory and telemetry schema ready in Supabase")
         else:
             logger.warning(
-                "DATABASE_URL not set - /inventory routes are unavailable. "
+                "DATABASE_URL not set - /inventory and telemetry storage are unavailable. "
                 "See services/api/.env.example."
             )
     except Exception:
@@ -94,6 +101,7 @@ def allowed_origins() -> list[str]:
         raise RuntimeError("ALLOWED_ORIGINS must list explicit browser origins, never '*'.")
     return origins
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins(),
@@ -101,6 +109,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.exception_handler(Exception)
 async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
@@ -120,9 +129,7 @@ async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONR
     So: the real exception is logged with its traceback here, and the
     client gets a fixed, structured, human-readable body.
     """
-    logger.exception(
-        "Unhandled exception on %s %s", request.method, request.url.path, exc_info=exc
-    )
+    logger.exception("Unhandled exception on %s %s", request.method, request.url.path, exc_info=exc)
     return JSONResponse(
         status_code=500,
         content={
@@ -141,6 +148,11 @@ app.include_router(suppliers_router)
 app.include_router(incidents_manager_router)
 app.include_router(incidents_router)
 app.include_router(inventory_router)
+app.include_router(knowledge_router)
+app.include_router(telemetry_router)
+app.include_router(telemetry_report_router)
+app.include_router(reporting_router)
+app.include_router(tasks_router)
 
 
 @app.get("/", tags=["health"])

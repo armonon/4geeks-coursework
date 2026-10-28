@@ -7,6 +7,18 @@ This folder contains **agent skills** (reusable capabilities) that help you work
 
 Coursework operations currently include read-only skills for milestone branch
 auditing, 4Geeks authentication, project status, pending work, and progress.
-See [`OPENCLAW.md`](../OPENCLAW.md) for the dedicated agent setup.
+The coursework agent and its 4Geeks skills moved to [4geeks-coursework-agent](https://github.com/armonon/4geeks-coursework-agent).
 
 > _Spanish version: [README.es.md](./README.es.md)._
+
+
+## Why there are two skills directories
+
+| Directory | Holds | Read by |
+|---|---|---|
+| `skills/` (here) | agent skills — things an assistant does *for you* | OpenClaw |
+| `.agents/skills/` | repository invariants — things that verify *this repo* | coding agents working on the monorepo |
+
+`freight-quote-invariants` lives in `.agents/skills/` because it ships a
+script that asserts the freight-quote rules still hold (rule `MONO-1`).
+It is a check on the codebase, not a capability of an assistant.

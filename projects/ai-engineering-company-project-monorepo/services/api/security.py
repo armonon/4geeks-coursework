@@ -10,15 +10,17 @@ environment, never hardcoded. See `.env.example`.
 
 from __future__ import annotations
 
+import hashlib
+import hmac
 import os
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+import jwt
 from dotenv import load_dotenv
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-import jwt
 
 # libpass is a maintained drop-in fork of passlib; the import path is
 # unchanged, which is why this reads as `passlib`.
@@ -72,6 +74,30 @@ def access_token_expire_minutes() -> int:
         return int(raw)
     except ValueError:
         return 60
+
+
+def telemetry_hmac_key() -> str:
+    """Dedicated pseudonymisation key, with a safe local-dev fallback.
+
+    Production should set ``TELEMETRY_HMAC_KEY`` independently. Reusing the
+    already-secret JWT key is limited to local development so telemetry never
+    falls back to a public or hardcoded identifier.
+    """
+    configured = os.environ.get("TELEMETRY_HMAC_KEY", "").strip()
+    key = configured or secret_key()
+    if len(key.encode()) < 32:
+        raise RuntimeError("TELEMETRY_HMAC_KEY must contain at least 32 bytes.")
+    return key
+
+
+def pseudonymous_user_id(user_id: int) -> str:
+    """Return the approved non-reversible ``usr_<HMAC-SHA-256>`` id."""
+    digest = hmac.new(
+        telemetry_hmac_key().encode(),
+        f"trackflow-telemetry-user:{user_id}".encode(),
+        hashlib.sha256,
+    ).hexdigest()
+    return f"usr_{digest}"
 
 
 # ---------------------------------------------------------------------------

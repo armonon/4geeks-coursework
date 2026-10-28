@@ -14,7 +14,7 @@ the engineering trade-off, and connect it to evidence in the repository.
 | Sales forecasting | Regression and time-aware data | Company monorepo | Complete |
 | Regression evaluation | Cross-validation and learning curves | Company monorepo | Complete |
 | StreamLoop churn tuning | Search spaces and stable hyperparameter tuning | Standalone Python template | Complete |
-| Milestone 7 — RAG knowledge base | Retrieval, Qdrant, generation, API, UI | Company monorepo | Next |
+| Milestone 7 — RAG knowledge base | Retrieval, Qdrant, generation, API, UI | Company monorepo | Complete |
 
 The RAG milestone appears in two syllabus modules but is one unique assignment.
 
@@ -301,6 +301,60 @@ cost. Similarity search must have a threshold or explicit “insufficient eviden
 path. RAG reduces unsupported answers but does not eliminate them; evaluate both
 retrieval quality and answer faithfulness. Protect ingestion from untrusted or
 poisoned content.
+
+### TrackFlow RAG evidence
+
+The TrackFlow knowledge base ingests four approved policy documents into the
+exact `trackflow_knowledge` Qdrant collection. Paragraph-level semantic
+chunking produces 18 points, at least three per document. Every point stores
+company, source document, section, language, chunk index, and text. UUIDv5 point
+IDs plus clear-and-reload setup make ingestion repeatable without duplicates.
+
+Production configuration uses two distinct models through the 4Geeks
+OpenAI-compatible gateway: `pplx-embed-v1-0.6b` for embeddings and
+`llama-3.1-8b-instant` for generation. The loader detects vector dimensions and
+rejects inconsistent results; code rejects using one model ID for both jobs.
+Qdrant uses cosine similarity, top-five retrieval, and a configurable minimum
+score. The `/knowledge/query` endpoint requires the existing bearer-token
+session and returns only the answer, not raw chunks, prompts, or provider errors.
+
+The system prompt permits only retrieved evidence and restates the highest-risk
+company rules: no promised SLA during Black Friday, Christmas, or January Sales;
+international returns are manual; storage discounts require Miguel Torres's
+approval. No relevant context means an explicit insufficient-information answer,
+not a guess. The protected backoffice page provides loading, answer, and readable
+failure states in both light and dark themes.
+
+The retrieval golden set has twelve questions spanning all four documents and
+the high-demand-period exception. It achieved **12/12 Recall@3 (100%)** through
+the production Qdrant code path with a deterministic offline CI encoder. A live
+local end-to-end run used `nomic-embed-text` and `qwen2.5:7b` as distinct models;
+it retrieved the high-demand policy first and correctly refused to promise a
+Black Friday SLA, explaining the possible 40% extension.
+
+Assessment-ready lesson: RAG quality is two separate questions—did retrieval
+find the right evidence, and did generation remain faithful to it? Measure both,
+preserve source metadata, keep setup idempotent, separate embedding from
+generation, and choose safe failure over an ungrounded answer.
+
+## 9. One-minute assessment recap
+
+- **Pretrained models:** select from a model card, pin versions, batch work, and
+  validate domain fit on real application data.
+- **Classification:** choose metrics from the cost of false positives and false
+  negatives; inspect the confusion matrix rather than trusting accuracy alone.
+- **Unsupervised learning:** scaling changes distances; silhouette measures
+  separation; cluster labels are arbitrary and are not ground truth.
+- **Regression and time series:** preserve chronology, shift lag features, beat
+  a naïve baseline, and keep the final test period untouched during selection.
+- **Evaluation:** report cross-validation mean and spread; diagnose training vs
+  validation gaps; make corrective action match overfitting or underfitting.
+- **Tuning:** keep preprocessing inside the pipeline, search training folds only,
+  and choose an objective such as F2 that represents the real business trade-off.
+- **Production ML:** define contracts, versions, monitoring, drift signals, and
+  useful failures; a saved model without those boundaries is not a system.
+- **RAG:** evaluate retrieval and faithfulness separately, preserve citations and
+  metadata, use thresholds, and refuse to answer when approved evidence is absent.
 
 ## WeLoveReviews results to remember
 

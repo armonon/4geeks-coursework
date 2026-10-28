@@ -25,11 +25,18 @@ services/api/data/
 .coverage.*
 htmlcov/
 
+# Pipeline run artefacts are reproducible and may contain internal identifiers.
+data/raw/pipeline-runs/
+data/eval/pipeline-runs/
+data/raw/telemetry_*.csv
+data/raw/.telemetry_*.tmp
+
 # OpenClaw local memory and private workspace context
 /USER.md
 /MEMORY.md
 /BOOTSTRAP.md
 /memory/
+/openclaw-workspace-state.json
 
 # The warehouse-agent brief requires public deliverables under .openclaw/.
 # Ignore everything there by default, then allow only the reviewable contract.
@@ -39,5 +46,8 @@ htmlcov/
 !/.openclaw/AGENTS.md
 !/.openclaw/TOOLS.md
 !/.openclaw/TRANSCRIPT.md
+!/.openclaw/.agents/
+!/.openclaw/.agents/rules/
+!/.openclaw/.agents/rules/warehouse-agent.md
 !/.openclaw/skills/
 !/.openclaw/skills/**

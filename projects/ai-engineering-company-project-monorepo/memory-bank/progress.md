@@ -2,7 +2,373 @@
 
 Rolling log of substantive changes. Newest first.
 
+## 2026-10-28 · Formal regression-model evaluation
+
+**Branch:** `codex/regression-model-evaluation`
+
+- Evaluated the approved TrackFlow seasonal-residual Random Forest exclusively
+  on the 2017-2023 usable training matrix; the final 2024-2025 test period stays
+  untouched for post-selection confirmation.
+- Added five expanding `TimeSeriesSplit` folds with 12-month validation windows,
+  explicit chronological guards, and raw-prefix reconstruction proving each lag
+  and rolling feature is unchanged when future rows are absent.
+- Generated the required learning curve and reported training/validation MAE
+  and RMSE as mean ± sample standard deviation across folds. Validation RMSE is
+  EUR 54,296 ± 14,435 versus training RMSE EUR 17,585 ± 3,145.
+- Diagnosed moderate overfitting from the persistent learning-curve gap. The
+  specific corrective experiment is to increase `min_samples_leaf` and reduce
+  `max_depth`, selecting values through the same temporal folds before touching
+  the final test set.
+- Documented RMSE as primary because large peak-season capacity misses have
+  disproportionate operational cost, while retaining MAE as typical EUR error.
+- Added an exact rubric map and tests for fold chronology and future-target
+  mutation invariance.
+- Traceability: `DOC-1`; official “Evaluating a Regression Model” rubric and the
+  TrackFlow sales briefing.
+
+## 2026-10-28 · TrackFlow sales forecasting
+
+**Branch:** `codex/sales-forecast-model`
+
+- Added the official TrackFlow 2016–2025 consolidated monthly sales CSV and its
+  company briefing without simulation or schema changes.
+- Built strictly causal lag, shifted rolling, cyclical calendar, briefing-based
+  annual growth-cycle, and trend features. The first eight source years are
+  training history; 2024–2025 are a disjoint held-out test period.
+- Added additive trend/seasonality/residual decomposition that visibly confirms
+  the November–December peaks, February trough, and long-term growth pattern.
+- Chose an explainable Random Forest seasonal-residual forecaster for the small
+  Finance-facing dataset. It predicts a correction to lag-12 revenue, preserves
+  the final EUR target, and beats the seasonal-naive baseline: €56,047 test RMSE
+  (4.31% of average revenue) versus €93,184.
+- Reported all required test metrics: MSE, PSI, normalized Gini, and D'Agostino
+  K², plus RMSE, MAE, R², baseline comparison, and variability-band coverage.
+  PSI honestly flags major growth-related drift; the consolidated-only file
+  cannot diagnose LA/ZGZ mix independently.
+- Added the required forecast variability plot, decomposition plot, saved model,
+  forecast/metric artifacts, exact rubric map, and tests for both the 8/2-year
+  boundary and causal feature construction.
+- Traceability: `DOC-1`; official TrackFlow sales-forecasting briefing and the
+  project’s no-leakage acceptance criteria.
+
+## 2026-10-28 · Redis/Celery message queues and async tasks
+
+**Branch:** `codex/async-tasks`
+
+- Offloaded the existing weekly warehouse/client reporting pipeline from the
+  FastAPI request process to an independent Celery worker. The trigger returns
+  `202 Accepted` with a task ID and authenticated `/tasks/{task_id}` status URL.
+- Added Redis as both broker and result backend, a separate worker, and Flower
+  to Docker Compose. Task messages carry identifiers and bounded window values,
+  while late acknowledgement, worker-loss rejection, time limits, event
+  monitoring, and no-eviction Redis policy make delivery behaviour explicit.
+- Added three-attempt exponential retry handling and a durable SQL dead-letter
+  record containing task ID, task name, attempt, safe error summary, and UTC
+  failure time. Structured worker logs include ID, attempt, state, duration,
+  retry delay, and error without connection strings or payload data.
+- Live Docker acceptance completed one real reporting task and one controlled
+  three-attempt failure. Flower showed one success and one failure, and the
+  final failure was present in the durable dead-letter table. Evidence lives at
+  `docs/evidence/async-tasks/`.
+- Pinned the mutually compatible FastAPI/Prefect range after a clean container
+  build exposed an upstream API incompatibility. Focused acceptance coverage
+  passes 19 tests and also enforces the sub-200 ms API handoff contract.
+- Traceability: `DOC-1`, `MONO-2`; official 4Geeks “Message Queues and Async
+  Tasks” rubric and the existing reporting-pipeline design.
+
+## 2026-10-26 · Python Todo List CLI
+
+**Branch:** `codex/todo-list-cli-python`
+
+- Added the official evaluator-facing `app.py` function contract under
+  `internal/todo-list-cli-python` so the introductory Python assignment stays
+  in the cumulative monorepo without being folded into an unrelated service.
+- Implemented standard-library-only add, positioned list, delete, CSV save,
+  CSV load, and interactive menu flows, including non-destructive validation
+  for empty titles and invalid positions.
+- Added isolated acceptance coverage for the complete rubric, the official
+  plain-line CSV fixture, CSV quoting, missing-file startup, and repeated use.
+- Verification passed the unmodified five-test course evaluator, eight local
+  CLI tests, 101 workspace tests, 389 API tests, all typechecks, and all
+  production builds.
+- Traceability: `DOC-1`; official 4Geeks Todo List CLI rubric and the
+  repository's documented `internal/` CLI boundary.
+
+## 2026-10-23 · Milestone 6 resilient business performance pipeline
+
+**Branch:** `milestone-6-resilient-pipeline`
+
+- Implemented the approved TrackFlow Prefect 3 flow with independent extract,
+  cached transform, atomic/idempotent load, durable run metadata, database
+  retries, and an optional evaluation snapshot invoked with `return_state=True`.
+- Added the pure four-event transformation and exact weekly warehouse/client
+  KPI grain from the TrackFlow briefing; conflicting logical duplicates and
+  malformed mandatory dimensions fail publication rather than becoming zeros.
+- Added the separate authenticated `services/reporting/` module with latest-run,
+  manager/admin manual-trigger, and exact KPI response-contract endpoints.
+- Added deterministic SQLite acceptance coverage for KPI definitions,
+  conflicting duplicates, repeat-run idempotency, optional-task failure, and
+  all three HTTP contracts. Container packaging and hot-reload mounts now carry
+  the pipeline/process/reporting modules without changing technical telemetry.
+- Updated all three Next.js apps and their lint configuration together from
+  16.3.8 to the non-breaking 16.4.3 security release; the final production and
+  development dependency audits report zero known vulnerabilities.
+- Traceability: `DOC-1`, `MONO-2`; `data/pipelines/PIPELINE_DESIGN.md` and the
+  official TrackFlow Business Performance Pipeline briefing.
+
+## 2026-10-10 · Account-wide agent integration
+
+Reconciled telemetry storage and authenticated technical reporting with current main,
+preserving the newer pipeline design documents and dependency maintenance.
+The combined follow-up also integrates warehouse-agent and talent workflows,
+keeps telemetry navigation/packaging intact, extracts the coursework steward to
+its existing dedicated repository, and applies the pending PyJWT/js-yaml updates.
+Final local workspace typechecks, 101 JS tests, 384 API tests and all production
+builds passed. Live PostgreSQL migration/deployment is not claimed.
+Traceability: DOC-1, MONO-2; the existing telemetry capture/storage plan.
+
+
 ---
+
+## 2026-10-07 · Technical telemetry report
+
+**Branch:** `codex/telemetry-technical-report`
+
+- Added the independently packaged read-only Pandas analysis at the rubric's
+  exact `services/telemetry/analysis.py` path and authenticated cached
+  `GET /telemetry/report` in the existing FastAPI app.
+- Four metrics cover event volume, error-event share, API latency and login
+  failure rate. Every metric uses SQL event-type/time bounds, UTC conversion,
+  vectorised aggregation and JSON-safe output; no business KPIs or dashboard.
+- Added 19 meaningful SQL/Pandas/date/cache/auth tests. Independent OpenAI/Sol
+  review found an extreme-date UTC overflow; fixed and independently reverified.
+  Full API suite:381 passed. JS/TS tests:96 passed; typechecks/builds, UI lint,
+  repository Ruff, formatting and production npm audit also passed.
+- Real local Chromium generated login and inventory activity; authenticated
+  report, cache repeat,401 and422 behavior passed. Supabase remains signed out,
+  so live prerequisite/report evidence is still blocked, not fabricated.
+- This branch includes verified storage29 as a prerequisite. Keep the report
+  PR draft until29 lands and real Supabase evidence/current CI are complete.
+- Traceability: `DOC-1`, `MONO-2`; see exact rubric mapping in
+  `docs/telemetry/report-submission-review.md`.
+
+---
+
+## 2026-10-07 · Independent storage review and prerequisite integration
+
+**Branch:** `codex/telemetry-event-storage`
+
+- Independent OpenAI/Sol review cleared maintenance PR #33, now merged into
+  main as `d60df41`; synchronized that base while preserving both progress
+  histories and the storage milestone's zero-frontend-diff boundary.
+- Fixed the storage review's deployment finding: `services/Dockerfile` now
+  copies the approved telemetry catalogue to its required runtime path.
+- Added a regression exercising real ingestion against catalogue packaging
+  derived from Docker COPY entries; removing the COPY reproduces the missing
+  file failure. All 36 telemetry cases passed independent re-review.
+- Final local gates passed: 96 JS/TS tests, 362 API tests, 10 analyzer tests,
+  typechecks, all production builds, UI lint, repository Ruff and changed-test
+  formatting. Production npm audit: zero vulnerabilities.
+- Fresh production-browser verification passed login, inbound and outbound
+  workflows with 14 new events across eight types, zero page errors, and
+  mixed-batch receipt 2/1/1 with exactly one matching row. This is isolated
+  SQLite evidence, not a live Supabase claim.
+- No actual Docker execution is claimed; the host lacks a Docker runtime.
+  Supabase remains at trusted sign-in and the required live screenshot is
+  still outstanding. PR #29 remains draft until every evidence/check gate
+  is complete (`DOC-1`).
+
+---
+
+## 2026-10-07 · Veridian ETL design exercise
+
+**Branch:** `codex/veridian-pipeline-design`
+
+- Added design-only assignment at `PIPELINE_DESIGN.md` after complete official rubric
+  and scoped context review. No ETL code, migrations, live writes or schedules.
+- Exact rubric mapping, source/destination contracts, update/dedup behavior,
+  failure recovery, observability and scoped concurrency decisions are explicit.
+- Independent OpenAI/Sol review findings were fixed and re-reviewed: Veridian
+  cross-batch publication locking; business source-idempotency/retry contract
+  clearly labelled a future, separately reviewed ingestion change.
+- Existing monorepo checks passed unchanged runtime code:96 JS/TS tests and335
+  API tests, typechecking and all production builds. Only generated tsconfig
+  rewrites were restored. No automated ETL test/code claims for a design task.
+- Traceability: `DOC-1`; purpose and complete assignment mapping live in the
+  design document. No new repository or canonical company-context changes.
+
+---
+
+## 2026-10-07 · Weekly warehouse/client business pipeline design
+
+**Branch:** `milestone-6-business-pipeline-design`
+
+- Added design-only assignment at `data/pipelines/PIPELINE_DESIGN.md` after complete official rubric
+  and scoped context review. No ETL code, migrations, live writes or schedules.
+- Exact rubric mapping, source/destination contracts, update/dedup behavior,
+  failure recovery, observability and scoped concurrency decisions are explicit.
+- Independent OpenAI/Sol review findings were fixed and re-reviewed: Veridian
+  cross-batch publication locking; business source-idempotency/retry contract
+  clearly labelled a future, separately reviewed ingestion change.
+- Existing monorepo checks passed unchanged runtime code:96 JS/TS tests and335
+  API tests, typechecking and all production builds. Only generated tsconfig
+  rewrites were restored. No automated ETL test/code claims for a design task.
+- Traceability: `DOC-1`; purpose and complete assignment mapping live in the
+  design document. No new repository or canonical company-context changes.
+
+---
+
+## 2026-10-07 · Coursework verification maintenance
+
+**Branch:** `codex/coursework-verification-maintenance`
+
+- Resolved the existing production npm-audit blockers discovered while
+  reviewing telemetry storage: all three UIs and their ESLint configurations
+  move together to Next.js 16.3.8; compatible transitive updates select
+  sharp 0.35.5 and source-map-js 1.2.2.
+- Cleared incident-analyzer import-ordering, `collections.abc.Iterable`, and
+  public export ordering findings without changing business rules or outputs.
+- Kept this work separate from PR #29 so the storage submission remains
+  frontend-free. No root workspace graph, CI configuration, company context,
+  application UI source, telemetry model, or live database changes.
+- Supersedes the Next.js 16.3.6 dependency proposals (#31/#32); that version
+  does not clear the newer advisory ranges. Do not close or merge those PRs
+  automatically; review this coordinated patch first.
+- Fresh local checks passed: clean npm install, workspace bootstrap and
+  typechecking, 96 JS/TS tests, 335 API tests, 10 incident-analyzer tests,
+  all production builds, all UI linters, repository-wide Ruff, changed-package
+  formatting, and production npm audit (zero vulnerabilities).
+- Real Chromium exercised the patched backoffice against the isolated storage
+  API: failed/successful login, inbound/outbound orders, technical/business
+  telemetry, exact mixed-batch receipt, and zero page errors. Website rendering
+  and sharp-backed image optimization also passed. No external candidate data
+  or live Supabase data was used.
+- The builds' generated website/tracker tsconfig edits were restored; only
+  manifests, the lockfile, incident-analyzer lint/formatting and memory-bank
+  documentation belong in this maintenance diff.
+
+Traceability: `DOC-1`, `MONO-2`, and the existing tech-context requirement for
+one patched Next.js version across the three UIs.
+
+---
+
+## 2026-10-07 · Telemetry storage submission review
+
+**Branch:** `codex/telemetry-event-storage`
+
+- Rechecked the official storage rubric and TrackFlow telemetry context;
+  added exact rubric-to-file traceability and an honest evidence handoff in
+  `docs/telemetry/storage-submission-review.md` (`DOC-1`).
+- Extended storage tests for both warehouses' inbound/outbound dimensions,
+  per-event property type/range/enum/pattern/UUID/version failures, empty
+  batches, and real database rollback/recovery after a bulk-insert failure.
+- No runtime model, frontend source, dependency, or database schema changes.
+- Kept PR #29 draft: Supabase sign-in is required for its real Table Editor
+  screenshot. Historical live evidence is not presented as a fresh check.
+- Recorded existing production dependency-audit and incident-analyzer lint
+  blockers separately, rather than mixing maintenance into this storage PR.
+- Fresh checks passed: 96 JS/TS tests, 361 API tests (35 telemetry cases),
+  typechecking, all production builds, UI lint and API lint. Real local
+  Chromium login/inbound/outbound flows persisted technical/business events;
+  the mixed batch returned 2 received, 1 stored, 1 rejected. Supabase evidence
+  remains distinct from this isolated SQLite verification.
+
+---
+
+## 2026-09-23 · Persistent telemetry storage
+
+**Branch:** `codex/telemetry-event-storage`
+
+- Replaced the temporary receiver with per-event partial validation and a
+  single bulk insert into the existing Supabase/PostgreSQL connection.
+- Added the eight-column append-only `telemetry_events` SQLModel table, UUID
+  database default, timestamp/event-type indexes, JSONB GIN index, constrained
+  service/severity values, and an idempotent SQL migration.
+- Reused the Phase 2 `TelemetryEvent` model unchanged and added a loose outer
+  batch model so one invalid item cannot make FastAPI reject valid siblings.
+- Revalidated every accepted event against the approved TrackFlow catalogue,
+  preserving only property allowlists and documented correlation tags.
+- Added regression coverage for mixed batches, whole-envelope 422 boundaries,
+  safe logging, exact storage mapping, the table/index contract, and exactly
+  one INSERT for a heterogeneous valid batch.
+- Kept the backoffice unchanged; the same URL and payload contract remain in
+  place.
+
+The mapping and operational handoff live in
+`docs/telemetry/storage-implementation.md` (`DOC-1`).
+
+## 2026-09-02 · Backoffice telemetry event capture
+
+**Branch:** `codex/telemetry-event-capture`
+
+- Added the temporary FastAPI `POST /telemetry/events` receiver with the exact
+  approved standard envelope, safe count/type-only logging, environment-based
+  target configuration, and no persistence.
+- Built one catalogue-validated browser `TelemetryService`: 10-second / 20-event
+  batching, three exponential-backoff retries, reliable `sendBeacon` flush,
+  automatic correlation/session fields, and HMAC-pseudonymous user identity.
+- Instrumented all 23 approved event types across TrackFlow inventory,
+  authentication/security, navigation/workflows, API performance/errors,
+  frontend errors, and Next.js LCP Web Vitals. All five CONTEXT-mandatory
+  events have concrete decision points.
+- Added governed opaque ids and per-SKU threshold policy for the CONTEXT seed
+  catalogue, plus zero-stock SKU registration and a non-mutating physical-count
+  audit view so no event relies on fabricated dimensions.
+- Added regression coverage for envelope rejection, safe logs, batching,
+  allowlists, retry timing, beacon flushing, pseudonymisation, direct-stock
+  rejection, and discrepancy comparisons.
+
+The implementation and privacy handoff live in
+`docs/telemetry/capture-implementation.md` (`DOC-1`).
+
+## 2026-09-01 · TrackFlow telemetry design plan
+
+**Branch:** `codex/telemetry-design-plan`
+
+- Added `docs/telemetry/telemetry-plan.md` and the validatable custom schema
+  catalogue `docs/telemetry/event-schemas.json` for the telemetry-plan project.
+- Preserved all five mandatory TrackFlow event identifiers and the course
+  context's long-form warehouse dimensions (`los_angeles` / `zaragoza`).
+- Designed 23 events: 5 mandatory and 18 identified opportunities across
+  business inventory, authentication/security, navigation/workflows,
+  performance, frontend errors, and API errors.
+- Defined the standard envelope, explicit property allowlist for every event,
+  stream/batch urgency, high-frequency controls, privacy handling, retention,
+  exclusions, risks, and an instrumentation handoff.
+- Kept committed dispatches (`outbound_order_created`) distinct from confirmed
+  losses (`inventory_loss_recorded`) so future SLA reporting does not classify
+  warehouse loss as customer throughput.
+- A strict rubric audit validated all 23 event contracts, Markdown/JSON
+  property parity, forbidden-property rejection, and the official threshold
+  boundary: emit only when stock crosses from at/above to below the configured
+  minimum.
+
+This is a design-only milestone: no runtime instrumentation or new service was
+added. The structure follows the monorepo documentation contract (`DOC-1`).
+
+## 2026-09-01 · Inventory backoffice rubric alignment
+
+**Branch:** `milestone-5-inventory-backoffice`
+
+- Made the assignment's four canonical routes available at
+  `/backoffice/inventory/products`, `/backoffice/inventory/orders/inbound`,
+  `/backoffice/inventory/orders/outbound`, and
+  `/backoffice/inventory/orders`; the earlier short routes now redirect so
+  saved links continue to work.
+- Added `NEXT_PUBLIC_INVENTORY_API_URL` as the assignment-specific API origin
+  override while retaining the same-origin `/trackflow-api` Docker proxy as
+  the safe default.
+- Added a visible, quantity-adjacent client warning before an outbound request
+  can exceed warehouse stock. The same location now surfaces the API's
+  insufficient-stock 400 detail, and successful movement submissions reset
+  every form field.
+- Made the movement history expose the authenticated creator explicitly as
+  `user_uuid`, matching the evaluator's required field name.
+- Documented the low-stock threshold and extended the API, inventory, and
+  navigation regression tests for the new contracts.
+
+This preserves TrackFlow's scoped SKU / LA / ZGZ vocabulary and the existing
+centralized authenticated API client (`DOC-1`).
 
 ## 2026-08-29 · Public TrackFlow demonstration
 
@@ -559,3 +925,122 @@ Three consequential edits came with it:
 - Docker was not installed on the authoring machine, so image execution was
   not claimed. Static Dockerfile/Compose validation and the full repository
   typecheck, test, and build workflow are the available verification gates.
+
+## 2026-08-29 — Warehouse Steward acceptance proof
+
+- Added the dedicated public OpenClaw workspace under `.openclaw/`: Warehouse
+  Steward identity, six hard safety constraints, authenticated HTTP-only tool
+  contract, read-only `stock-check`, confirmation-gated `log-movement`, and a
+  shared Node adapter that never logs credentials or retries writes.
+- Registered the isolated `trackflow-warehouse` agent and verified the existing
+  OpenAI runtime with a real embedded turn. Private operative credentials stay
+  only in ignored `.openclaw/.env`; no bearer token is persisted.
+- Ran the documented seed command against the Docker API. That exposed three
+  real packaging omissions (`seed_inventory`, `routers*`, and `schemas`) in
+  `services/api/pyproject.toml`; fixed them and added regression tests for all
+  console-script imports.
+- Captured `.openclaw/TRANSCRIPT.md` from a real session: two white-sneaker
+  candidates were disambiguated, LA stock was freshly read as 145, a separately
+  confirmed 60-unit receipt produced movement 6 and stock 205, a declined loss
+  wrote nothing, and a 999-unit dispatch returned the API's exact HTTP 400
+  insufficient-stock message without a retry.
+- Independently checked the movement feed after the conversation: one matching
+  receipt exists, no declined serum loss exists, no refused tracking number
+  exists, and LA stock remains 205.
+
+## 2026-08-29 — Talent Pipeline consolidated into backoffice
+
+- Added a protected `Talent pipeline` section to the existing backoffice at
+  `/talent`, with the full Milestone 3 list/search/filter, register, detail,
+  edit, stage/status update, and internal-note workflows.
+- Kept candidate traffic isolated behind `lib/talent-api.ts` and a same-origin
+  `/talent-api` rewrite; it does not reuse the authenticated TrackFlow
+  inventory/auth base URL or depend on cross-origin browser policy.
+- Added focused tests for API URL normalization and candidate filter query
+  construction. Backoffice typecheck, 49 tests, and lint pass.
+- Preserved `milestone-3-talent-pipeline` and the historical standalone
+  workspace as assessment evidence while making the cumulative backoffice the
+  single current demo surface.
+
+## 2026-10-26 — Milestone 6 Part 3 pipeline enhancement
+
+- Refactored the weekly warehouse/client pipeline into explicit Prefect
+  extraction, transformation, and load subflows with typed stage boundaries.
+  The optional evaluation snapshot is also a subflow and uses
+  `return_state=True`, so a convenience-artifact failure cannot invalidate a
+  successfully committed report.
+- Added database-free root tests for the pure TrackFlow transform, including
+  hand-calculated discrepancy-rate coverage, warehouse partitioning, stockout
+  counting, and malformed timestamp rejection.
+- Added the protected `/reporting` backoffice dashboard. It calls the existing
+  authenticated reporting endpoint, renders the completed UTC reporting
+  period and all four approved KPIs, and includes loading, empty, failure,
+  retry, summary, and warehouse/client detail states.
+- Kept `telemetry_events` and `services/telemetry/analysis.py` unchanged; the
+  dashboard reads only the reporting service and performs presentation-level
+  aggregation for its summary cards.
+
+## 2026-10-28 — Background Processes nightly job
+
+- Added the independent `scripts/nightly_export.py` process. It resolves the
+  previous UTC calendar day (or `TARGET_DATE`), writes an atomic daily
+  `data/raw/telemetry_YYYY-MM-DD.csv` audit snapshot, and launches the existing
+  Milestone 6 Prefect pipeline as a subprocess rather than on FastAPI's thread.
+- Added the `services/job_runner` persistence boundary and PostgreSQL migration
+  for `job_runs`. The lifecycle is `pending → processing → completed | failed`;
+  the `processing` status and its partial unique index are the only distributed
+  lock, while `(job_name, target_date)` enforces per-day idempotency.
+- Added the UTC system-crontab configuration at
+  `infra/cron/trackflow-nightly-export.cron` (`0 2 * * *`). OS cron was chosen
+  to keep the job's execution and failure boundary independent from the API.
+- Added acceptance coverage for UTC date selection, filtered/atomic CSV output,
+  duplicate-day skipping, failure cleanup, and two simultaneous instances.
+  A standalone SQLite demonstration produced one CSV row, completed the real
+  Prefect subprocess, skipped the duplicate run, and persisted a forced second
+  date as `failed` with no `processing` zombie.
+
+## 2026-10-28 — Triage Queue priority manager
+
+- Added the standard-library-only `internal/triage-queue` assignment with a
+  validated `Patient` model and a thread-safe `TriageQueue` heap.
+- Preserved strict clinical ordering: triage level 1 before 2 before 3, UTC
+  arrival order inside a level, and an enqueue sequence as the deterministic
+  tie-breaker for identical timestamps.
+- Implemented all five required queue operations, per-level statistics, clear
+  empty-queue errors, and an interactive menu that survives invalid input.
+- Documented heap efficiency and mutation-first concurrent ownership, with
+  acceptance coverage for priority, FIFO, snapshots, validation, CLI recovery,
+  and duplicate-free concurrent dequeues.
+
+## 2026-10-28 — Branch Queue tagged service manager
+
+- Added the standard-library-only `internal/branch-queue` assignment with one
+  `deque` per canonical service: deposit, withdrawal, and account management.
+- Implemented globally sequential ticket issuance, isolated FIFO service
+  calling, non-mutating peek/list operations, per-service and total statistics,
+  and a terminal menu that recovers from invalid input.
+- Protected ticket allocation and every queue mutation with one lock so
+  concurrent issuers cannot duplicate a number and concurrent agents cannot
+  call the same client twice.
+- Documented the per-service efficiency and mutation-first ownership model;
+  acceptance coverage includes service isolation, FIFO, global numbering,
+  snapshots, validation, CLI recovery, and concurrent issue/call behavior.
+
+## 2026-10-28 — RAG sales knowledge base
+
+- Added the four approved TrackFlow policy documents and an idempotent loader
+  that creates 18 semantic chunks in the exact `trackflow_knowledge` Qdrant
+  collection. Deterministic point IDs and the six-field payload contract make
+  repeat ingestion safe and auditable.
+- Added separate retrieval and generation boundaries backed by distinct
+  4Geeks LiteLLM model IDs. The generation prompt is constrained to retrieved
+  evidence and explicitly protects high-demand SLA, international-return, and
+  storage-discount approval rules.
+- Added the authenticated `POST /knowledge/query` API and protected backoffice
+  Sales knowledge view with loading, readable failure, and light/dark states.
+- Added twelve cross-document retrieval questions. The production Qdrant path
+  reached Recall@3 of 100% with a reproducible offline CI encoder, and a live
+  local run with distinct Ollama embedding/generation models returned the
+  correct Black Friday non-guarantee.
+- Added Qdrant to Compose, safe environment templates, focused provider/API/UI
+  tests, and the architecture and acceptance evidence under `docs/rag/`.
