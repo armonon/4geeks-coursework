@@ -1,112 +1,62 @@
-# Data Science Project Boilerplate
+# California Housing K-means
 
-This boilerplate is designed to kickstart data science projects by providing a basic setup for database connections, data processing, and machine learning model development. It includes a structured folder organization for your datasets and a set of pre-defined Python packages necessary for most data science tasks.
+A complete 4Geeks unsupervised-learning project that groups California census
+block groups using latitude, longitude, and median income, then trains a
+supervised classifier from the resulting pseudo-labels.
 
-## Structure
+## Verified results
 
-The project is organized as follows:
+| Evidence | Result |
+|---|---:|
+| Official rows retained | 20,640 |
+| Training rows | 16,512 |
+| Held-out test rows | 4,128 |
+| K-means clusters | 6 |
+| Sampled train silhouette | 0.4012 |
+| Selected supervised model | Random forest |
+| Supervised test accuracy | **99.49%** |
+| Supervised test macro F1 | **0.9933** |
 
-- **`src/app.py`** → Main Python script where your project will run.
-- **`src/explore.ipynb`** → Notebook for exploration and testing. Once exploration is complete, migrate the clean code to `app.py`.
-- **`src/utils.py`** → Auxiliary functions, such as database connection.
-- **`requirements.txt`** → List of required Python packages.
-- **`models/`** → Will contain your SQLAlchemy model classes.
-- **`data/`** → Stores datasets at different stages:
-  - **`data/raw/`** → Raw data.
-  - **`data/interim/`** → Temporarily transformed data.
-  - **`data/processed/`** → Data ready for analysis.
+The complete executed analysis, train/test cluster plots, centroid profiles,
+model comparison, and confusion matrix are in
+[`src/explore.ipynb`](src/explore.ipynb).
 
+## Assignment coverage
 
-## ⚡ Initial Setup in Codespaces (Recommended)
+- Loads the official `housing.csv` and selects only `Latitude`, `Longitude`, and
+  `MedInc`
+- Creates a reproducible 80/20 split before model fitting
+- Scales the three unlike feature units inside a leakage-safe pipeline
+- Fits the required six-cluster K-means model on training data only
+- Adds integer `cluster` columns to training and test sets
+- Predicts test clusters without refitting and overlays them on the cluster plot
+- Profiles centroids back in original units and interprets the grouping
+- Compares logistic regression and random forest using five-fold training CV
+- Evaluates the selected classifier on the held-out test set
+- Saves both fitted models under `models/`
 
-No manual setup is required, as **Codespaces is automatically configured** with the predefined files created by the academy for you. Just follow these steps:
-
-1. **Wait for the environment to configure automatically**.
-   - All necessary packages and the database will install themselves.
-   - The automatically created `username` and `db_name` are in the **`.env`** file at the root of the project.
-2. **Once Codespaces is ready, you can start working immediately**.
-
-
-## 💻 Local Setup (Only if you can't use Codespaces)
-
-**Prerequisites**
-
-Make sure you have Python 3.11+ installed on your machine. You will also need pip to install the Python packages.
-
-**Installation**
-
-Clone the project repository to your local machine.
-
-Navigate to the project directory and install the required Python packages:
+## Reproduce
 
 ```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
-```
-
-**Create a database (if necessary)**
-
-Create a new database within the Postgres engine by customizing and executing the following command:
-
-```bash
-$ psql -U postgres -c "DO \$\$ BEGIN 
-    CREATE USER my_user WITH PASSWORD 'my_password'; 
-    CREATE DATABASE my_database OWNER my_user; 
-END \$\$;"
-```
-Connect to the Postgres engine to use your database, manipulate tables, and data:
-
-```bash
-$ psql -U my_user -d my_database
-```
-
-Once inside PSQL, you can create tables, run queries, insert, update, or delete data, and much more!
-
-**Environment Variables**
-
-Create a .env file in the root directory of the project to store your environment variables, such as your database connection string:
-
-```makefile
-DATABASE_URL="postgresql://<USER>:<PASSWORD>@<HOST>:<PORT>/<DB_NAME>"
-
-#example
-DATABASE_URL="postgresql://my_user:my_password@localhost:5432/my_database"
-```
-
-## Running the Application
-
-To run the application, execute the app.py script from the root directory of the project:
-
-```bash
 python src/app.py
+python scripts/build_notebook.py
+jupyter nbconvert --to notebook --execute src/explore.ipynb \
+  --output explore.ipynb --output-dir src --ExecutePreprocessor.timeout=900
+pytest
 ```
 
-## Adding Models
+## Saved evidence
 
-To add SQLAlchemy model classes, create new Python script files within the models/ directory. These classes should be defined according to your database schema.
+- `models/kmeans_pipeline.joblib`: fitted scaler + six-cluster K-means
+- `models/cluster_classifier.joblib`: selected random forest
+- `data/processed/cluster_profiles.csv`: centroids in original units
+- `data/processed/housing_train_clustered.csv`: training pseudo-labels
+- `data/processed/housing_test_clustered.csv`: predicted test clusters
+- `data/processed/metrics.json`: clustering and classification evidence
 
-Example model definition (`models/example_model.py`):
-
-```py
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column
-
-Base = declarative_base()
-
-class ExampleModel(Base):
-    __tablename__ = 'example_table'
-    id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(unique=True)
-```
-
-## Working with Data
-
-You can place your raw datasets in the data/raw directory, intermediate datasets in data/interim, and processed datasets ready for analysis in data/processed.
-
-To process data, you can modify the app.py script to include your data processing steps, using pandas for data manipulation and analysis.
-
-## Contributors
-
-This template was built as part of the [Data Science and Machine Learning Bootcamp](https://4geeksacademy.com/us/coding-bootcamps/datascience-machine-learning) by 4Geeks Academy by [Alejandro Sanchez](https://twitter.com/alesanchezr) and many other contributors. Learn more about [4Geeks Academy BootCamp programs](https://4geeksacademy.com/us/programs) here.
-
-Other templates and resources like this can be found on the school's GitHub page.
+Cluster identifiers are arbitrary categories, not ranks or ground-truth social
+labels. The supervised accuracy measures agreement with K-means pseudo-labels;
+it does not establish that the six segments are objectively correct.
