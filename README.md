@@ -1,4 +1,67 @@
-# Data Science Project Boilerplate
+# WeLoveReviews Sentiment Analysis
+
+An auditable sentiment-analysis pipeline for 500 Harbor House Café customer
+reviews. The project integrates the required pretrained multilingual BERT model,
+compares written sentiment with the reported 4.5/5 average, and documents model
+errors caused by the product-review-to-service-review domain mismatch.
+
+## Verified result
+
+- 500/500 reviews processed
+- 82.4% positive, 8.2% neutral, and 9.4% negative model sentiment
+- 95% agreement between human rating bands and predicted sentiment bands
+- 16 high-rating false negatives identified and reviewed
+- Model and Python dependencies pinned for reproducibility
+
+The complete analytical story, charts, false-negative examples, and 20-row
+manual sanity check are in the executed [`src/explore.ipynb`](src/explore.ipynb).
+The production entry point is [`src/app.py`](src/app.py), and its enriched output
+is [`data/processed/reviews_with_sentiment.csv`](data/processed/reviews_with_sentiment.csv).
+
+## Run locally
+
+Python 3.11 is recommended.
+
+```bash
+python3.11 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python src/app.py
+pytest -q
+```
+
+The first production run downloads the pinned model to the normal Hugging Face
+cache. Model weights are never stored in this repository.
+
+## Rebuild the notebook
+
+```bash
+python scripts/build_notebook.py
+jupyter nbconvert --to notebook --execute src/explore.ipynb \
+  --output explore.ipynb --output-dir src --ExecutePreprocessor.timeout=600
+```
+
+## Project structure
+
+```text
+data/raw/reviews.csv                         provided source dataset
+data/processed/reviews_with_sentiment.csv   complete auditable predictions
+src/sentiment.py                            pinned reusable model integration
+src/app.py                                  production CSV pipeline
+src/explore.ipynb                           executed narrative analysis
+tests/test_sentiment.py                     mapping, validation, and pipeline tests
+```
+
+## Model contract
+
+- Model: `nlptown/bert-base-multilingual-uncased-sentiment`
+- Revision: `8f6f4e3a8f70be4b65d3a4a8762b6d781cda240d`
+- Mapping: 1–2 stars → negative, 3 → neutral, 4–5 → positive
+- Input provenance: 4Geeks Academy AI Engineering syllabus
+
+---
+
+## Original template documentation
 
 This boilerplate is designed to kickstart data science projects by providing a basic setup for database connections, data processing, and machine learning model development. It includes a structured folder organization for your datasets and a set of pre-defined Python packages necessary for most data science tasks.
 
